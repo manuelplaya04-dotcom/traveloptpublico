@@ -1,4 +1,4 @@
-FROM python:3.12.15-slim
+FROM python:3.12.16-slim
 # Versiones fijas (= local): builds reproducibles y sin sorpresas de la cadena de suministro.
 COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /uvx /bin/
 
