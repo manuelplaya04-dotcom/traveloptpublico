@@ -30,6 +30,8 @@ services:
         sync: false             # vuelos y hoteles reales; solo se usan con DEFAULT_MODE=hybrid (o live)
       - key: ALERT_WEBHOOK_URL
         sync: false             # opcional: alertas a Discord/Slack/Telegram (la URL es un secreto)
+      - key: GEMINI_API_KEY
+        sync: false             # explicador del embudo (opcional); sin clave, explicación por reglas
       - key: TICKETMASTER_API_KEY
         sync: false             # eventos en la ciudad (opcional); sin clave, solo Google Events pre-cargado
       - key: SERPAPI_QUOTA_RESERVE

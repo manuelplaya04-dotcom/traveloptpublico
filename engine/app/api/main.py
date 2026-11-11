@@ -25,6 +25,8 @@ from starlette.datastructures import Headers
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 from app.domain.models import CASE_KEY_PATTERN, TripRequest
+from app.explain.gemini import GeminiExplainer
+from app.explain.service import explain as explain_run
 from app.optimizer.skeletons import plan_for
 from app.providers.fixture import get_fixture
 from app.providers.base import Kind
@@ -573,6 +575,24 @@ async def share_run(run_id: UUID, body: ShareIn, repo: Repository = Depends(repo
     if run.status not in ("done", "infeasible"):
         raise HTTPException(409, {"code": "invalid_state", "status": run.status})
     return {"token": await repo.create_share(str(run_id), str(body.uid))}
+
+
+@app.get("/v1/runs/{run_id}/explanation", dependencies=[Depends(require_key)])
+async def run_explanation(run_id: UUID, uid: UUID, request: Request, repo: Repository = Depends(repo_dep)):
+    """Por qué una búsqueda no tiene resultados, en palabras (solo su dueño). Siempre responde 200 con un texto: si el
+    LLM no está configurado o falla, la explicación por reglas; nunca un error hacia la persona."""
+    run = await repo.get_run(str(run_id))
+    if run is None or run.user_id != str(uid):
+        raise HTTPException(404, {"code": "run_not_found"})
+    if run.status != "infeasible":
+        raise HTTPException(409, {"code": "invalid_state", "status": run.status})
+    s = get_settings()
+    explainer = GeminiExplainer(s.gemini_api_key.get_secret_value(), s.gemini_model, request.app.state.http,
+                                s.explain_timeout_s) if s.gemini_api_key else None
+    out = await explain_run(str(run.id), effective_request(run.request, run.summary), run.summary or {},
+                            lambda: repo.load_offers(run.id), request.app.state.cache,
+                            request.app.state.optimize_slots, explainer)
+    return out.model_dump(mode="json")
 
 
 @app.get("/v1/runs/{run_id}/price-advice", dependencies=[Depends(require_key)])

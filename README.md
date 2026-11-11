@@ -33,6 +33,19 @@ El motor modela el viaje como un problema de **satisfacción y optimización de 
 5. **Dinero exacto.** Todos los montos son `int` en centavos, nunca `float`. Los impuestos van en *basis points* con
    redondeo half-up por línea, y el total y el reparto por persona concilian al centavo.
 
+## Explicador del embudo (IA sin alucinaciones)
+
+Cuando ninguna combinación cumple las condiciones, un "sin resultados" seco hace que la persona abandone sin saber qué
+cambiar. El explicador le dice **por qué** no hubo viaje y **qué cambio concreto lo destraba**: "7 vuelos tenían más
+escalas que tu máximo; si aceptás 1 escala por tramo, el mejor itinerario cuesta USD 20,083.62". El número no lo
+calcula el LLM: el motor vuelve a correr CP-SAT con cada restricción aflojada un paso, sobre las mismas ofertas y sin
+consumir cuota de proveedores.
+
+El LLM (Gemini, tier gratuito) **no es un chatbot**: recibe solo un JSON de "hechos del embudo" sin datos personales y
+lo traduce a español. Antes de mostrarse, un control de integridad verifica que cada número y cada código del texto
+estén en esos hechos. Si el modelo inventa algo, tarda más de 8 s, da límite de uso o no hay clave, se muestra la misma
+explicación armada por plantillas. La persona nunca ve un error ni un dato inventado.
+
 ## Arquitectura
 
 ```mermaid
@@ -47,9 +60,11 @@ flowchart LR
         C -->|"miss"| R["Adapters de proveedores<br/>retry + backoff + circuit breaker"]
         X --> F["Filtros duros<br/>(embudo con motivo)"]
         F --> S["CP-SAT<br/>top 3 itinerarios"]
+        S -->|"sin resultados"| EX["Explicador del embudo<br/>hechos + CP-SAT contrafactual"]
     end
 
     R --> API[("SerpApi · Open-Meteo · Wikidata<br/>OSRM · Ticketmaster")]
+    EX -->|"solo hechos, sin datos personales"| LLM[("Gemini<br/>(texto validado)")]
     C <--> DB[("Supabase Postgres<br/>RLS")]
     S -->|"único escritor"| DB
     DB -->|"Realtime"| U

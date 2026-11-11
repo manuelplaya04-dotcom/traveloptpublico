@@ -220,3 +220,13 @@ Dado que el orquestador depende de múltiples APIs externas, implementa patrones
     guarda ni viaja; la clave se borra a las 24 h. En header y no en el cuerpo para que web y motor se puedan desplegar
     en cualquier orden. Cabeceras: se suman `Cross-Origin-Opener-Policy` y `Cross-Origin-Resource-Policy: same-origin`
     y más permisos bloqueados; HSTS, `nosniff`, `X-Frame-Options: DENY` y la CSP con nonce ya estaban.
+18. **Explicador del embudo con LLM (2026-11-11):** se pidió un LLM que explique los "sin resultados". El modelo es
+    **Gemini en el tier gratuito** (`gemini-3.5-flash-lite`, elegido por la persona responsable para mantener costo
+    cero): en ese tier Google puede usar lo enviado para mejorar sus productos, así que el payload (`FunnelFacts`,
+    `engine/app/explain/facts.py`) lleva solo cantidades por regla, destinos, viajeros y contrafactuales, nunca ids,
+    fechas exactas ni presupuesto. Los contrafactuales los calcula el motor (CP-SAT con una restricción aflojada un
+    paso, sobre las ofertas guardadas, sin pedir datos nuevos). El texto pasa por un control de integridad
+    (`integrity.py`: todo número y código de 3 letras debe estar en los hechos, sin enlaces ni listas, largo acotado);
+    si falla, o si el LLM tarda más de 8 s, da 429 o no hay clave, se muestra la explicación por plantillas. Solo se
+    cachea el texto que pasó el control (30 días). **Límite conocido del control:** verifica números y códigos, no
+    nombres propios en prosa; un destino alternativo inventado lo frena el prompt, no el chequeo.

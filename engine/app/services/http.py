@@ -71,6 +71,7 @@ EGRESS_ALLOWLIST: frozenset[str] = frozenset({
     "app.ticketmaster.com",
     "router.project-osrm.org",
     "query.wikidata.org",
+    "generativelanguage.googleapis.com",  # Gemini: explicador del embudo
     # webhooks de alertas (la URL concreta es un secreto del entorno; ver app/services/alerts.py)
     "discord.com", "discordapp.com", "hooks.slack.com", "api.telegram.org",
 })

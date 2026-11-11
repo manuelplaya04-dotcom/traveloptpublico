@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     max_lodging_queries_per_run: int = Field(8, ge=1)  # misma cuota; hoteles (+ alquileres si el grupo es de 3 o más)
     max_serpapi_queries_per_run: int = Field(6, ge=1)  # presupuesto pago por corrida; si no entra, se recorta el plan
     alert_webhook_url: SecretStr | None = None  # Discord/Slack/Telegram; secreto (la URL misma es la credencial)
+    gemini_api_key: SecretStr | None = None  # explicador del embudo (Gemini, tier gratuito); sin clave, explicación por reglas
+    gemini_model: str = "gemini-3.5-flash-lite"
+    explain_timeout_s: float = 8.0  # pasado este plazo se muestra la explicación de respaldo
     ticketmaster_api_key: str | None = None  # eventos (Discovery API, gratis sin tarjeta); sin clave, solo Google Events
     # ciudades cuyo Google Events pre-carga el cron semanal (una búsqueda de SerpApi por ciudad): "CODIGO:Nombre,..."
     prefetch_event_cities: str = "ORL:Orlando,NYC:New York"

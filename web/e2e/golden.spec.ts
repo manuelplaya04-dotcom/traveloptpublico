@@ -88,6 +88,10 @@ test("sin escalas no hay solución factible", async ({ page }) => {
   await expect(page.getByTestId("run-status")).toHaveText("infeasible", { timeout: 60_000 });
   // sin datos de rescate: el motor explica qué flexibilizar según su embudo
   await expect(page.getByTestId("suggestions")).toContainText("Permití al menos 1 escala");
+  // explicador del embudo: sin clave de Gemini en local, la versión por reglas, con el contrafactual del optimizador
+  const why = page.getByTestId("funnel-explanation");
+  await expect(why).toContainText("de 0 a 1, hay itinerario desde USD 20,083.62", { timeout: 60_000 });
+  await expect(page.getByTestId("funnel-explanation-source")).toContainText("Explicación automática");
 });
 
 test("CP-4b.3: el modal se abre sin recargar, Esc lo cierra y el foco vuelve al CTA", async ({ page }) => {

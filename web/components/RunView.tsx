@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Funnel from "@/components/Funnel";
+import FunnelExplanation from "@/components/FunnelExplanation";
 import SiteFooter from "@/components/landing/SiteFooter";
 import TripPlanner from "@/components/planner/TripPlanner";
 import TripPreview from "@/components/planner/TripPreview";
@@ -77,6 +78,7 @@ export default function RunView({ runId }: { runId: string }) {
       {run.status === "infeasible" && (
         <Alert tone="warning">
           <p>Ninguna combinación cumple tus condiciones. Abajo ves qué opciones quedaron afuera y por qué.</p>
+          <FunnelExplanation runId={runId} />
           {tips.length > 0 && (
             <ul className="mt-2 list-disc space-y-1 pl-5 font-normal" data-testid="suggestions">
               {tips.map((t) => <li key={t}>{t}</li>)}
