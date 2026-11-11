@@ -1,0 +1,9 @@
+# Falsos positivos ya publicados en el historial (no se pueden borrar sin reescribirlo). Uno por línea, con motivo.
+# 8d8fc56: booking_token de Google Flights en una respuesta grabada de SerpApi; tokens opacos de reserva, no credenciales. Ya reemplazados por placeholders.
+8d8fc56a767686936a102d30e232afbb11cc8b35:engine/tests/contracts/serpapi_google_flights_mco_nyc.json:generic-api-key:43
+8d8fc56a767686936a102d30e232afbb11cc8b35:engine/tests/contracts/serpapi_google_flights_mco_nyc.json:generic-api-key:85
+8d8fc56a767686936a102d30e232afbb11cc8b35:engine/tests/contracts/serpapi_google_flights_mco_nyc.json:generic-api-key:126
+8d8fc56a767686936a102d30e232afbb11cc8b35:engine/tests/contracts/serpapi_google_flights_mco_nyc.json:generic-api-key:166
+8d8fc56a767686936a102d30e232afbb11cc8b35:engine/tests/contracts/serpapi_google_flights_mco_nyc.json:generic-api-key:235
+8d8fc56a767686936a102d30e232afbb11cc8b35:engine/tests/contracts/serpapi_google_flights_mco_nyc.json:generic-api-key:276
+8d8fc56a767686936a102d30e232afbb11cc8b35:engine/tests/contracts/serpapi_google_flights_mco_nyc.json:generic-api-key:317

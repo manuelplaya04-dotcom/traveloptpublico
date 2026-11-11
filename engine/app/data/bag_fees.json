@@ -1,0 +1,13 @@
+{
+  "_comment": "Tarifas publicadas de valija despachada (USD por valija y por pasajero, vuelos dentro de EE.UU., pago anticipado online). Fuente: FrequentMiler 'Bagpocolypse' (2026-04-09), coincidente con Lugless (abril 2026). Las páginas oficiales bloquean la lectura automática: verificar al reservar. JetBlue: valor de temporada alta (el más alto publicado) para no subestimar. Revisar cada 6 meses.",
+  "source": "https://frequentmiler.com/bagpocolypse-american-alaska-united-delta-and-southwest-all-raise-checked-bag-fees/",
+  "as_of": "2026-04-09",
+  "domestic_usd": {
+    "AA": [45, 55],
+    "AS": [45, 55],
+    "DL": [45, 55],
+    "UA": [45, 55],
+    "WN": [45, 55],
+    "B6": [49, 69]
+  }
+}

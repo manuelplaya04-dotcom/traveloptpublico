@@ -1,0 +1,42 @@
+# secretos
+.env
+.env.*
+!.env.example
+web/.env*.local
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# node / next
+node_modules/
+web/.next/
+# restos de builds con la raíz mal detectada (no deberían aparecer)
+/.next/
+web/web/
+web/playwright-report/
+web/test-results/
+
+# supabase
+supabase/.branches/
+supabase/.temp/
+
+# local / despliegue
+.claude/settings.local.json
+.vercel/
+*.pem
+
+# sistema y logs
+.DS_Store
+Thumbs.db
+*.log
+
+# workflows de n8n generados para producción (scripts/n8n_render.py)
+/n8n/dist/

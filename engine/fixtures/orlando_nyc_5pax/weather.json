@@ -1,0 +1,12 @@
+{
+  "ORL": {
+    "source": "fixture_climatology",
+    "default": {"tmax_c": 33.5, "heavy_rain_prob": 0.30},
+    "overrides": {"2027-07-12": {"heavy_rain_prob": 0.55}}
+  },
+  "NYC": {
+    "source": "fixture_climatology",
+    "default": {"tmax_c": 30.0, "heavy_rain_prob": 0.20},
+    "overrides": {"2027-07-18": {"heavy_rain_prob": 0.60}}
+  }
+}

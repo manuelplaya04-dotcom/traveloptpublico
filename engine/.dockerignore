@@ -1,0 +1,9 @@
+# Contexto mínimo para la imagen: solo pyproject, lock, app/ y fixtures/.
+.venv/
+tests/
+**/__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.pyc
+Dockerfile
+.dockerignore

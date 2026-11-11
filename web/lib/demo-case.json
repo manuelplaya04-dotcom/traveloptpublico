@@ -1,0 +1,38 @@
+{
+  "case_key": "orlando_nyc_5pax",
+  "origin_airports": ["EZE"],
+  "cities": [
+    {
+      "code": "ORL", "airports": ["MCO"], "lat": 28.3852, "lon": -81.5639,
+      "min_nights": 6, "max_nights": 8,
+      "must_do": ["MK", "EPCOT", "HS", "AK", "EPIC"]
+    },
+    {
+      "code": "NYC", "airports": ["JFK", "LGA", "EWR"], "lat": 40.7580, "lon": -73.9855,
+      "min_nights": 4, "max_nights": 6,
+      "must_do": ["SOL", "TOR", "MOMA"]
+    }
+  ],
+  "fixed_order": true,
+  "first_checkin_from": "2027-07-08",
+  "first_checkin_to": "2027-07-09",
+  "total_nights_min": 12,
+  "total_nights_max": 12,
+  "pax": 5,
+  "budget_minor": 2100000,
+  "currency": "USD",
+  "constraints": {
+    "min_bathrooms": 2,
+    "min_bedrooms": 0,
+    "max_stops": 1,
+    "earliest_departure_hour": 6,
+    "latest_arrival_hour": 23,
+    "checked_bags_per_pax": 1,
+    "allow_overnight_outbound": true,
+    "max_heavy_rain_prob": 0.5,
+    "max_tmax_c": 38.0,
+    "max_consecutive_full_days": 3,
+    "activity_free_travel_days": true
+  },
+  "top_n": 3
+}

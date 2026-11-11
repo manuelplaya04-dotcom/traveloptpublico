@@ -1,0 +1,266 @@
+{
+  "$defs": {
+    "CityPlan": {
+      "properties": {
+        "code": {
+          "pattern": "^[A-Z]{2,5}$",
+          "title": "Code",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "pattern": "^[\\p{L} .'-]{1,40}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "airports": {
+          "items": {
+            "pattern": "^[A-Z]{3}$",
+            "type": "string"
+          },
+          "maxItems": 5,
+          "minItems": 1,
+          "title": "Airports",
+          "type": "array"
+        },
+        "lat": {
+          "maximum": 90,
+          "minimum": -90,
+          "title": "Lat",
+          "type": "number"
+        },
+        "lon": {
+          "maximum": 180,
+          "minimum": -180,
+          "title": "Lon",
+          "type": "number"
+        },
+        "min_nights": {
+          "maximum": 21,
+          "minimum": 1,
+          "title": "Min Nights",
+          "type": "integer"
+        },
+        "max_nights": {
+          "maximum": 21,
+          "minimum": 1,
+          "title": "Max Nights",
+          "type": "integer"
+        },
+        "must_do": {
+          "default": [],
+          "items": {
+            "pattern": "^[A-Za-z0-9_-]{1,32}$",
+            "type": "string"
+          },
+          "maxItems": 10,
+          "title": "Must Do",
+          "type": "array"
+        }
+      },
+      "required": [
+        "code",
+        "airports",
+        "lat",
+        "lon",
+        "min_nights",
+        "max_nights"
+      ],
+      "title": "CityPlan",
+      "type": "object"
+    },
+    "Constraints": {
+      "properties": {
+        "min_bathrooms": {
+          "default": 2,
+          "minimum": 0,
+          "title": "Min Bathrooms",
+          "type": "integer"
+        },
+        "min_bedrooms": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Min Bedrooms",
+          "type": "integer"
+        },
+        "max_stops": {
+          "default": 1,
+          "minimum": 0,
+          "title": "Max Stops",
+          "type": "integer"
+        },
+        "earliest_departure_hour": {
+          "default": 6,
+          "maximum": 23,
+          "minimum": 0,
+          "title": "Earliest Departure Hour",
+          "type": "integer"
+        },
+        "latest_arrival_hour": {
+          "default": 23,
+          "maximum": 23,
+          "minimum": 0,
+          "title": "Latest Arrival Hour",
+          "type": "integer"
+        },
+        "checked_bags_per_pax": {
+          "default": 1,
+          "minimum": 0,
+          "title": "Checked Bags Per Pax",
+          "type": "integer"
+        },
+        "allow_overnight_outbound": {
+          "default": true,
+          "title": "Allow Overnight Outbound",
+          "type": "boolean"
+        },
+        "max_heavy_rain_prob": {
+          "default": 0.5,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Max Heavy Rain Prob",
+          "type": "number"
+        },
+        "max_tmax_c": {
+          "default": 38.0,
+          "title": "Max Tmax C",
+          "type": "number"
+        },
+        "max_consecutive_full_days": {
+          "default": 3,
+          "minimum": 1,
+          "title": "Max Consecutive Full Days",
+          "type": "integer"
+        },
+        "activity_free_travel_days": {
+          "default": true,
+          "title": "Activity Free Travel Days",
+          "type": "boolean"
+        }
+      },
+      "title": "Constraints",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "case_key": {
+      "anyOf": [
+        {
+          "pattern": "^[a-z0-9_]{1,64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Case Key"
+    },
+    "origin_airports": {
+      "items": {
+        "pattern": "^[A-Z]{3}$",
+        "type": "string"
+      },
+      "maxItems": 5,
+      "minItems": 1,
+      "title": "Origin Airports",
+      "type": "array"
+    },
+    "cities": {
+      "items": {
+        "$ref": "#/$defs/CityPlan"
+      },
+      "maxItems": 4,
+      "minItems": 1,
+      "title": "Cities",
+      "type": "array"
+    },
+    "fixed_order": {
+      "default": true,
+      "title": "Fixed Order",
+      "type": "boolean"
+    },
+    "first_checkin_from": {
+      "format": "date",
+      "title": "First Checkin From",
+      "type": "string"
+    },
+    "first_checkin_to": {
+      "format": "date",
+      "title": "First Checkin To",
+      "type": "string"
+    },
+    "total_nights_min": {
+      "maximum": 60,
+      "minimum": 1,
+      "title": "Total Nights Min",
+      "type": "integer"
+    },
+    "total_nights_max": {
+      "maximum": 60,
+      "minimum": 1,
+      "title": "Total Nights Max",
+      "type": "integer"
+    },
+    "pax": {
+      "maximum": 9,
+      "minimum": 1,
+      "title": "Pax",
+      "type": "integer"
+    },
+    "budget_minor": {
+      "maximum": 10000000000,
+      "minimum": 0,
+      "title": "Budget Minor",
+      "type": "integer"
+    },
+    "currency": {
+      "const": "USD",
+      "default": "USD",
+      "title": "Currency",
+      "type": "string"
+    },
+    "constraints": {
+      "$ref": "#/$defs/Constraints",
+      "default": {
+        "min_bathrooms": 2,
+        "min_bedrooms": 0,
+        "max_stops": 1,
+        "earliest_departure_hour": 6,
+        "latest_arrival_hour": 23,
+        "checked_bags_per_pax": 1,
+        "allow_overnight_outbound": true,
+        "max_heavy_rain_prob": 0.5,
+        "max_tmax_c": 38.0,
+        "max_consecutive_full_days": 3,
+        "activity_free_travel_days": true
+      }
+    },
+    "top_n": {
+      "default": 3,
+      "maximum": 10,
+      "minimum": 1,
+      "title": "Top N",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "origin_airports",
+    "cities",
+    "first_checkin_from",
+    "first_checkin_to",
+    "total_nights_min",
+    "total_nights_max",
+    "pax",
+    "budget_minor"
+  ],
+  "title": "TripRequest",
+  "type": "object"
+}

@@ -1,0 +1,8 @@
+# Reglas por defecto de gitleaks + excepciones puntuales y justificadas. Nunca agregar acá una clave real:
+# si gitleaks marca una, se rota (ver docs/seguridad_predeploy.md).
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Clave inventada para los tests en proceso del motor (no da acceso a nada)"
+regexes = ['''test-key-0123456789abcdefghij''']

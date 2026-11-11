@@ -1,0 +1,584 @@
+{
+ "hotels": {
+  "search_metadata": {
+   "status": "Success",
+   "google_hotels_url": "https://www.google.com/travel/search?q=New+York%2C+NY&hl=en&gl=us"
+  },
+  "properties": [
+   {
+    "type": "hotel",
+    "name": "YOTEL New York Times Square",
+    "link": "https://www.yotel.com/en/hotels/yotel-new-york?utm_source=Google&utm_medium=Yext_YONYC",
+    "gps_coordinates": {
+     "latitude": 40.7591608,
+     "longitude": -73.9954657
+    },
+    "rate_per_night": {
+     "display_price": "$122",
+     "extracted_display_price": 122,
+     "lowest": "$143",
+     "extracted_lowest": 143,
+     "before_taxes_fees": "$122",
+     "extracted_before_taxes_fees": 122,
+     "after_taxes_fees": "$143",
+     "extracted_after_taxes_fees": 143
+    },
+    "total_rate": {
+     "display_price": "$487",
+     "extracted_display_price": 487,
+     "lowest": "$573",
+     "extracted_lowest": 573,
+     "before_taxes_fees": "$487",
+     "extracted_before_taxes_fees": 487,
+     "after_taxes_fees": "$573",
+     "extracted_after_taxes_fees": 573
+    },
+    "hotel_class": "4-star hotel",
+    "extracted_hotel_class": 4,
+    "overall_rating": 3.8,
+    "reviews": 10021,
+    "amenities": [
+     "Breakfast ($)",
+     "Free Wi-Fi",
+     "Parking ($)",
+     "Air conditioning",
+     "Fitness center",
+     "Bar",
+     "Restaurant",
+     "Accessible",
+     "Business center",
+     "Kid-friendly",
+     "Smoke-free property"
+    ],
+    "check_in_time": "3:00 PM",
+    "check_out_time": "11:00 AM",
+    "property_token": "redacted-0",
+    "images": [
+     {
+      "thumbnail": "https://lh3.googleusercontent.com/grass-cs/AABkmLfY5FQMLWJm-CWD9GK7hhpqidJN3E6R9Kd5mIZd9GnkaVQ8j0fncSHwEeLV3SqKfBnhMDizJ52eh1nMI89V-qv9PDHxJcJbhQe1oTfTcdmyk4vKBw4grUfZCrRHKsXUHLUxSCkG=s287-w287-h192-n-k-no-v1"
+     }
+    ]
+   },
+   {
+    "type": "hotel",
+    "name": "DoubleTree by Hilton New York Downtown",
+    "link": "https://www.hilton.com/en/hotels/nycbpdt-doubletree-new-york-downtown/?SEO_id=GMB-AMER-DT-NYCBPDT",
+    "gps_coordinates": {
+     "latitude": 40.703921,
+     "longitude": -74.0123541
+    },
+    "rate_per_night": {
+     "display_price": "$116",
+     "extracted_display_price": 116,
+     "lowest": "$134",
+     "extracted_lowest": 134,
+     "before_taxes_fees": "$116",
+     "extracted_before_taxes_fees": 116,
+     "after_taxes_fees": "$134",
+     "extracted_after_taxes_fees": 134
+    },
+    "total_rate": {
+     "display_price": "$465",
+     "extracted_display_price": 465,
+     "lowest": "$537",
+     "extracted_lowest": 537,
+     "before_taxes_fees": "$465",
+     "extracted_before_taxes_fees": 465,
+     "after_taxes_fees": "$537",
+     "extracted_after_taxes_fees": 537
+    },
+    "hotel_class": "4-star hotel",
+    "extracted_hotel_class": 4,
+    "overall_rating": 3.6,
+    "reviews": 3833,
+    "amenities": [
+     "Breakfast ($)",
+     "Free Wi-Fi",
+     "Parking ($)",
+     "Air conditioning",
+     "Pet-friendly",
+     "Fitness center",
+     "Bar",
+     "Restaurant",
+     "Room service",
+     "Accessible",
+     "Kid-friendly",
+     "Smoke-free property"
+    ],
+    "check_in_time": "4:00 PM",
+    "check_out_time": "11:00 AM",
+    "property_token": "redacted-1",
+    "images": [
+     {
+      "thumbnail": "https://lh3.googleusercontent.com/grass-cs/AABkmLccuETG7pSafRSFwrXtqjYcBfvbK0_cyo7ahBBcM1scEzJ9RE2iadge4b3-ENA2wszgk2SJWqq9pBP2siRJTX5tNhMjOT3pKP4S7qP-vanDTD2mH3lPTFNAmLc0gBSpCu6ivOvzAQ=s287-w287-h192-n-k-no-v1"
+     }
+    ]
+   },
+   {
+    "type": "hotel",
+    "name": "Pod 51",
+    "link": "https://www.thepodhotel.com/pod-51?utm_source=google&utm_medium=organic&utm_campaign=gbp_listing",
+    "gps_coordinates": {
+     "latitude": 40.7556979,
+     "longitude": -73.9691596
+    },
+    "rate_per_night": {
+     "display_price": "$107",
+     "extracted_display_price": 107,
+     "lowest": "$128",
+     "extracted_lowest": 128,
+     "before_taxes_fees": "$107",
+     "extracted_before_taxes_fees": 107,
+     "after_taxes_fees": "$128",
+     "extracted_after_taxes_fees": 128
+    },
+    "total_rate": {
+     "display_price": "$428",
+     "extracted_display_price": 428,
+     "lowest": "$511",
+     "extracted_lowest": 511,
+     "before_taxes_fees": "$428",
+     "extracted_before_taxes_fees": 428,
+     "after_taxes_fees": "$511",
+     "extracted_after_taxes_fees": 511
+    },
+    "hotel_class": "3-star hotel",
+    "extracted_hotel_class": 3,
+    "overall_rating": 4.1,
+    "reviews": 4102,
+    "amenities": [
+     "Wi-Fi ($)",
+     "Parking ($)",
+     "Air conditioning",
+     "Pet-friendly",
+     "Fitness center",
+     "Room service"
+    ],
+    "check_in_time": "12:00 AM",
+    "check_out_time": "12:00 AM",
+    "property_token": "redacted-2",
+    "images": [
+     {
+      "thumbnail": "https://lh3.googleusercontent.com/grass-cs/AABkmLeml42-nmPEsTF9ibS7StBMwYdspAQwbQ_EzkSEmqrsyJj8EjdFVr7nsz-yfUf3H8p48uLqYpmTJo3_UGTYEO2IloqPkYwWLG-CjyGXlN4WxvPPXViN1j5t56sbjsbRyFmp4h9Y=s287-w287-h192-n-k-no-v1"
+     }
+    ]
+   },
+   {
+    "type": "hotel",
+    "name": "Hotel St. James",
+    "link": "https://www.hotelstjames.net/",
+    "gps_coordinates": {
+     "latitude": 40.757240599999996,
+     "longitude": -73.9832593
+    },
+    "rate_per_night": {
+     "display_price": "$108",
+     "extracted_display_price": 108,
+     "lowest": "$128",
+     "extracted_lowest": 128,
+     "before_taxes_fees": "$108",
+     "extracted_before_taxes_fees": 108,
+     "after_taxes_fees": "$128",
+     "extracted_after_taxes_fees": 128
+    },
+    "total_rate": {
+     "display_price": "$434",
+     "extracted_display_price": 434,
+     "lowest": "$512",
+     "extracted_lowest": 512,
+     "before_taxes_fees": "$434",
+     "extracted_before_taxes_fees": 434,
+     "after_taxes_fees": "$512",
+     "extracted_after_taxes_fees": 512
+    },
+    "hotel_class": "2-star hotel",
+    "extracted_hotel_class": 2,
+    "overall_rating": 4.1,
+    "reviews": 1991,
+    "amenities": [
+     "Free Wi-Fi",
+     "Air conditioning",
+     "Restaurant",
+     "Accessible",
+     "Kid-friendly",
+     "Smoke-free property"
+    ],
+    "check_in_time": "3:00 PM",
+    "check_out_time": "11:00 AM",
+    "property_token": "redacted-3",
+    "images": [
+     {
+      "thumbnail": "https://lh3.googleusercontent.com/grass-cs/AABkmLf58CWLbmzsArCoqHmjSafryENiNvvKU4lZxi0FLRGZJoZBRgpWfrbeD4lh0ZhCxTAhRmIxQKA5Sx0j6jphDn_mC9AuYRnHiy-Y4lIAYVpxaVby07vWYojcEWvqz-mA9t05V7s=s287-w287-h192-n-k-no-v1"
+     }
+    ]
+   },
+   {
+    "type": "vacation rental",
+    "name": "Massive 1,000 sq ft; 3 train lines; Airbnb Superhost; Sealy Hybrid beds",
+    "link": "https://www.brooklynescape.com",
+    "gps_coordinates": {
+     "latitude": 40.682987213134766,
+     "longitude": -73.90825653076172
+    },
+    "rate_per_night": {
+     "display_price": "$188",
+     "extracted_display_price": 188,
+     "lowest": "$188",
+     "extracted_lowest": 188,
+     "before_taxes_fees": "$188",
+     "extracted_before_taxes_fees": 188,
+     "after_taxes_fees": "$188",
+     "extracted_after_taxes_fees": 188
+    },
+    "total_rate": {
+     "display_price": "$752",
+     "extracted_display_price": 752,
+     "lowest": "$752",
+     "extracted_lowest": 752,
+     "before_taxes_fees": "$752",
+     "extracted_before_taxes_fees": 752,
+     "after_taxes_fees": "$752",
+     "extracted_after_taxes_fees": 752
+    },
+    "overall_rating": 4.83,
+    "reviews": 492,
+    "essential_info": [
+     "Entire apartment",
+     "Sleeps 7",
+     "2 bedrooms",
+     "5 beds",
+     "1,000 sq ft"
+    ],
+    "amenities": [
+     "Air conditioning",
+     "Balcony",
+     "Kid-friendly",
+     "Crib",
+     "Heating",
+     "Ironing board",
+     "Kitchen",
+     "Microwave",
+     "Oven stove",
+     "Patio",
+     "Pet-friendly",
+     "Smoke-free",
+     "Cable TV",
+     "Washer",
+     "Free parking",
+     "Free Wi-Fi"
+    ],
+    "check_in_time": "4:00 PM",
+    "check_out_time": "11:00 AM",
+    "property_token": "redacted-4",
+    "images": [
+     {
+      "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW1-dGBXtqJJSSJDF0UrTWTO5DUn5Qan8jlo_0KGp_y5TMRvOP97Blg8NcSAkcwyOrg1J07FW297GXso40BHtE3hXxxk43HfEE52JQzFqTrAbVq3GbpNKFdQ-KqD234XzV4kQ7a6is_66R4O7BUFSihMESRONBBV1mw7KJN0Se4m0m7ovObkm_-LWg=s287-w287-h192-n-k-no-v1"
+     }
+    ]
+   },
+   {
+    "type": "vacation rental",
+    "name": "Charming spacious garden level apt",
+    "link": "https://thebestfurnished.com/product/charming-spacious-garden-level-apt?src=ggl",
+    "gps_coordinates": {
+     "latitude": 40.641380310058594,
+     "longitude": -73.95269775390625
+    },
+    "rate_per_night": {
+     "display_price": "$194",
+     "extracted_display_price": 194,
+     "lowest": "$194",
+     "extracted_lowest": 194,
+     "before_taxes_fees": "$194",
+     "extracted_before_taxes_fees": 194,
+     "after_taxes_fees": "$194",
+     "extracted_after_taxes_fees": 194
+    },
+    "total_rate": {
+     "display_price": "$778",
+     "extracted_display_price": 778,
+     "lowest": "$778",
+     "extracted_lowest": 778,
+     "before_taxes_fees": "$778",
+     "extracted_before_taxes_fees": 778,
+     "after_taxes_fees": "$778",
+     "extracted_after_taxes_fees": 778
+    },
+    "overall_rating": 4.894445,
+    "reviews": 18,
+    "essential_info": [
+     "Entire apartment",
+     "Sleeps 4",
+     "1 bedroom",
+     "1 bathroom",
+     "4 beds",
+     "650 sq ft"
+    ],
+    "amenities": [
+     "Air conditioning",
+     "Kid-friendly",
+     "Crib",
+     "Heating",
+     "Ironing board",
+     "Kitchen",
+     "Microwave",
+     "Oven stove",
+     "Smoke-free",
+     "Cable TV",
+     "Washer",
+     "Free Wi-Fi"
+    ],
+    "check_in_time": "4:00 PM",
+    "check_out_time": "10:00 AM",
+    "property_token": "redacted-5",
+    "images": [
+     {
+      "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW1M5FtmnGdT9Ij0vW1pn-wanL2Kp1NkWFs6jLKRg-kNU4B6jE2RCjKJKhXvGIonF8kUBnVL0FKSKrWBF3DqvmpGsZR-5wy4o1C-8P59ZHxwd-BSe2EyApxJR9iKN_9mHte1DHK1MXPEYXhqI3WLSOFtWr-A9nCI1YHqnO1QvP2Z8ys336bMpw-3wg=s287-w287-h192-n-k-no-v1"
+     }
+    ]
+   }
+  ]
+ },
+ "rentals": {
+  "search_metadata": {
+   "status": "Success",
+   "google_hotels_url": "https://www.google.com/travel/search?q=New+York%2C+NY&hl=en&gl=us"
+  },
+  "properties": [
+   {
+    "type": "vacation rental",
+    "name": "Lavish 3BR Retreat w Private Rooftop Deck Near NYC",
+    "link": "https://new.rentalsunited.com/Property/2620195?sc=554691",
+    "gps_coordinates": {
+     "latitude": 40.74225616455078,
+     "longitude": -74.0421142578125
+    },
+    "rate_per_night": {
+     "display_price": "$260",
+     "extracted_display_price": 260,
+     "lowest": "$289",
+     "extracted_lowest": 289,
+     "before_taxes_fees": "$260",
+     "extracted_before_taxes_fees": 260,
+     "after_taxes_fees": "$289",
+     "extracted_after_taxes_fees": 289
+    },
+    "total_rate": {
+     "display_price": "$1,040",
+     "extracted_display_price": 1040,
+     "lowest": "$1,156",
+     "extracted_lowest": 1156,
+     "before_taxes_fees": "$1,040",
+     "extracted_before_taxes_fees": 1040,
+     "after_taxes_fees": "$1,156",
+     "extracted_after_taxes_fees": 1156
+    },
+    "overall_rating": 4.303704,
+    "reviews": 54,
+    "essential_info": [
+     "Entire apartment",
+     "Sleeps 8",
+     "3 bedrooms",
+     "2 bathrooms",
+     "4 beds",
+     "1,302 sq ft"
+    ],
+    "amenities": [
+     "Air conditioning",
+     "Balcony",
+     "Crib",
+     "Heating",
+     "Ironing board",
+     "Kitchen",
+     "Outdoor grill",
+     "Patio",
+     "Pet-friendly",
+     "Smoke-free",
+     "Cable TV",
+     "Washer",
+     "Wheelchair accessible",
+     "Paid parking",
+     "Free Wi-Fi"
+    ],
+    "check_in_time": "3:00 PM",
+    "check_out_time": "10:00 AM",
+    "property_token": "redacted-0",
+    "images": [
+     {
+      "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW09N6A4xaU_MZOtj-IVRDtlwPjj6Yf7zEvVoMdfufJbcroVvlfAAnsxS-d-9uBn5ZqYFdNUcLjCRnQFKfpKigIm2tpJjRY-EylLlgT64TED4nxKuoptgAtSMLJyKK_hCTcBbS4jBo8gRumz1bS4cs7DSoEG6eUtuGezwNZC_KM83_0b-nLsM5B6=s287-w287-h192-n-k-no-v1"
+     }
+    ]
+   },
+   {
+    "type": "vacation rental",
+    "name": "10m to NYC: 25ft Ceiling Penthouse, Skyline Balcony & \"Treehouse\" Loft",
+    "gps_coordinates": {
+     "latitude": 40.777976989746094,
+     "longitude": -74.01437377929688
+    },
+    "rate_per_night": {
+     "display_price": "$264",
+     "extracted_display_price": 264,
+     "lowest": "$292",
+     "extracted_lowest": 292,
+     "before_taxes_fees": "$264",
+     "extracted_before_taxes_fees": 264,
+     "after_taxes_fees": "$292",
+     "extracted_after_taxes_fees": 292
+    },
+    "total_rate": {
+     "display_price": "$1,055",
+     "extracted_display_price": 1055,
+     "lowest": "$1,168",
+     "extracted_lowest": 1168,
+     "before_taxes_fees": "$1,055",
+     "extracted_before_taxes_fees": 1055,
+     "after_taxes_fees": "$1,168",
+     "extracted_after_taxes_fees": 1168
+    },
+    "overall_rating": 4.8,
+    "reviews": 46,
+    "essential_info": [
+     "Entire apartment",
+     "Sleeps 7",
+     "3 bedrooms",
+     "4 beds"
+    ],
+    "amenities": [
+     "Air conditioning",
+     "Balcony",
+     "Heating",
+     "Ironing board",
+     "Kitchen",
+     "Microwave",
+     "Oven stove",
+     "Pet-friendly",
+     "Smoke-free",
+     "Cable TV",
+     "Washer",
+     "Free parking",
+     "Free Wi-Fi"
+    ],
+    "check_in_time": "4:30 PM",
+    "check_out_time": "10:00 AM",
+    "property_token": "redacted-1",
+    "images": [
+     {
+      "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW3deCeZ8SMhPto1FWhhD4iv2RBEec6JyFwsvvOXTc1UwsKdoVRVU4DkQdraQ-DyqJM7vuitT-XOnj9YbfYZkEWL-JNdB4fKEWs8VyriTKpq4y9sBeb839yv2EDHdapixRgHJNJs6zGVQ8OD3RUyGGAeoto1IKSfU35ck3AW-hfuZsvq0Oeunks=s287-w287-h192-n-k-no-v1"
+     }
+    ]
+   },
+   {
+    "type": "vacation rental",
+    "name": "LUXURY APARTMENT 15 MIN FROM MANHATTAN AT A BARGAIN PRICE. GREAT OPPORTUNITY.",
+    "gps_coordinates": {
+     "latitude": 40.79029846191406,
+     "longitude": -74.00715637207031
+    },
+    "rate_per_night": {
+     "display_price": "$161",
+     "extracted_display_price": 161,
+     "lowest": "$179",
+     "extracted_lowest": 179,
+     "before_taxes_fees": "$161",
+     "extracted_before_taxes_fees": 161,
+     "after_taxes_fees": "$179",
+     "extracted_after_taxes_fees": 179
+    },
+    "total_rate": {
+     "display_price": "$646",
+     "extracted_display_price": 646,
+     "lowest": "$715",
+     "extracted_lowest": 715,
+     "before_taxes_fees": "$646",
+     "extracted_before_taxes_fees": 646,
+     "after_taxes_fees": "$715",
+     "extracted_after_taxes_fees": 715
+    },
+    "overall_rating": 4.719512,
+    "reviews": 246,
+    "essential_info": [
+     "Entire house",
+     "Sleeps 4",
+     "2 bedrooms",
+     "1 bathroom",
+     "2 beds"
+    ],
+    "amenities": [
+     "Air conditioning",
+     "Heating",
+     "Ironing board",
+     "Kitchen",
+     "Microwave",
+     "Oven stove",
+     "Cable TV",
+     "Free parking",
+     "Free Wi-Fi"
+    ],
+    "check_in_time": "4:00 PM",
+    "check_out_time": "10:00 AM",
+    "property_token": "redacted-2",
+    "images": [
+     {
+      "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW3LGmN30vBLsEYGIiLEdBWa9-MTNBb7GX9CB0gOfuud9NtIVHAfdAEbcbd7N6XjpqXiLGQURcNKCMOaAp_AYNcy86gLPsFFTW_qzUZmlsaoIoH20JUviu1pXcwhQp_a-GzwTJZdgHSsK-yhuvkuuC0I05jSTwA9Itmvz4MHv-KO6V5DJuMvC8iL=s287-w287-h192-n-k-no-v1"
+     }
+    ]
+   },
+   {
+    "type": "vacation rental",
+    "name": "Studio726 In the heart of Midtown Manhattan",
+    "link": "https://reservations.studiosmidtownmanhattan.com/listings/518073?googleVR=1&utm_source=google&utm_medium=vacation_rentals",
+    "gps_coordinates": {
+     "latitude": 40.74721145629883,
+     "longitude": -73.98780822753906
+    },
+    "rate_per_night": {
+     "display_price": "$353",
+     "extracted_display_price": 353,
+     "lowest": "$354",
+     "extracted_lowest": 354,
+     "before_taxes_fees": "$353",
+     "extracted_before_taxes_fees": 353,
+     "after_taxes_fees": "$354",
+     "extracted_after_taxes_fees": 354
+    },
+    "total_rate": {
+     "display_price": "$1,411",
+     "extracted_display_price": 1411,
+     "lowest": "$1,417",
+     "extracted_lowest": 1417,
+     "before_taxes_fees": "$1,411",
+     "extracted_before_taxes_fees": 1411,
+     "after_taxes_fees": "$1,417",
+     "extracted_after_taxes_fees": 1417
+    },
+    "overall_rating": 4.45,
+    "reviews": 17,
+    "essential_info": [
+     "Entire apartment",
+     "Sleeps 6",
+     "1 bathroom",
+     "4 beds"
+    ],
+    "amenities": [
+     "Air conditioning",
+     "Crib",
+     "Heating",
+     "Kitchen",
+     "Microwave",
+     "Oven stove",
+     "Cable TV",
+     "Paid parking"
+    ],
+    "check_in_time": "4:00 PM",
+    "check_out_time": "10:00 AM",
+    "property_token": "redacted-3",
+    "images": [
+     {
+      "thumbnail": "https://lh3.googleusercontent.com/grass-proxy/AIM7gW2JHHFtVsHGmBnB8b5USxsaGxnh9pky0YMk0nrvQBbChn_ANcO_VXqTiLfHNa1_GaLpbiADhl-H-dTo_ne3Nkyy9snAsny1ggjyvEkmcXNsmx1mZNfzT9HmoTk2oiXTVF9fpSQQMp70jG4J5udXlkDYCLF3cIWWEvO2o7Oj-NQKhoLIBkdKH-hb=s287-w287-h192-n-k-no-v1"
+     }
+    ]
+   }
+  ]
+ }
+}

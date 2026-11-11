@@ -1,0 +1,29 @@
+[
+  {"id": "H1", "city": "ORL", "lat": 28.292, "lon": -81.4076, "name": "Villa 4 dorm. Kissimmee", "tax_bps": 1350, "stay_fee_minor": 25000, "min_nights": 5, "short_term_legal": true, "deeplink": "https://www.booking.com/searchresults.html?group_adults=5&ss=Kissimmee%2C+Florida",
+   "units": [{"unit_type": "Casa completa", "capacity": 10, "bedrooms": 4, "bathrooms": 3, "available": 1, "nightly_minor": 26000}]},
+  {"id": "H2", "city": "ORL", "lat": 28.1614, "lon": -81.6017, "name": "Townhouse 3 dorm. Davenport", "tax_bps": 1250, "stay_fee_minor": 18000, "min_nights": 7, "short_term_legal": true, "deeplink": "https://www.booking.com/searchresults.html?group_adults=5&ss=Davenport%2C+Florida",
+   "units": [{"unit_type": "Casa completa", "capacity": 8, "bedrooms": 3, "bathrooms": 2, "available": 1, "nightly_minor": 18500}]},
+  {"id": "H3", "city": "ORL", "lat": 28.3772, "lon": -81.5157, "name": "Condo 2 dorm. (1 baño) Lake Buena Vista", "tax_bps": 1250, "stay_fee_minor": 12000, "min_nights": 3, "short_term_legal": true, "deeplink": "https://www.booking.com/searchresults.html?group_adults=5&ss=Lake+Buena+Vista%2C+Florida",
+   "units": [{"unit_type": "Condo completo", "capacity": 6, "bedrooms": 2, "bathrooms": 1, "available": 1, "nightly_minor": 12000}]},
+  {"id": "H4", "city": "ORL", "lat": 28.37, "lon": -81.518, "name": "Hotel Resort Lake Buena Vista", "tax_bps": 1250, "stay_fee_minor": 0, "min_nights": 1, "short_term_legal": true, "deeplink": "https://www.booking.com/searchresults.html?group_adults=5&ss=Lake+Buena+Vista%2C+Florida",
+   "units": [
+     {"unit_type": "2 Queen", "capacity": 4, "bedrooms": 1, "bathrooms": 1, "bathrooms_source": "inferred_per_room", "available": 5, "nightly_minor": 15900, "per_night_fee_minor": 3500},
+     {"unit_type": "King", "capacity": 2, "bedrooms": 1, "bathrooms": 1, "bathrooms_source": "inferred_per_room", "available": 5, "nightly_minor": 13900, "per_night_fee_minor": 3500},
+     {"unit_type": "Family Suite", "capacity": 6, "bedrooms": 2, "bathrooms": 1, "available": 2, "nightly_minor": 28900, "per_night_fee_minor": 3500}
+   ]},
+
+  {"id": "N1", "city": "NYC", "lat": 40.7549, "lon": -73.984, "name": "Hotel Midtown", "tax_bps": 1475, "stay_fee_minor": 0, "min_nights": 1, "short_term_legal": true, "deeplink": "https://www.booking.com/searchresults.html?group_adults=5&ss=Midtown+Manhattan%2C+New+York",
+   "units": [
+     {"unit_type": "2 Queen", "capacity": 4, "bedrooms": 1, "bathrooms": 1, "bathrooms_source": "inferred_per_room", "available": 3, "nightly_minor": 28900, "per_night_fee_minor": 3000},
+     {"unit_type": "King", "capacity": 2, "bedrooms": 1, "bathrooms": 1, "bathrooms_source": "inferred_per_room", "available": 3, "nightly_minor": 24900, "per_night_fee_minor": 3000}
+   ]},
+  {"id": "N2", "city": "NYC", "lat": 40.7447, "lon": -73.9485, "name": "Hotel Long Island City", "tax_bps": 1475, "stay_fee_minor": 0, "min_nights": 1, "short_term_legal": true, "deeplink": "https://www.booking.com/searchresults.html?group_adults=5&ss=Long+Island+City%2C+New+York",
+   "units": [
+     {"unit_type": "2 Queen", "capacity": 4, "bedrooms": 1, "bathrooms": 1, "bathrooms_source": "inferred_per_room", "available": 2, "nightly_minor": 19900},
+     {"unit_type": "Queen", "capacity": 2, "bedrooms": 1, "bathrooms": 1, "bathrooms_source": "inferred_per_room", "available": 2, "nightly_minor": 16900}
+   ]},
+  {"id": "N3", "city": "NYC", "lat": 40.6782, "lon": -73.9442, "name": "Depto. 3 dorm. Brooklyn (alquiler temporario)", "tax_bps": 1475, "stay_fee_minor": 20000, "min_nights": 2, "short_term_legal": false, "deeplink": "https://www.booking.com/searchresults.html?group_adults=5&ss=Brooklyn%2C+New+York",
+   "units": [{"unit_type": "Depto. completo", "capacity": 6, "bedrooms": 3, "bathrooms": 2, "available": 1, "nightly_minor": 35000}]},
+  {"id": "N4", "city": "NYC", "lat": 40.758, "lon": -73.9855, "name": "Suite Hotel Times Square", "tax_bps": 1475, "stay_fee_minor": 0, "min_nights": 1, "short_term_legal": true, "deeplink": "https://www.booking.com/searchresults.html?group_adults=5&ss=Times+Square%2C+New+York",
+   "units": [{"unit_type": "Suite 2 dorm.", "capacity": 6, "bedrooms": 2, "bathrooms": 2, "available": 2, "nightly_minor": 52000, "per_night_fee_minor": 3000}]}
+]

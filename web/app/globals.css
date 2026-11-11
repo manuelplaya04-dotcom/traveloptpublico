@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+/* Solo modo claro (fase_4b_frontend_ux.md): `dark:` queda atado a una clase que no se usa. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-bg: #ffffff;
+  --color-surface: #f9fafb;
+  --color-ink: #111827;
+  --color-muted: #6b7280;
+  --color-line: #e5e7eb;
+  --color-accent: #4f46e5;
+  --color-accent-hover: #4338ca;
+  --color-accent-soft: #eef2ff;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-poppins), var(--font-inter), ui-sans-serif, sans-serif;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+/* Modal: entrada suave (sin recargar la página). */
+dialog[open] {
+  animation: modal-in 220ms ease-out;
+}
+dialog[open]::backdrop {
+  background: rgb(17 24 39 / 0.45);
+  backdrop-filter: blur(4px);
+  animation: fade-in 220ms ease-out;
+}
+@keyframes modal-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+/* Impresión / PDF: documento A4 en blanco y negro, sin sombras ni fondos, sin cortar días ni tarjetas. */
+@page {
+  size: A4;
+  margin: 14mm 12mm;
+}
+@media print {
+  html, body { background: #fff !important; color: #000 !important; font-size: 11pt; }
+  *, *::before, *::after { box-shadow: none !important; text-shadow: none !important; animation: none !important; }
+  main { min-height: 0 !important; padding-bottom: 0 !important; }
+  .bg-surface, .bg-white, [class*="bg-accent"], [class*="bg-amber"], [class*="bg-orange"], [class*="bg-red"] { background: #fff !important; }
+  [class*="text-"] { color: #000 !important; }
+  li, article, aside, [role="alert"] { break-inside: avoid; }
+  h1, h2, h3, h4 { break-after: avoid; }
+  #checkout a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; word-break: break-all; }
+}
+
+/* Entrada de contenido nuevo (resultado, cambio de paso): fundido corto, sin mover el layout. */
+.enter {
+  animation: fade-in 300ms ease-in-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  dialog[open], dialog[open]::backdrop, .enter { animation: none; }
+}

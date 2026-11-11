@@ -1,0 +1,46 @@
+[project]
+name = "travelopt-engine"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.54.0",
+  "pydantic>=2.7",
+  "pydantic-settings>=2.4",
+  "httpx>=0.27",
+  "psycopg[binary,pool]>=3.3.6",
+  "ortools>=9.10",   # se usa desde la Fase 3 (CP-SAT); se instala desde el inicio
+  "tzdata>=2025.2",
+]
+
+[dependency-groups]
+dev = [
+    "mypy==1.15.0",
+    "pytest>=8",
+    "ruff>=0.6",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]   # defaults previos a ruff 0.17, fijados para que una versión nueva no cambie el gate
+
+[tool.mypy]
+# Norma 2: tipado estático riguroso. Corre en el CI y en el gate de la fase 3.
+python_version = "3.12"
+plugins = ["pydantic.mypy"]
+files = ["app"]
+warn_unused_ignores = true
+warn_redundant_casts = true
+no_implicit_optional = true
+check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = ["ortools.*", "psycopg_pool.*"]
+ignore_missing_imports = true

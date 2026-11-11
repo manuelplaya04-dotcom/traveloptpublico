@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "travelopt-devtools": {
+      "type": "stdio",
+      "command": "uv",
+      "args": ["run", "--project", "tools/devtools_mcp", "python", "tools/devtools_mcp/server.py"]
+    },
+    "supabase-local": {
+      "type": "http",
+      "url": "http://localhost:55321/mcp"
+    }
+  }
+}

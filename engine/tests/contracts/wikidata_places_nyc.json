@@ -1,0 +1,741 @@
+{
+ "head": {
+  "vars": [
+   "item",
+   "itemLabel",
+   "coord",
+   "sitelinks",
+   "type",
+   "article"
+  ]
+ },
+ "results": {
+  "bindings": [
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q9202"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://es.wikipedia.org/wiki/Estatua_de_la_Libertad"
+    },
+    "type": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1440300"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-74.044425277 40.689209166)"
+    },
+    "sitelinks": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+     "type": "literal",
+     "value": "159"
+    },
+    "itemLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Estatua de la Libertad"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q160236"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://es.wikipedia.org/wiki/Museo_Metropolitano_de_Arte"
+    },
+    "type": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q207694"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-73.963333333 40.779444444)"
+    },
+    "sitelinks": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+     "type": "literal",
+     "value": "88"
+    },
+    "itemLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Museo Metropolitano de Arte"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q160236"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://es.wikipedia.org/wiki/Museo_Metropolitano_de_Arte"
+    },
+    "type": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q33506"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-73.963333333 40.779444444)"
+    },
+    "sitelinks": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+     "type": "literal",
+     "value": "88"
+    },
+    "itemLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Museo Metropolitano de Arte"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q160409"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://es.wikipedia.org/wiki/Central_Park"
+    },
+    "type": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q22746"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-73.966111111 40.7825)"
+    },
+    "sitelinks": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+     "type": "literal",
+     "value": "87"
+    },
+    "itemLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Central Park"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q11259"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://es.wikipedia.org/wiki/Times_Square"
+    },
+    "type": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q174782"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-73.985833333 40.7575)"
+    },
+    "sitelinks": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+     "type": "literal",
+     "value": "72"
+    },
+    "itemLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Times Square"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q188740"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://es.wikipedia.org/wiki/MoMA"
+    },
+    "type": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q207694"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-73.9775 40.761666666)"
+    },
+    "sitelinks": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+     "type": "literal",
+     "value": "67"
+    },
+    "itemLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Museo de Arte Moderno"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q188740"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://es.wikipedia.org/wiki/MoMA"
+    },
+    "type": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q207694"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-73.977611111 40.761444444)"
+    },
+    "sitelinks": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+     "type": "literal",
+     "value": "67"
+    },
+    "itemLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Museo de Arte Moderno"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q188740"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://es.wikipedia.org/wiki/MoMA"
+    },
+    "type": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q33506"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-73.9775 40.761666666)"
+    },
+    "sitelinks": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+     "type": "literal",
+     "value": "67"
+    },
+    "itemLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Museo de Arte Moderno"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q188740"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://es.wikipedia.org/wiki/MoMA"
+    },
+    "type": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q33506"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-73.977611111 40.761444444)"
+    },
+    "sitelinks": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+     "type": "literal",
+     "value": "67"
+    },
+    "itemLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Museo de Arte Moderno"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q201469"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://es.wikipedia.org/wiki/Museo_Solomon_R._Guggenheim"
+    },
+    "type": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q207694"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-73.958888888 40.783055555)"
+    },
+    "sitelinks": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+     "type": "literal",
+     "value": "60"
+    },
+    "itemLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Museo Solomon R. Guggenheim"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q632682"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://es.wikipedia.org/wiki/Museo_Brooklyn"
+    },
+    "type": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q207694"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-73.963631 40.671206)"
+    },
+    "sitelinks": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+     "type": "literal",
+     "value": "48"
+    },
+    "itemLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Museo Brooklyn"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q632682"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://es.wikipedia.org/wiki/Museo_Brooklyn"
+    },
+    "type": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q33506"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-73.963631 40.671206)"
+    },
+    "sitelinks": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+     "type": "literal",
+     "value": "48"
+    },
+    "itemLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Museo Brooklyn"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q739792"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://es.wikipedia.org/wiki/Zool%C3%B3gico_del_Bronx"
+    },
+    "type": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q43501"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-73.878333333 40.850277777)"
+    },
+    "sitelinks": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+     "type": "literal",
+     "value": "41"
+    },
+    "itemLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Zoológico del Bronx"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1136137"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://es.wikipedia.org/wiki/National_September_11_Memorial_%26_Museum"
+    },
+    "type": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q33506"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-74.013611111 40.711388888)"
+    },
+    "sitelinks": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+     "type": "literal",
+     "value": "35"
+    },
+    "itemLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "National September 11 Memorial & Museum"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q745296"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://es.wikipedia.org/wiki/Parque_Flushing_Meadows-Corona"
+    },
+    "type": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q22746"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-73.84479 40.743746)"
+    },
+    "sitelinks": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+     "type": "literal",
+     "value": "35"
+    },
+    "itemLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Flushing Meadows-Corona Park"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q13689"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://es.wikipedia.org/wiki/The_Battery_(Manhattan)"
+    },
+    "type": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q22746"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-74.016111111 40.703611111)"
+    },
+    "sitelinks": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+     "type": "literal",
+     "value": "32"
+    },
+    "itemLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "The Battery"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q110000"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://es.wikipedia.org/wiki/Madison_Square"
+    },
+    "type": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q174782"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-73.988055555 40.742222222)"
+    },
+    "sitelinks": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+     "type": "literal",
+     "value": "31"
+    },
+    "itemLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Madison Square"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q110000"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://es.wikipedia.org/wiki/Madison_Square"
+    },
+    "type": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q22746"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-73.988055555 40.742222222)"
+    },
+    "sitelinks": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+     "type": "literal",
+     "value": "31"
+    },
+    "itemLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Madison Square"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1049632"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://es.wikipedia.org/wiki/Prospect_Park"
+    },
+    "type": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q22746"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-73.97035 40.66143)"
+    },
+    "sitelinks": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+     "type": "literal",
+     "value": "31"
+    },
+    "itemLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Prospect Park"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1049632"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://es.wikipedia.org/wiki/Prospect_Park"
+    },
+    "type": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q22698"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-73.97035 40.66143)"
+    },
+    "sitelinks": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+     "type": "literal",
+     "value": "31"
+    },
+    "itemLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Prospect Park"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q843869"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://es.wikipedia.org/wiki/High_Line_(Nueva_York)"
+    },
+    "type": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q22746"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-74.005 40.7483)"
+    },
+    "sitelinks": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+     "type": "literal",
+     "value": "30"
+    },
+    "itemLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "High Line"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q607212"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://es.wikipedia.org/wiki/Studio_54"
+    },
+    "type": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q24354"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-73.983777777 40.764361111)"
+    },
+    "sitelinks": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+     "type": "literal",
+     "value": "30"
+    },
+    "itemLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Studio 54"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q639791"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://es.wikipedia.org/wiki/Museo_Whitney_de_Arte_Estadounidense"
+    },
+    "type": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q207694"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-74.0089 40.7396)"
+    },
+    "sitelinks": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+     "type": "literal",
+     "value": "30"
+    },
+    "itemLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Museo Whitney de Arte Estadounidense"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q753437"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://es.wikipedia.org/wiki/Radio_City_Music_Hall"
+    },
+    "type": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q24354"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-73.979167 40.759722)"
+    },
+    "sitelinks": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+     "type": "literal",
+     "value": "30"
+    },
+    "itemLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Radio City Music Hall"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q682827"
+    },
+    "article": {
+     "type": "uri",
+     "value": "https://es.wikipedia.org/wiki/Colecci%C3%B3n_Frick"
+    },
+    "type": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q207694"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-73.967222222 40.771111111)"
+    },
+    "sitelinks": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+     "type": "literal",
+     "value": "29"
+    },
+    "itemLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Colección Frick"
+    }
+   }
+  ]
+ }
+}

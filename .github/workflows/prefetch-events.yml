@@ -1,0 +1,28 @@
+# Pre-carga semanal de Google Events (vía SerpApi) en la caché del motor: las búsquedas de los usuarios leen de ahí y
+# no gastan cuota. Una búsqueda por ciudad de PREFETCH_EVENT_CITIES (~9 al mes para Orlando y Nueva York).
+# Necesita los secretos ENGINE_BASE_URL (https://…onrender.com) y ENGINE_API_KEY en Settings → Secrets → Actions.
+name: prefetch-events
+
+on:
+  schedule:
+    - cron: "0 7 * * 1"   # lunes 07:00 UTC (04:00 en Argentina)
+  workflow_dispatch: {}
+
+permissions: {}
+
+jobs:
+  prefetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Despertar el motor y pre-cargar eventos
+        env:
+          ENGINE_BASE_URL: ${{ secrets.ENGINE_BASE_URL }}
+          ENGINE_API_KEY: ${{ secrets.ENGINE_API_KEY }}
+        run: |
+          if [ -z "$ENGINE_BASE_URL" ] || [ -z "$ENGINE_API_KEY" ]; then
+            echo "Faltan los secretos ENGINE_BASE_URL / ENGINE_API_KEY: no se pre-carga nada."; exit 0
+          fi
+          # plan gratuito: el primer pedido despierta al motor (~40 s)
+          curl -fsS --retry 5 --retry-delay 15 --retry-all-errors --max-time 90 "$ENGINE_BASE_URL/healthz" > /dev/null
+          curl -fsS --max-time 90 -X POST -H "Authorization: Bearer $ENGINE_API_KEY" "$ENGINE_BASE_URL/v1/maintenance/prefetch-events"

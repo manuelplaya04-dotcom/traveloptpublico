@@ -1,0 +1,47 @@
+# Updates de dependencias. Los de seguridad llegan además por las alertas de Dependabot (activarlas en
+# Settings → Code security). Agrupados y semanales para no inundar de PRs; cada PR pasa por el CI completo.
+# Solo versiones menores y parches: los saltos mayores (y el de la versión de Python) se hacen a mano, con pruebas.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /web
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 5
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      minor-y-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: uv
+    directory: /engine
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 5
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      minor-y-patch:
+        update-types: [minor, patch]
+
+  # Mantiene al día los SHA fijados de las actions (el comentario con la versión se actualiza solo).
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly, day: monday }
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      actions:
+        patterns: ["*"]
+
+  # Imagen base del motor: se queda en Python 3.12.x (solo parches); el binario de uv sin saltos mayores.
+  - package-ecosystem: docker
+    directory: /engine
+    schedule: { interval: weekly, day: monday }
+    ignore:
+      - dependency-name: "python"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]

@@ -1,0 +1,133 @@
+{
+ "search_metadata": {
+  "status": "Success"
+ },
+ "events_results": [
+  {
+   "title": "Chop & Play",
+   "type": "African diaspora social",
+   "date": {
+    "start_date": "Nov 9",
+    "when": "Nov 9, 10:00 AM"
+   },
+   "address": [
+    "Flavors Nigerian Restaurant",
+    "Orlando, FL"
+   ],
+   "venue": {
+    "name": "Flavors Nigerian Restaurant"
+   },
+   "ticket_info": [
+    {
+     "source": "eventbrite.com",
+     "link": "https://www.eventbrite.com/e/2002626607091?aff=ebdiglgoogleliveevents",
+     "link_type": "tickets"
+    }
+   ]
+  },
+  {
+   "title": "Orlando Networking Event",
+   "type": "Professional networking mixer",
+   "date": {
+    "start_date": "Jan 12",
+    "when": "Jan 12, 5:30 PM"
+   },
+   "address": [
+    "Jenny's Eat Drink Socialize",
+    "Orlando, FL"
+   ],
+   "venue": {
+    "name": "Jenny's Eat Drink Socialize"
+   },
+   "ticket_info": [
+    {
+     "source": "eventbrite.com",
+     "link": "https://www.eventbrite.com/e/75th-orlando-networking-event-blue-and-white-edition-tickets-1992540705889",
+     "link_type": "tickets"
+    }
+   ]
+  },
+  {
+   "title": "3rd Thursday Orlando: Arts. Making. History.",
+   "type": "Monthly arts and culture festival",
+   "date": {
+    "start_date": "Dec 17",
+    "when": "Dec 17"
+   },
+   "address": [
+    "CityArts",
+    "Orlando, FL"
+   ],
+   "venue": {
+    "name": "CityArts"
+   },
+   "ticket_info": [
+    {
+     "source": "orlandoweekly.com",
+     "link": "https://www.orlandoweekly.com/events/details/3rd-thursday-orlando-arts-making-history-/19254710/2026-12-17T00/",
+     "link_type": "tickets"
+    }
+   ]
+  },
+  {
+   "title": "Orlando Whiskey Festival",
+   "type": "Whiskey tasting festival",
+   "date": {
+    "start_date": "Feb 19",
+    "when": "Feb 19, 6:30 PM"
+   },
+   "address": [
+    "Orlando Science Center",
+    "Orlando, FL"
+   ],
+   "venue": {
+    "name": "Orlando Science Center"
+   },
+   "ticket_info": [
+    {
+     "source": "happenin.city",
+     "link": "https://www.happenin.city/happenins/orlando/orlando-whiskey-festival",
+     "link_type": "tickets"
+    }
+   ]
+  },
+  {
+   "title": "Stellar Nights",
+   "type": "Nighttime museum event",
+   "date": {
+    "start_date": "Mar 12",
+    "when": "Mar 12, 10:00 AM"
+   },
+   "address": [
+    "Orlando Science Center",
+    "Orlando, FL"
+   ],
+   "venue": {
+    "name": "Orlando Science Center"
+   },
+   "ticket_info": []
+  },
+  {
+   "title": "Sunday Sessions",
+   "type": "Bar DJ set",
+   "date": {
+    "start_date": "Dec 6",
+    "when": "Dec 6"
+   },
+   "address": [
+    "ICEBAR Orlando",
+    "Orlando, FL"
+   ],
+   "venue": {
+    "name": "ICEBAR Orlando"
+   },
+   "ticket_info": [
+    {
+     "source": "thateventsite.com",
+     "link": "https://www.thateventsite.com/markets/orlando/events/sunday-sessions-at-icebar-orlando-2026-12-06",
+     "link_type": "tickets"
+    }
+   ]
+  }
+ ]
+}

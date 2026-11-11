@@ -1,0 +1,559 @@
+{
+  "$defs": {
+    "ActivityOffer": {
+      "properties": {
+        "kind": {
+          "const": "activity",
+          "default": "activity",
+          "title": "Kind",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "city": {
+          "title": "City",
+          "type": "string"
+        },
+        "activity_key": {
+          "title": "Activity Key",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "date": {
+          "format": "date",
+          "title": "Date",
+          "type": "string"
+        },
+        "price_per_pax_minor": {
+          "minimum": 0,
+          "title": "Price Per Pax Minor",
+          "type": "integer"
+        },
+        "outdoor": {
+          "title": "Outdoor",
+          "type": "boolean"
+        },
+        "slots": {
+          "default": 2,
+          "maximum": 2,
+          "minimum": 1,
+          "title": "Slots",
+          "type": "integer"
+        },
+        "lat": {
+          "anyOf": [
+            {
+              "maximum": 90,
+              "minimum": -90,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lat"
+        },
+        "lon": {
+          "anyOf": [
+            {
+              "maximum": 180,
+              "minimum": -180,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lon"
+        },
+        "deeplink": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Deeplink"
+        }
+      },
+      "required": [
+        "id",
+        "provider",
+        "city",
+        "activity_key",
+        "name",
+        "date",
+        "price_per_pax_minor",
+        "outdoor"
+      ],
+      "title": "ActivityOffer",
+      "type": "object"
+    },
+    "FlightOffer": {
+      "properties": {
+        "kind": {
+          "const": "flight",
+          "default": "flight",
+          "title": "Kind",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "origin": {
+          "title": "Origin",
+          "type": "string"
+        },
+        "destination": {
+          "title": "Destination",
+          "type": "string"
+        },
+        "depart_at": {
+          "format": "date-time",
+          "title": "Depart At",
+          "type": "string"
+        },
+        "arrive_at": {
+          "format": "date-time",
+          "title": "Arrive At",
+          "type": "string"
+        },
+        "stops": {
+          "minimum": 0,
+          "title": "Stops",
+          "type": "integer"
+        },
+        "carrier": {
+          "title": "Carrier",
+          "type": "string"
+        },
+        "price_per_pax_minor": {
+          "minimum": 0,
+          "title": "Price Per Pax Minor",
+          "type": "integer"
+        },
+        "included_bags": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Included Bags",
+          "type": "integer"
+        },
+        "bag_fee_minor": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Bag Fee Minor",
+          "type": "integer"
+        },
+        "seats_available": {
+          "minimum": 0,
+          "title": "Seats Available",
+          "type": "integer"
+        },
+        "deeplink": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Deeplink"
+        }
+      },
+      "required": [
+        "id",
+        "provider",
+        "origin",
+        "destination",
+        "depart_at",
+        "arrive_at",
+        "stops",
+        "carrier",
+        "price_per_pax_minor",
+        "seats_available"
+      ],
+      "title": "FlightOffer",
+      "type": "object"
+    },
+    "LodgingOffer": {
+      "properties": {
+        "kind": {
+          "const": "lodging",
+          "default": "lodging",
+          "title": "Kind",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "city": {
+          "title": "City",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "check_in": {
+          "format": "date",
+          "title": "Check In",
+          "type": "string"
+        },
+        "check_out": {
+          "format": "date",
+          "title": "Check Out",
+          "type": "string"
+        },
+        "units": {
+          "items": {
+            "$ref": "#/$defs/LodgingUnit"
+          },
+          "minItems": 1,
+          "title": "Units",
+          "type": "array"
+        },
+        "stay_fee_minor": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Stay Fee Minor",
+          "type": "integer"
+        },
+        "tax_bps": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Tax Bps",
+          "type": "integer"
+        },
+        "min_nights": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Min Nights",
+          "type": "integer"
+        },
+        "short_term_legal": {
+          "default": true,
+          "title": "Short Term Legal",
+          "type": "boolean"
+        },
+        "stars": {
+          "anyOf": [
+            {
+              "maximum": 5,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stars"
+        },
+        "rating": {
+          "anyOf": [
+            {
+              "maximum": 10,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rating"
+        },
+        "lat": {
+          "anyOf": [
+            {
+              "maximum": 90,
+              "minimum": -90,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lat"
+        },
+        "lon": {
+          "anyOf": [
+            {
+              "maximum": 180,
+              "minimum": -180,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lon"
+        },
+        "deeplink": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Deeplink"
+        }
+      },
+      "required": [
+        "id",
+        "provider",
+        "city",
+        "name",
+        "check_in",
+        "check_out",
+        "units"
+      ],
+      "title": "LodgingOffer",
+      "type": "object"
+    },
+    "LodgingUnit": {
+      "properties": {
+        "unit_type": {
+          "title": "Unit Type",
+          "type": "string"
+        },
+        "capacity": {
+          "minimum": 1,
+          "title": "Capacity",
+          "type": "integer"
+        },
+        "bedrooms": {
+          "minimum": 0,
+          "title": "Bedrooms",
+          "type": "integer"
+        },
+        "bathrooms": {
+          "minimum": 0,
+          "title": "Bathrooms",
+          "type": "integer"
+        },
+        "bathrooms_source": {
+          "default": "explicit",
+          "enum": [
+            "explicit",
+            "inferred_per_room"
+          ],
+          "title": "Bathrooms Source",
+          "type": "string"
+        },
+        "available": {
+          "minimum": 0,
+          "title": "Available",
+          "type": "integer"
+        },
+        "base_total_minor": {
+          "minimum": 0,
+          "title": "Base Total Minor",
+          "type": "integer"
+        },
+        "fees_total_minor": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Fees Total Minor",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "unit_type",
+        "capacity",
+        "bedrooms",
+        "bathrooms",
+        "available",
+        "base_total_minor"
+      ],
+      "title": "LodgingUnit",
+      "type": "object"
+    },
+    "TransportQuote": {
+      "properties": {
+        "kind": {
+          "const": "transport",
+          "default": "transport",
+          "title": "Kind",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "city": {
+          "title": "City",
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "car_rental",
+            "transfers"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "per_day_minor": {
+          "default": 0,
+          "title": "Per Day Minor",
+          "type": "integer"
+        },
+        "per_trip_minor": {
+          "default": 0,
+          "title": "Per Trip Minor",
+          "type": "integer"
+        },
+        "trips": {
+          "default": 0,
+          "title": "Trips",
+          "type": "integer"
+        },
+        "fixed_minor": {
+          "default": 0,
+          "title": "Fixed Minor",
+          "type": "integer"
+        },
+        "tax_bps": {
+          "default": 0,
+          "title": "Tax Bps",
+          "type": "integer"
+        },
+        "deeplink": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Deeplink"
+        }
+      },
+      "required": [
+        "id",
+        "provider",
+        "city",
+        "mode"
+      ],
+      "title": "TransportQuote",
+      "type": "object"
+    },
+    "WeatherDay": {
+      "properties": {
+        "city": {
+          "title": "City",
+          "type": "string"
+        },
+        "date": {
+          "format": "date",
+          "title": "Date",
+          "type": "string"
+        },
+        "tmax_c": {
+          "title": "Tmax C",
+          "type": "number"
+        },
+        "heavy_rain_prob": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Heavy Rain Prob",
+          "type": "number"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "city",
+        "date",
+        "tmax_c",
+        "heavy_rain_prob",
+        "source"
+      ],
+      "title": "WeatherDay",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "flights": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/FlightOffer"
+      },
+      "title": "Flights",
+      "type": "array"
+    },
+    "lodging": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/LodgingOffer"
+      },
+      "title": "Lodging",
+      "type": "array"
+    },
+    "activities": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/ActivityOffer"
+      },
+      "title": "Activities",
+      "type": "array"
+    },
+    "weather": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/WeatherDay"
+      },
+      "title": "Weather",
+      "type": "array"
+    },
+    "transport": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/TransportQuote"
+      },
+      "title": "Transport",
+      "type": "array"
+    }
+  },
+  "title": "OfferSet",
+  "type": "object"
+}

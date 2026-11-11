@@ -1,0 +1,38 @@
+{
+  "name": "WF-02 error-handler",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "1c2d3e4f-0002-4000-8000-000000000001",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const e = $input.first().json;\nreturn [{ json: {\n  workflow: e.workflow?.name,\n  execution_id: e.execution?.id,\n  execution_url: e.execution?.url,\n  last_node: e.execution?.lastNodeExecuted,\n  message: e.execution?.error?.message,\n} }];"
+      },
+      "id": "1c2d3e4f-0002-4000-8000-000000000002",
+      "name": "Format",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {},
+      "id": "1c2d3e4f-0002-4000-8000-000000000003",
+      "name": "Notificar (reemplazar por Email/Slack)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [440, 0]
+    }
+  ],
+  "connections": {
+    "Error Trigger": { "main": [[{ "node": "Format", "type": "main", "index": 0 }]] },
+    "Format": { "main": [[{ "node": "Notificar (reemplazar por Email/Slack)", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {},
+  "active": false
+}

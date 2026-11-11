@@ -1,0 +1,320 @@
+{
+ "search_metadata": {
+  "status": "Success",
+  "google_flights_url": "https://www.google.com/travel/flights?hl=en&gl=us&curr=USD&tfs=CBwQAhowEgoyMDI3LTAxLTE1agcIARIDTUNPcgcIARIDSkZLcgcIARIDTEdBcgcIARIDRVdSQAFIAXABmAEC&tfu=EgIIAQ"
+ },
+ "best_flights": [
+  {
+   "flights": [
+    {
+     "departure_airport": {
+      "name": "Orlando International Airport",
+      "id": "MCO",
+      "time": "2027-01-15 18:42"
+     },
+     "arrival_airport": {
+      "name": "Newark Liberty International Airport",
+      "id": "EWR",
+      "time": "2027-01-15 21:30"
+     },
+     "duration": 168,
+     "airplane": "Airbus A321neo",
+     "airline": "Frontier",
+     "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/F9.png",
+     "travel_class": "Economy",
+     "flight_number": "F9 2512",
+     "legroom": "28 in",
+     "extensions": [
+      "Below average legroom (28 in)",
+      "Carbon emissions estimate: 114 kg"
+     ]
+    }
+   ],
+   "total_duration": 168,
+   "carbon_emissions": {
+    "this_flight": 114000
+   },
+   "price": 84,
+   "type": "One way",
+   "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/F9.png",
+   "extensions": [
+    "Checked baggage for a fee"
+   ],
+   "booking_token": "redacted-0"
+  },
+  {
+   "flights": [
+    {
+     "departure_airport": {
+      "name": "Orlando International Airport",
+      "id": "MCO",
+      "time": "2027-01-15 11:55"
+     },
+     "arrival_airport": {
+      "name": "LaGuardia Airport",
+      "id": "LGA",
+      "time": "2027-01-15 14:32"
+     },
+     "duration": 157,
+     "airplane": "Airbus A220-300 Passenger",
+     "airline": "JetBlue",
+     "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/B6.png",
+     "travel_class": "Economy",
+     "flight_number": "B6 1098",
+     "legroom": "32 in",
+     "extensions": [
+      "Above average legroom (32 in)",
+      "Free Wi-Fi",
+      "In-seat power & USB outlets",
+      "Live TV",
+      "Carbon emissions estimate: 177 kg"
+     ],
+     "often_delayed_by_over_30_min": true
+    }
+   ],
+   "total_duration": 157,
+   "carbon_emissions": {
+    "this_flight": 177000
+   },
+   "price": 119,
+   "type": "One way",
+   "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/B6.png",
+   "extensions": [
+    "Checked baggage for a fee"
+   ],
+   "booking_token": "redacted-1"
+  },
+  {
+   "flights": [
+    {
+     "departure_airport": {
+      "name": "Orlando International Airport",
+      "id": "MCO",
+      "time": "2027-01-15 12:09"
+     },
+     "arrival_airport": {
+      "name": "LaGuardia Airport",
+      "id": "LGA",
+      "time": "2027-01-15 14:50"
+     },
+     "duration": 161,
+     "airplane": "Airbus A321",
+     "airline": "Delta",
+     "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/DL.png",
+     "travel_class": "Economy",
+     "flight_number": "DL 1511",
+     "legroom": "31 in",
+     "extensions": [
+      "Average legroom (31 in)",
+      "Free Wi-Fi",
+      "In-seat power & USB outlets",
+      "Live TV",
+      "Carbon emissions estimate: 152 kg"
+     ]
+    }
+   ],
+   "total_duration": 161,
+   "carbon_emissions": {
+    "this_flight": 153000
+   },
+   "price": 119,
+   "type": "One way",
+   "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/DL.png",
+   "extensions": [
+    "Checked baggage for a fee"
+   ],
+   "booking_token": "redacted-2"
+  }
+ ],
+ "other_flights": [
+  {
+   "flights": [
+    {
+     "departure_airport": {
+      "name": "Orlando International Airport",
+      "id": "MCO",
+      "time": "2027-01-15 20:34"
+     },
+     "arrival_airport": {
+      "name": "LaGuardia Airport",
+      "id": "LGA",
+      "time": "2027-01-15 23:15"
+     },
+     "duration": 161,
+     "airplane": "Airbus A321neo",
+     "airline": "Frontier",
+     "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/F9.png",
+     "travel_class": "Economy",
+     "flight_number": "F9 2432",
+     "legroom": "28 in",
+     "extensions": [
+      "Below average legroom (28 in)",
+      "Carbon emissions estimate: 100 kg"
+     ]
+    }
+   ],
+   "total_duration": 161,
+   "carbon_emissions": {
+    "this_flight": 101000
+   },
+   "price": 94,
+   "type": "One way",
+   "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/F9.png",
+   "extensions": [
+    "Checked baggage for a fee"
+   ],
+   "booking_token": "redacted-3"
+  },
+  {
+   "flights": [
+    {
+     "departure_airport": {
+      "name": "Orlando International Airport",
+      "id": "MCO",
+      "time": "2027-01-15 10:01"
+     },
+     "arrival_airport": {
+      "name": "Hartsfield-Jackson Atlanta International Airport",
+      "id": "ATL",
+      "time": "2027-01-15 11:50"
+     },
+     "duration": 109,
+     "airplane": "Airbus A321neo",
+     "airline": "Frontier",
+     "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/F9.png",
+     "travel_class": "Economy",
+     "flight_number": "F9 1241",
+     "legroom": "28 in",
+     "extensions": [
+      "Below average legroom (28 in)",
+      "Carbon emissions estimate: 59 kg"
+     ]
+    },
+    {
+     "departure_airport": {
+      "name": "Hartsfield-Jackson Atlanta International Airport",
+      "id": "ATL",
+      "time": "2027-01-15 14:12"
+     },
+     "arrival_airport": {
+      "name": "LaGuardia Airport",
+      "id": "LGA",
+      "time": "2027-01-15 16:27"
+     },
+     "duration": 135,
+     "airplane": "Airbus A320neo",
+     "airline": "Frontier",
+     "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/F9.png",
+     "travel_class": "Economy",
+     "flight_number": "F9 3458",
+     "legroom": "28 in",
+     "extensions": [
+      "Below average legroom (28 in)",
+      "Carbon emissions estimate: 92 kg"
+     ],
+     "often_delayed_by_over_30_min": true
+    }
+   ],
+   "layovers": [
+    {
+     "duration": 142,
+     "name": "Hartsfield-Jackson Atlanta International Airport",
+     "id": "ATL"
+    }
+   ],
+   "total_duration": 386,
+   "carbon_emissions": {
+    "this_flight": 153000
+   },
+   "price": 99,
+   "type": "One way",
+   "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/F9.png",
+   "extensions": [
+    "Checked baggage for a fee"
+   ],
+   "booking_token": "redacted-4"
+  },
+  {
+   "flights": [
+    {
+     "departure_airport": {
+      "name": "Orlando International Airport",
+      "id": "MCO",
+      "time": "2027-01-15 06:00"
+     },
+     "arrival_airport": {
+      "name": "LaGuardia Airport",
+      "id": "LGA",
+      "time": "2027-01-15 08:37"
+     },
+     "duration": 157,
+     "airplane": "Airbus A321",
+     "airline": "Delta",
+     "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/DL.png",
+     "travel_class": "Economy",
+     "flight_number": "DL 1523",
+     "legroom": "31 in",
+     "extensions": [
+      "Average legroom (31 in)",
+      "Free Wi-Fi",
+      "In-seat power & USB outlets",
+      "Live TV",
+      "Carbon emissions estimate: 152 kg"
+     ]
+    }
+   ],
+   "total_duration": 157,
+   "carbon_emissions": {
+    "this_flight": 153000
+   },
+   "price": 119,
+   "type": "One way",
+   "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/DL.png",
+   "extensions": [
+    "Checked baggage for a fee"
+   ],
+   "booking_token": "redacted-5"
+  },
+  {
+   "flights": [
+    {
+     "departure_airport": {
+      "name": "Orlando International Airport",
+      "id": "MCO",
+      "time": "2027-01-15 06:00"
+     },
+     "arrival_airport": {
+      "name": "Newark Liberty International Airport",
+      "id": "EWR",
+      "time": "2027-01-15 08:41"
+     },
+     "duration": 161,
+     "airplane": "Boeing 737MAX 9 Passenger",
+     "airline": "United",
+     "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/UA.png",
+     "travel_class": "Economy",
+     "flight_number": "UA 2679",
+     "legroom": "30 in",
+     "extensions": [
+      "Average legroom (30 in)",
+      "Wi-Fi for a fee",
+      "In-seat power outlet",
+      "Stream media to your device",
+      "Carbon emissions estimate: 122 kg"
+     ]
+    }
+   ],
+   "total_duration": 161,
+   "carbon_emissions": {
+    "this_flight": 122000
+   },
+   "price": 119,
+   "type": "One way",
+   "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/UA.png",
+   "extensions": [
+    "Checked baggage for a fee"
+   ],
+   "booking_token": "redacted-6"
+  }
+ ]
+}

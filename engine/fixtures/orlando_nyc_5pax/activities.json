@@ -1,0 +1,172 @@
+[
+  {
+    "key": "MK",
+    "city": "ORL",
+    "lat": 28.4177, "lon": -81.5812,
+    "name": "Magic Kingdom (1 día)",
+    "outdoor": true,
+    "slots": 2,
+    "base_minor": 18900,
+    "weekend_premium_minor": 2000,
+    "closed_dates": [],
+    "deeplink": "https://disneyworld.disney.go.com/"
+  },
+  {
+    "key": "EPCOT",
+    "city": "ORL",
+    "lat": 28.3747, "lon": -81.5494,
+    "name": "EPCOT (1 día)",
+    "outdoor": true,
+    "slots": 2,
+    "base_minor": 16900,
+    "weekend_premium_minor": 2000,
+    "closed_dates": [],
+    "deeplink": "https://disneyworld.disney.go.com/"
+  },
+  {
+    "key": "HS",
+    "city": "ORL",
+    "lat": 28.3575, "lon": -81.5583,
+    "name": "Hollywood Studios (1 día)",
+    "outdoor": true,
+    "slots": 2,
+    "base_minor": 17900,
+    "weekend_premium_minor": 2000,
+    "closed_dates": [],
+    "deeplink": "https://disneyworld.disney.go.com/"
+  },
+  {
+    "key": "AK",
+    "city": "ORL",
+    "lat": 28.3553, "lon": -81.5901,
+    "name": "Animal Kingdom (1 día)",
+    "outdoor": true,
+    "slots": 2,
+    "base_minor": 15900,
+    "weekend_premium_minor": 1500,
+    "closed_dates": [],
+    "deeplink": "https://disneyworld.disney.go.com/"
+  },
+  {
+    "key": "EPIC",
+    "city": "ORL",
+    "lat": 28.472, "lon": -81.4489,
+    "name": "Epic Universe (1 día)",
+    "outdoor": true,
+    "slots": 2,
+    "base_minor": 19900,
+    "weekend_premium_minor": 2500,
+    "closed_dates": [
+      "2027-07-15"
+    ],
+    "deeplink": "https://www.universalorlando.com/"
+  },
+  {
+    "key": "SOL",
+    "city": "NYC",
+    "lat": 40.6892, "lon": -74.0445,
+    "name": "Estatua de la Libertad + Ellis Island",
+    "outdoor": true,
+    "slots": 1,
+    "base_minor": 3100,
+    "weekend_premium_minor": 0,
+    "closed_dates": [],
+    "deeplink": "https://www.nps.gov/stli/"
+  },
+  {
+    "key": "TOR",
+    "city": "NYC",
+    "lat": 40.7593, "lon": -73.9794,
+    "name": "Top of the Rock",
+    "outdoor": true,
+    "slots": 1,
+    "base_minor": 4500,
+    "weekend_premium_minor": 500,
+    "closed_dates": [],
+    "deeplink": "https://www.rockefellercenter.com/"
+  },
+  {
+    "key": "MOMA",
+    "city": "NYC",
+    "lat": 40.7614, "lon": -73.9776,
+    "name": "MoMA",
+    "outdoor": false,
+    "slots": 1,
+    "base_minor": 3000,
+    "weekend_premium_minor": 0,
+    "closed_dates": [],
+    "deeplink": "https://www.moma.org/"
+  },
+  {
+    "key": "KSC",
+    "city": "ORL",
+    "lat": 28.5729, "lon": -80.649,
+    "name": "Kennedy Space Center (1 día)",
+    "outdoor": false,
+    "slots": 2,
+    "base_minor": 7500,
+    "weekend_premium_minor": 0,
+    "closed_dates": [],
+    "deeplink": "https://www.kennedyspacecenter.com/"
+  },
+  {
+    "key": "WHEEL",
+    "city": "ORL",
+    "lat": 28.4433, "lon": -81.4682,
+    "name": "ICON Park: The Wheel",
+    "outdoor": true,
+    "slots": 1,
+    "base_minor": 3000,
+    "weekend_premium_minor": 500,
+    "closed_dates": [],
+    "deeplink": "https://iconparkorlando.com/"
+  },
+  {
+    "key": "MEDV",
+    "city": "ORL",
+    "lat": 28.3316, "lon": -81.4836,
+    "name": "Medieval Times (cena show)",
+    "outdoor": false,
+    "slots": 1,
+    "base_minor": 7000,
+    "weekend_premium_minor": 0,
+    "closed_dates": [],
+    "deeplink": "https://www.medievaltimes.com/"
+  },
+  {
+    "key": "AMNH",
+    "city": "NYC",
+    "lat": 40.7813, "lon": -73.974,
+    "name": "Museo Americano de Historia Natural",
+    "outdoor": false,
+    "slots": 1,
+    "base_minor": 2800,
+    "weekend_premium_minor": 0,
+    "closed_dates": [],
+    "deeplink": "https://www.amnh.org/"
+  },
+  {
+    "key": "CIRC",
+    "city": "NYC",
+    "lat": 40.7627, "lon": -74.0012,
+    "name": "Crucero por Manhattan (Circle Line)",
+    "outdoor": true,
+    "slots": 1,
+    "base_minor": 4500,
+    "weekend_premium_minor": 500,
+    "closed_dates": [],
+    "deeplink": "https://www.circleline.com/"
+  },
+  {
+    "key": "BWAY",
+    "city": "NYC",
+    "lat": 40.759, "lon": -73.9845,
+    "name": "Musical en Broadway",
+    "outdoor": false,
+    "slots": 1,
+    "base_minor": 15000,
+    "weekend_premium_minor": 2000,
+    "closed_dates": [],
+    "deeplink": "https://www.broadway.org/"
+  }
+]

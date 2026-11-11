@@ -1,0 +1,4 @@
+[
+  {"id": "T-ORL", "provider": "fixture", "city": "ORL", "mode": "car_rental", "per_day_minor": 8900, "fixed_minor": 6000, "tax_bps": 0, "deeplink": "https://www.google.com/search?q=alquiler+de+autos+aeropuerto+Orlando+MCO"},
+  {"id": "T-NYC", "provider": "fixture", "city": "NYC", "mode": "transfers", "per_trip_minor": 9500, "trips": 2, "tax_bps": 0, "deeplink": "https://www.google.com/maps/dir/?api=1&origin=JFK+Airport&destination=Times+Square&travelmode=driving"}
+]

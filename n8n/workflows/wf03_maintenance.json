@@ -1,0 +1,37 @@
+{
+  "name": "WF-03 maintenance",
+  "nodes": [
+    {
+      "parameters": { "rule": { "interval": [{ "field": "minutes", "minutesInterval": 5 }] } },
+      "id": "2d3e4f5a-0003-4000-8000-000000000001",
+      "name": "Cada 5 min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:8000/v1/maintenance/reap",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": { "timeout": 15000 }
+      },
+      "id": "2d3e4f5a-0003-4000-8000-000000000002",
+      "name": "Reap stale runs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [220, 0],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "credentials": { "httpHeaderAuth": { "id": "REEMPLAZAR", "name": "Engine API key" } }
+    }
+  ],
+  "connections": {
+    "Cada 5 min": { "main": [[{ "node": "Reap stale runs", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {},
+  "active": false
+}

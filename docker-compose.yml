@@ -1,0 +1,32 @@
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:${N8N_VERSION:?definir N8N_VERSION en .env}   # versión exacta, nunca latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5678:5678"   # solo loopback: n8n no se expone a la red local
+    environment:
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:?definir N8N_ENCRYPTION_KEY en .env}
+      GENERIC_TIMEZONE: ${N8N_TIMEZONE:-UTC}
+      TZ: ${N8N_TIMEZONE:-UTC}
+      N8N_HOST: localhost
+      N8N_PORT: 5678
+      N8N_PROTOCOL: http
+      WEBHOOK_URL: http://localhost:5678/
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "true"      # los nodos no leen $env (engine_base_url es literal en los workflows)
+      EXECUTIONS_DATA_PRUNE: "true"
+      EXECUTIONS_DATA_MAX_AGE: 168              # horas
+      # Consumo acotado (OWASP API4): mismo tope global que el motor (20 corridas activas), corte por tiempo
+      # alineado con el reaper (600 s) y payloads chicos (el webhook solo recibe {run_id}).
+      N8N_CONCURRENCY_PRODUCTION_LIMIT: 20
+      EXECUTIONS_TIMEOUT: 600                   # segundos
+      EXECUTIONS_TIMEOUT_MAX: 900
+      N8N_PAYLOAD_SIZE_MAX: 2                   # MiB
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./n8n/workflows:/workflows:ro
+
+volumes:
+  n8n_data:
