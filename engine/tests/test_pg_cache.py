@@ -151,3 +151,36 @@ def test_ofertas_en_una_sola_sentencia_sin_nulos_y_con_lectura_identica():
                 await conn.execute("delete from public.search_runs where id = %s", (rid,))
 
     _run(t)
+
+
+def test_limite_por_conexion_en_postgres_real():
+    async def t(repo, cache, key):
+        from app.providers.fixture import FixtureProvider
+        from app.repo.base import RateLimited, RunLimits
+
+        req = FixtureProvider("orlando_nyc_5pax").trip_request()
+        client = uuid.uuid4().hex
+        lim = RunLimits(per_user_active=5, per_user_hour=50, total_active=10_000, per_client_hour=2)
+        async with repo.pool.connection() as conn:  # sesiones anónimas distintas: un usuario por corrida
+            users = [str((await (await conn.execute(
+                "insert into auth.users (id, email) values (gen_random_uuid(), %s) returning id",
+                (f"{key}-{i}@test.local",))).fetchone())["id"]) for i in range(4)]
+        ids = []
+        try:
+            for u in users[:2]:
+                rid = await repo.create_run(req, "fixture", u, lim, client)
+                ids.append(rid)
+                await repo.transition(rid, {"queued"}, "done")
+            with pytest.raises(RateLimited) as exc:
+                await repo.create_run(req, "fixture", users[2], lim, client)
+            assert exc.value.scope == "client"
+            ids.append(await repo.create_run(req, "fixture", users[3], lim, uuid.uuid4().hex))  # otra conexión
+            async with repo.pool.connection() as conn:
+                n = (await (await conn.execute("select count(*) as n from public.run_clients where client_key = %s",
+                                               (client,))).fetchone())["n"]
+            assert n == 2
+        finally:
+            async with repo.pool.connection() as conn:
+                await conn.execute("delete from auth.users where id = any(%s::uuid[])", (users,))  # cascada
+
+    _run(t)

@@ -26,6 +26,7 @@ class RunLimits:
     per_user_active: int
     per_user_hour: int
     total_active: int
+    per_client_hour: int = 20  # por conexión (clave seudónima de la IP): frena a quien abre sesiones nuevas en serie
 
 
 class RateLimited(Exception):
@@ -34,11 +35,13 @@ class RateLimited(Exception):
         self.scope, self.counts = scope, counts
 
 
-def check_limits(lim: RunLimits, total_active: int, active: int, last_hour: int) -> None:
+def check_limits(lim: RunLimits, total_active: int, active: int, last_hour: int, client_hour: int = 0) -> None:
     if total_active >= lim.total_active:
         raise RateLimited("global", total_active=total_active)
     if active >= lim.per_user_active or last_hour >= lim.per_user_hour:
         raise RateLimited("user", active=active, last_hour=last_hour)
+    if client_hour >= lim.per_client_hour:
+        raise RateLimited("client", last_hour=client_hour)
 
 
 @dataclass
@@ -72,8 +75,9 @@ def build_offer_set(rows: Iterable[tuple[str, dict]]) -> OfferSet:
 
 class Repository(Protocol):
     async def create_run(self, req: TripRequest, mode: str, user_id: str | None,
-                         limits: RunLimits | None = None) -> str:
-        """Crea la corrida. Con `limits`, cuenta y crea de forma atómica o levanta RateLimited."""
+                         limits: RunLimits | None = None, client_key: str | None = None) -> str:
+        """Crea la corrida. Con `limits`, cuenta y crea de forma atómica o levanta RateLimited. `client_key`: clave
+        seudónima de la conexión (HMAC de la IP), para el límite por conexión."""
         ...
 
     async def get_run(self, run_id: str) -> RunRecord | None: ...

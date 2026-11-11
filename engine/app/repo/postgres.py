@@ -38,7 +38,7 @@ class PgRepository:
         await self.pool.close()
 
     async def create_run(self, req: TripRequest, mode: str, user_id: str | None,
-                         limits: RunLimits | None = None) -> str:
+                         limits: RunLimits | None = None, client_key: str | None = None) -> str:
         async with self.pool.connection() as conn:  # una transacción: el lock vive hasta el commit
             if limits:
                 await conn.execute("select pg_advisory_xact_lock(hashtext('search_runs.create'))")
@@ -55,7 +55,15 @@ class PgRepository:
                         {"nt": list(NON_TERMINAL), "u": user_id},
                     )
                 ).fetchone())
-                check_limits(limits, c["total_active"], c["active"], c["last_hour"])
+                client_hour = 0
+                if client_key:
+                    # minimización: la clave solo sirve para la última hora; lo de más de un día se borra acá mismo
+                    await conn.execute("delete from public.run_clients where created_at < now() - interval '1 day'")
+                    client_hour = _first(await (await conn.execute(
+                        """select count(*) as n from public.run_clients
+                           where client_key = %s and created_at > now() - interval '1 hour'""", (client_key,),
+                    )).fetchone())["n"]
+                check_limits(limits, c["total_active"], c["active"], c["last_hour"], client_hour)
             tr = _first(await (
                 await conn.execute(
                     "insert into public.trip_requests (user_id, case_key, payload) values (%s, %s, %s) returning id",
@@ -69,6 +77,9 @@ class PgRepository:
                     (tr["id"], user_id, mode),
                 )
             ).fetchone())
+            if client_key:
+                await conn.execute("insert into public.run_clients (run_id, client_key) values (%s, %s)",
+                                   (run["id"], client_key))
             return str(run["id"])
 
     async def get_run(self, run_id: str) -> RunRecord | None:

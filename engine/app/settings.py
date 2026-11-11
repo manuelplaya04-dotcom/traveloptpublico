@@ -40,6 +40,7 @@ class Settings(BaseSettings):
     max_concurrent_optimizations: int = 2  # solo inprocess: tope de CP-SAT simultáneos (instancia de 512 MB)
     max_active_runs_per_user: int = 2
     max_runs_per_user_hour: int = 10
+    max_runs_per_client_hour: int = 20  # por conexión (IP seudonimizada por la web); varias sesiones comparten red
     max_active_runs_total: int = 20  # tope global: cada sesión anónima es un user_id nuevo
     max_weather_requests_per_user_hour: int = 30
     max_client_errors_per_user_hour: int = 20  # reportes de errores del navegador (no deben poder inundar la base)  # "Ver más" del clima (ya cacheado por ciudad)

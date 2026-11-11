@@ -392,6 +392,12 @@ test("V1: deportes reales sin fechas inventadas, sellos de ejemplo, cookies de s
   const csp = res?.headers()["content-security-policy"] ?? "";
   expect(csp).toMatch(/script-src 'self' 'nonce-[A-Za-z0-9+/=]{16,}' 'strict-dynamic'/);
   expect(csp.split(";").find((d) => d.trim().startsWith("script-src"))).not.toContain("unsafe-inline");
+  expect(csp).toContain("frame-ancestors 'none'");
+  expect(csp).toContain("object-src 'none'");
+  const h = res?.headers() ?? {};
+  expect([h["x-content-type-options"], h["x-frame-options"], h["cross-origin-opener-policy"], h["cross-origin-resource-policy"]])
+    .toEqual(["nosniff", "DENY", "same-origin", "same-origin"]);
+  expect(h["x-powered-by"]).toBeUndefined();
   const dialog = await openForm(page);
   await addCity(dialog, "Boston");
   await dialog.getByRole("button", { name: "Siguiente" }).click();

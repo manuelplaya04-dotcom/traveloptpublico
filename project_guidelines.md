@@ -51,7 +51,7 @@ Dado que el orquestador depende de múltiples APIs externas, implementa patrones
 | Norma | Punto | Estado | Evidencia o hueco |
 |---|---|---|---|
 | 1 | BOLA/BOPLA con RLS | ✅ | RLS por `auth.uid()`, sin escritura desde el navegador, pgTAP 10/10 |
-| 1 | Cuotas y rate limit | ✅ | Corridas por usuario y global (Postgres), clima 30/h, n8n con concurrencia, timeout y payload acotados, PostgREST `max_rows` |
+| 1 | Cuotas y rate limit | ✅ | Corridas por usuario, por conexión (IP seudonimizada, decisión 17) y global (Postgres), clima 30/h, n8n con concurrencia, timeout y payload acotados, PostgREST `max_rows` |
 | 1 | XSS y CSP | ✅ | React escapa, `safeHref` único en `web/lib/links.ts` (solo https, sin credenciales, sin dominios reservados de relleno; con tests), CSP con nonce por request y `strict-dynamic`, sin `unsafe-inline` en scripts (decisión 9) |
 | 1 | SSRF con lista blanca | ✅ | `check_egress` en el cliente HTTP del motor, sin redirecciones, URL del motor validada en n8n |
 | 2 | Pydantic en entrada y salida | ✅ | Modelo canónico, `extra="forbid"` en `/v1/runs`. `CityPlan.name` con patrón de solo letras (sin marcado), espejado en zod |
@@ -210,3 +210,13 @@ Dado que el orquestador depende de múltiples APIs externas, implementa patrones
     - **Íconos:** lucide-react en lugar de emojis, con un test que impide volver a agregarlos. Costo: +13,2 KB gzip.
     - **Espera:** `TripPreview` muestra el recorrido y datos estables de los destinos (`lib/cityFacts.ts`) desde el pedido
       guardado, sin esperar al motor. Si no se puede leer el pedido, no se dibuja.
+17. **Límite por conexión y cabeceras de aislamiento (2026-11-11):** se pidió un rate limit por IP en las rutas de
+    Next (sugerido: Upstash). No se usó un contador en memoria de Vercel (cada instancia tiene el suyo: no limita de
+    verdad) ni Upstash (otra cuenta y otro servicio para un dato que Postgres ya maneja con lock transaccional). La web
+    calcula `HMAC-SHA256(IP, ENGINE_API_KEY)` recortado a 128 bits, **solo con la IP que pone Vercel** (`x-real-ip`;
+    fuera de Vercel los headers se pueden inventar y no hay clave), y la manda al motor en `X-Client-Key`. El motor la
+    cuenta en `run_clients` (RLS sin políticas ni GRANT: ni el dueño de la corrida la lee) dentro de la misma
+    transacción que los demás límites, con tope `MAX_RUNS_PER_CLIENT_HOUR=20` y 429 `scope: client`. La IP nunca se
+    guarda ni viaja; la clave se borra a las 24 h. En header y no en el cuerpo para que web y motor se puedan desplegar
+    en cualquier orden. Cabeceras: se suman `Cross-Origin-Opener-Policy` y `Cross-Origin-Resource-Policy: same-origin`
+    y más permisos bloqueados; HSTS, `nosniff`, `X-Frame-Options: DENY` y la CSP con nonce ya estaban.

@@ -17,6 +17,8 @@ export class RunRequestError extends Error {
 
 const MESSAGES: Record<string, string> = {
   rate_limited: "Tenés demasiadas corridas en curso o recientes. Esperá un minuto y volvé a intentar.",
+  rate_limited_client: "Superaste el límite de búsquedas por hora desde tu conexión. Probá de nuevo más tarde.",
+  rate_limited_global: "Hay muchas búsquedas en curso en este momento. Probá de nuevo en un par de minutos.",
   timeout: "El servidor tardó demasiado en responder. Probá de nuevo en un momento.",
   network: "No pudimos conectarnos. Revisá tu conexión y volvé a intentar.",
   engine_unavailable: "El optimizador no está disponible ahora. Probá de nuevo en unos minutos.",
@@ -49,7 +51,7 @@ export async function createRun(req: TripRequest, signal?: AbortSignal): Promise
     throw e;
   }
   const body: unknown = await res.json().catch(() => null); // cuerpo vacío o no JSON: se trata abajo
-  if (res.status === 429) throw fail("rate_limited");
+  if (res.status === 429) throw fail(rateLimitCode(body));
   if (!res.ok) throw fail(errorCode(body) ?? `http_${res.status}`);
   const runId = (body as { run_id?: unknown } | null)?.run_id;
   if (typeof runId !== "string" || !UUID.test(runId)) throw fail("empty_response");
@@ -64,6 +66,12 @@ export function runErrorMessage(e: unknown): string {
   if (e instanceof Error && e.message === CAPTCHA_ERROR) return CAPTCHA_ERROR;
   console.error("createRun: error inesperado", e);
   return "No pudimos crear la búsqueda. Probá de nuevo.";
+}
+
+// El motor dice qué límite se alcanzó (`detail.scope`): sesión, conexión o el sistema entero.
+export function rateLimitCode(body: unknown): string {
+  const scope = (body as { detail?: { scope?: unknown } } | null)?.detail?.scope;
+  return scope === "client" ? "rate_limited_client" : scope === "global" ? "rate_limited_global" : "rate_limited";
 }
 
 function errorCode(body: unknown): string | undefined {

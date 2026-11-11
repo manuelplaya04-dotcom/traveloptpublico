@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import re
 import secrets
 from contextlib import asynccontextmanager
 from time import perf_counter
@@ -200,14 +201,22 @@ async def _trigger_n8n(request: Request, run_id: str) -> None:
         raise HTTPException(503, {"code": "orchestrator_unavailable"}) from exc
 
 
+CLIENT_KEY = re.compile(r"^[0-9a-f]{32}$")
+
+
 async def _create(request: Request, body: CreateRunIn, repo: Repository) -> dict:
     s = get_settings()
     mode = body.mode or s.default_mode
     user_id = str(body.user_id) if body.user_id else None
     # Sin user_id solo crean las rutas dev (bloqueadas en producción) y los tests.
-    limits = RunLimits(s.max_active_runs_per_user, s.max_runs_per_user_hour, s.max_active_runs_total) if user_id else None
+    limits = RunLimits(s.max_active_runs_per_user, s.max_runs_per_user_hour, s.max_active_runs_total,
+                       s.max_runs_per_client_hour) if user_id else None
+    # Clave seudónima de la conexión (la calcula la web con HMAC; el motor nunca ve la IP). En header y no en el cuerpo:
+    # un motor anterior la ignora, así web y motor se pueden desplegar en cualquier orden. Con otro formato, se ignora.
+    raw_key = request.headers.get("X-Client-Key", "")
+    client_key = raw_key if CLIENT_KEY.fullmatch(raw_key) else None
     try:
-        run_id = await repo.create_run(body.trip_request, mode, user_id, limits)
+        run_id = await repo.create_run(body.trip_request, mode, user_id, limits, client_key)
     except RateLimited as exc:
         raise HTTPException(429, {"code": "rate_limited", "scope": exc.scope, **exc.counts},
                             headers={"Retry-After": "60"}) from exc

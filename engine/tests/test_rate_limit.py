@@ -58,3 +58,48 @@ def test_global_cap_across_anonymous_users(api, monkeypatch):
         assert r.status_code == 429 and r.json()["detail"] == {"code": "rate_limited", "scope": "global", "total_active": 3}
 
     asyncio.run(go())
+
+
+KEY_A, KEY_B = "a" * 32, "b" * 32  # claves seudónimas de prueba (formato: 32 hex)
+
+
+def test_cap_per_connection_across_new_sessions(api, monkeypatch):
+    """Sesiones anónimas nuevas desde la misma conexión (misma clave seudónima de IP) comparten el cupo por hora."""
+    monkeypatch.setenv("MAX_RUNS_PER_CLIENT_HOUR", "3")
+    get_settings.cache_clear()
+
+    async def go():
+        repo = app.state.repo
+
+        async def post(key, uid=None):
+            r = await api.post("/v1/runs", json={"trip_request": TRIP, "user_id": uid or str(uuid.uuid4()), "trigger": False},
+                               headers={"X-Client-Key": key})
+            if r.status_code == 202:
+                await repo.transition(r.json()["run_id"], {"queued"}, "done")
+            return r
+
+        assert [(await post(KEY_A)).status_code for _ in range(3)] == [202] * 3
+        r = await post(KEY_A)
+        assert r.status_code == 429 and r.headers["retry-after"] == "60"
+        assert r.json()["detail"] == {"code": "rate_limited", "scope": "client", "last_hour": 3}
+        assert (await post(KEY_B)).status_code == 202  # otra conexión no se ve afectada
+        for run in repo.runs.values():
+            run["created_at"] -= timedelta(hours=1, seconds=1)
+        assert (await post(KEY_A)).status_code == 202  # una hora después se libera
+
+    asyncio.run(go())
+
+
+def test_client_key_with_wrong_format_is_ignored_not_trusted(api, monkeypatch):
+    """Una IP en claro o basura en el header no se guarda ni se usa como clave."""
+    monkeypatch.setenv("MAX_RUNS_PER_CLIENT_HOUR", "1")
+    get_settings.cache_clear()
+
+    async def go():
+        for bad in ("192.168.0.1", "x" * 32, "", KEY_A.upper()):
+            r = await api.post("/v1/runs", json={"trip_request": TRIP, "user_id": str(uuid.uuid4()), "trigger": False},
+                               headers={"X-Client-Key": bad})
+            assert r.status_code == 202
+            assert app.state.repo.runs[r.json()["run_id"]]["client_key"] is None
+
+    asyncio.run(go())

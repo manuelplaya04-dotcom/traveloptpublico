@@ -7,3 +7,5 @@
 8d8fc56a767686936a102d30e232afbb11cc8b35:engine/tests/contracts/serpapi_google_flights_mco_nyc.json:generic-api-key:235
 8d8fc56a767686936a102d30e232afbb11cc8b35:engine/tests/contracts/serpapi_google_flights_mco_nyc.json:generic-api-key:276
 8d8fc56a767686936a102d30e232afbb11cc8b35:engine/tests/contracts/serpapi_google_flights_mco_nyc.json:generic-api-key:317
+# 6e2ef02: constante de prueba del límite por conexión (32 hex inventados, no es una credencial). Ya reemplazada por "a" * 32.
+6e2ef02cc170c7452bb78a9b8254f00c5054c51b:engine/tests/test_rate_limit.py:generic-api-key:63

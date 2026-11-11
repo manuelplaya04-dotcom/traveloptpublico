@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { tripRequestSchema } from "@/lib/contracts";
+import { clientKey } from "@/lib/clientKey";
 import { engineFetch } from "@/lib/engine";
 import { createClient } from "@/lib/supabase/server";
 
@@ -38,9 +39,11 @@ export async function POST(req: Request) {
 
   let r: Response;
   try {
+    const key = clientKey(req.headers, process.env.ENGINE_API_KEY);
     r = await engineFetch("/v1/runs", {
       method: "POST",
       body: JSON.stringify({ trip_request: parsed.data, user_id: user.id }),
+      headers: key ? { "X-Client-Key": key } : undefined, // límite por conexión, sin mandar la IP
     });
   } catch {
     return fail(502, "engine_unavailable"); // sin detalles internos hacia el navegador

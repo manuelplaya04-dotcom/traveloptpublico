@@ -23,17 +23,20 @@ class MemoryRepository:
         self.shares: dict[str, dict] = {}
 
     async def create_run(self, req: TripRequest, mode: str, user_id: str | None,
-                         limits: RunLimits | None = None) -> str:
+                         limits: RunLimits | None = None, client_key: str | None = None) -> str:
         if limits:
             hour_ago = _now() - timedelta(hours=1)
             mine = [r for r in self.runs.values() if r["user_id"] == user_id]
+            same_client = [r for r in self.runs.values() if client_key and r.get("client_key") == client_key]
             check_limits(limits, sum(r["status"] in NON_TERMINAL for r in self.runs.values()),
-                         sum(r["status"] in NON_TERMINAL for r in mine), sum(r["created_at"] >= hour_ago for r in mine))
+                         sum(r["status"] in NON_TERMINAL for r in mine), sum(r["created_at"] >= hour_ago for r in mine),
+                         sum(r["created_at"] >= hour_ago for r in same_client))
         rid = str(uuid.uuid4())
         self.runs[rid] = {
             "id": rid, "user_id": user_id, "status": "queued", "mode": mode,
             "request": req, "summary": {}, "error": None,
             "timings": {"queued": _now().isoformat()}, "created_at": _now(), "updated_at": _now(),
+            "client_key": client_key,
         }
         return rid
 
@@ -41,7 +44,7 @@ class MemoryRepository:
         r = self.runs.get(run_id)
         if r is None:
             return None
-        return RunRecord(**{k: v for k, v in r.items() if k not in ("created_at", "updated_at")})
+        return RunRecord(**{k: v for k, v in r.items() if k not in ("created_at", "updated_at", "client_key")})
 
     async def transition(self, run_id, allowed_from, to, *, summary=None, error=None) -> bool:
         r = self.runs.get(run_id)
