@@ -8,7 +8,7 @@ const MAX_W = 288;
 
 // Ícono "ⓘ" con una explicación corta. Accesible y sin hover obligatorio:
 // - Mouse: aparece al pasar por encima. Teclado: al enfocar. Táctil: se abre y cierra al tocar.
-// - Esc, tocar fuera, hacer scroll o cambiar el tamaño de la ventana lo cierran.
+// - Esc o tocar fuera lo cierran. Con scroll o resize acompaña al ícono, y se cierra si el ícono sale de la pantalla.
 // - La burbuja va en `position: fixed` y se acomoda dentro de la pantalla: no la recorta un carrusel con scroll ni
 //   ensancha la tarjeta (sin overflow). El texto siempre está en el DOM (oculto) para que el lector de pantalla lo lea
 //   como descripción del botón aunque no se abra.
@@ -31,22 +31,35 @@ export default function InfoTooltip({ children, className = "" }: { children: Re
   const close = useCallback(() => { byHover.current = false; setPos(null); }, []);
   const fine = () => typeof window !== "undefined" && !!window.matchMedia?.("(pointer: fine)").matches;
 
+  const isOpen = pos !== null;
   useEffect(() => {
-    if (!pos) return;
+    if (!isOpen) return;
     // Esc cierra solo la ayuda: preventDefault evita que un <dialog> nativo lo tome como pedido de cierre
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); close(); } };
     const onDown = (e: PointerEvent) => { if (!btn.current?.contains(e.target as Node)) close(); };
+    // Scroll o resize (incluido el scroll suave que sigue a un cambio de paso): la burbuja acompaña al ícono, una vez
+    // por cuadro. Solo se cierra si el ícono salió de la pantalla.
+    let frame = 0;
+    const follow = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const r = btn.current?.getBoundingClientRect();
+        if (!r || r.bottom < 0 || r.top > window.innerHeight || r.right < 0 || r.left > window.innerWidth) close();
+        else open();
+      });
+    };
     document.addEventListener("keydown", onKey, true);
     document.addEventListener("pointerdown", onDown);
-    window.addEventListener("scroll", close, { capture: true, passive: true });
-    window.addEventListener("resize", close);
+    window.addEventListener("scroll", follow, { capture: true, passive: true });
+    window.addEventListener("resize", follow);
     return () => {
+      cancelAnimationFrame(frame);
       document.removeEventListener("keydown", onKey, true);
       document.removeEventListener("pointerdown", onDown);
-      window.removeEventListener("scroll", close, { capture: true });
-      window.removeEventListener("resize", close);
+      window.removeEventListener("scroll", follow, { capture: true });
+      window.removeEventListener("resize", follow);
     };
-  }, [pos, close]);
+  }, [isOpen, open, close]);
 
   // Dentro de un <label> o una tarjeta clicable: no enfoca el campo ni dispara la acción de la tarjeta.
   const onClick = (e: MouseEvent) => {

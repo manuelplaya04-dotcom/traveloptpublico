@@ -1,7 +1,7 @@
 # Estado del proyecto TravelOpt: punto de guardado
 
 **Última actualización:** 2026-10-28 (Fases 0–4 y rediseño 4b cerrados; Fase 5 preparada en local, faltan cuentas)
-**Repositorio:** `C:\PROYECOTS\VIAJES.COM` (git, rama `main`)
+**Repositorio:** raíz de este repo (git, rama `main`)
 
 ---
 
@@ -69,11 +69,11 @@ Los documentos se actualizaron igual que el código, así que sus bloques siguen
 
 1. **Ruff 0.17** activa por defecto reglas nuevas (B, UP, SIM y PLR): daba 17 errores. Se fijó `[tool.ruff.lint] select = ["E4", "E7", "E9", "F"]` en `engine/pyproject.toml` y se renombró `l` → `lo` en `collect_offers` (`engine/app/providers/base.py`, E741).
 2. **psycopg async en Windows:** sin `--reload`, uvicorn usa `ProactorEventLoop` y el pool no conecta. Antes eso pasaba en silencio: `/healthz` daba 200 y la DB no funcionaba. Ahora `PgRepository.open()` usa `pool.open(wait=True, timeout=10)` y falla al arrancar. En Windows el motor se levanta con el comando de `CLAUDE.md`: `uv run uvicorn app.api.main:app --reload --port 8000`.
-3. `supabase/config.toml`: `project_id = "travelopt"` (la carpeta se llama `VIAJES.COM`) y `enable_anonymous_sign_ins = true`.
+3. `supabase/config.toml`: `project_id = "travelopt"` (independiente del nombre de la carpeta local) y `enable_anonymous_sign_ins = true`.
 
 ## 5. Detalles pendientes
 
-- **Python de uv dentro de la app de Claude.** La app corre empaquetada (MSIX), así que el Python 3.12.15 que instaló uv quedó virtualizado en `AppData\Local\Packages\Claude_…\LocalCache\Roaming\uv\python`. Desde una terminal fuera de la app, los `.venv` apuntan a una ruta que no existe y uv los recrea. Solución: correr una vez `uv python install 3.12` desde tu propia terminal.
+- **Python de uv dentro de la app de Claude.** La app corre empaquetada (MSIX), así que el Python 3.12.15 que instaló uv quedó virtualizado dentro de la carpeta de datos de la app. Desde una terminal fuera de la app, los `.venv` apuntan a una ruta que no existe y uv los recrea. Solución: correr una vez `uv python install 3.12` desde tu propia terminal.
 - La imagen de `uv` en `engine/Dockerfile` sigue en `latest` (Fase 5). `N8N_VERSION` ya quedó fijada en 2.44.7.
 - El proyecto de Docker Compose se llama `viajescom` porque toma el nombre de la carpeta. No afecta en nada.
 - Al importar los workflows (Fase 2), volver a elegir las credenciales en cada nodo: los IDs dicen `REEMPLAZAR`.
@@ -84,7 +84,7 @@ Los documentos se actualizaron igual que el código, así que sus bloques siguen
 
 | Qué | Dónde |
 |---|---|
-| Repo (documentos + código) | `C:\PROYECOTS\VIAJES.COM` |
+| Repo (documentos + código) | raíz de este repo |
 | Secretos | `.env` (ignorado por git; `N8N_ENCRYPTION_KEY` conviene respaldarla en un gestor de contraseñas) |
 | Servicios locales | Supabase (`npx supabase start/stop`), n8n (`docker compose up -d n8n`), motor en `:8000` (`--reload`) |
 
