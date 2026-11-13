@@ -30,9 +30,9 @@ export default memo(function FlightCard({ option, pax, bagsPerPax, optimal, sele
   return (
     <article
       data-testid={`flight-${f.id}`}
-      className={`flex w-full flex-col rounded-3xl bg-white p-6 transition-all duration-300 ${
+      className={`flex w-full flex-col rounded-3xl bg-white p-6 lift transition-colors duration-300 ${
         rejection ? "opacity-60 shadow-sm"
-          : selected ? "bg-accent/5 shadow-lg ring-2 ring-accent" : "shadow-sm hover:shadow-md"}`}
+          : selected ? "bg-accent/5 shadow-lg ring-2 ring-accent" : "shadow-sm"}`}
     >
       <header className="flex items-start justify-between gap-3">
         <div>

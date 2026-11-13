@@ -24,6 +24,8 @@ const unitsText = (o: LodgingOption) =>
 
 // Proveedores que no informan cuántas unidades quedan (Google Hotels): ahí no hay "Últimos lugares".
 const UNITS_UNKNOWN = new Set(["serpapi_google_hotels"]);
+// Una sola referencia para "sin etiquetas": un `[]` nuevo en cada render rompería el memo de cada tarjeta descartada.
+const NO_TAGS: PriceTag[] = [];
 
 // La combinación elegida se lleva todas las unidades que quedan de algún tipo: dato del proveedor, no inventado.
 const lastUnits = (o: LodgingOption) =>
@@ -65,7 +67,7 @@ export default function LodgingFeed({ city, cityName, nights, checkIn, checkOut,
     <Carousel label={`Alojamientos en ${cityName}`} testId="lodging-carousel">
       {group.map((o) => (
         <LodgingCard key={o.offer_id} o={o} city={city} nights={nights} optimal={optimalId === o.offer_id}
-          selected={chosen === o.offer_id} tags={tags.get(o.offer_id) ?? []} diff={diffs.get(o.offer_id)}
+          selected={chosen === o.offer_id} tags={tags.get(o.offer_id) ?? NO_TAGS} diff={diffs.get(o.offer_id)}
           onSelect={onSelect} />
       ))}
     </Carousel>
@@ -113,8 +115,8 @@ const LodgingCard = memo(function LodgingCard({ o, city, nights, optimal, select
   const focus = useMemo(() => pointFocus(city, o.name, "lodging", o), [city, o]);
   return (
     <article role="listitem" data-testid={`lodging-${o.offer_id.split("@")[0]}`}
-      className={`flex flex-col rounded-3xl bg-white p-6 transition-all duration-300 ${
-        o.rejection ? "opacity-60 shadow-sm" : selected ? "bg-accent/5 shadow-lg ring-2 ring-accent" : "shadow-sm hover:shadow-md"}`}>
+      className={`flex flex-col rounded-3xl bg-white p-6 lift transition-colors duration-300 ${
+        o.rejection ? "opacity-60 shadow-sm" : selected ? "bg-accent/5 shadow-lg ring-2 ring-accent" : "shadow-sm"}`}>
       <Thumbnail name={o.name} photo={o.photo_url} />
       <div className="mt-4 flex flex-wrap gap-2">
         {optimal && <span className="rounded-full bg-accent-soft px-3 py-1 text-xs font-bold text-accent">Óptimo</span>}

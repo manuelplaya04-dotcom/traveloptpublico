@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import dynamic from "next/dynamic";
 import WeatherIcon from "@/components/ui/WeatherIcon";
 import { fmtDay, weatherKind, weatherSource } from "@/lib/format";
@@ -10,7 +11,7 @@ const WeatherDetail = dynamic(() => import("@/components/city/WeatherDetail"));
 
 // Clima por día de la estadía + una recomendación para la valija. Marca los días que tus condiciones vetan para
 // actividades al aire libre (mismo umbral que el motor).
-export default function WeatherWidget({ days, maxRain, maxTmax, city, cityName, start, end }: {
+export default memo(function WeatherWidget({ days, maxRain, maxTmax, city, cityName, start, end }: {
   days: WeatherDay[]; maxRain: number; maxTmax: number; city: string; cityName: string; start: string; end: string;
 }) {
   if (days.length === 0) {
@@ -51,7 +52,7 @@ export default function WeatherWidget({ days, maxRain, maxTmax, city, cityName, 
       <WeatherDetail city={city} cityName={cityName} start={start} end={end} />
     </Widget>
   );
-}
+});
 
 export function Widget({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (

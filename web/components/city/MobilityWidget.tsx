@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Car, CarTaxiFront, Plane } from "lucide-react";
 import ExternalIcon from "@/components/ui/ExternalIcon";
 import { safeHref } from "@/lib/links";
@@ -8,7 +9,7 @@ import { fmtTrip, type Trip } from "@/lib/geo";
 import type { TransportQuote } from "@/lib/types";
 
 // Movilidad local: la cotización que usó el motor (el costo viene del itinerario, ya con impuestos).
-export default function MobilityWidget({ quotes, costMinor, nights, transfers = [] }: {
+export default memo(function MobilityWidget({ quotes, costMinor, nights, transfers = [] }: {
   quotes: TransportQuote[]; costMinor: number; nights: number;
   transfers?: { airport: string; trip: Trip }[]; // alojamiento → aeropuerto, ruta real por calle (solo logística)
 }) {
@@ -61,4 +62,4 @@ export default function MobilityWidget({ quotes, costMinor, nights, transfers = 
       <p className="mt-3 text-xs text-muted">Por ahora cotizamos una opción por ciudad.</p>
     </Widget>
   );
-}
+});

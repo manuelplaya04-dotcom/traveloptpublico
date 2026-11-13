@@ -199,13 +199,18 @@ class PgRepository:
         try:
             async with self.pool.connection() as conn:
                 rows = await (await conn.execute(
-                    """select city_code, value, source_kind from public.city_legal_rules
-                       where rule = 'short_term_rental_min_nights'""")).fetchall()
+                    """select city_code, rule, value, source_kind from public.city_legal_rules
+                       where rule in ('short_term_rental_min_nights', 'short_term_rental_registration_required')"""
+                )).fetchall()
         except (psycopg.Error, PoolTimeout) as exc:
             report("legal_rules_unavailable", "error", error=type(exc).__name__)
             return FAIL_CLOSED
-        return LegalRules(short_term_min_nights={r["city_code"]: r["value"] for r in rows},
-                          sources={r["city_code"]: r["source_kind"] for r in rows})
+        return LegalRules(
+            short_term_min_nights={r["city_code"]: r["value"] for r in rows if r["rule"] == "short_term_rental_min_nights"},
+            registration_required=frozenset(
+                r["city_code"] for r in rows if r["rule"] == "short_term_rental_registration_required"),
+            sources={r["city_code"]: r["source_kind"] for r in rows},
+        )
 
     async def create_share(self, run_id: str, user_id: str) -> str:
         async with self.pool.connection() as conn:

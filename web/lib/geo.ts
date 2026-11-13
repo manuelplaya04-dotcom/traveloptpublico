@@ -38,5 +38,6 @@ export function roadTrip(r: { distance_m: number; duration_s: number }): Trip {
 export const hasCoords = <T extends { lat?: number | null; lon?: number | null }>(p: T | null | undefined): p is T & LatLon =>
   typeof p?.lat === "number" && typeof p?.lon === "number";
 
+const KM_FORMAT = new Intl.NumberFormat("es-AR", { maximumFractionDigits: 1 }); // reutilizado: ver DAY_FORMAT en format.ts
 export const fmtTrip = (t: Trip) =>
-  `${t.km.toLocaleString("es-AR", { maximumFractionDigits: 1 })} km · ~${t.minutes} min ${t.mode}`;
+  `${KM_FORMAT.format(t.km)} km · ~${t.minutes} min ${t.mode}`;

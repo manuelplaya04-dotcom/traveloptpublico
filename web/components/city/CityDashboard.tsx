@@ -58,14 +58,17 @@ export default function CityDashboard({ index, stay, req, weather, transport, ac
     const r = routes?.[airports.length + i];
     return r ? [[a.name, roadTrip(r)] as const] : [];
   })), [routes, acts, airports.length]);
-  const days = weather.filter((w) => w.city === stay.city && w.date >= stay.check_in && w.date < stay.check_out)
-    .sort((a, b) => a.date.localeCompare(b.date));
+  // Derivados estables (useMemo): los paneles memoizados reciben la misma referencia y no se redibujan cuando solo
+  // cambia el alojamiento elegido.
+  const days = useMemo(() => weather.filter((w) => w.city === stay.city && w.date >= stay.check_in && w.date < stay.check_out)
+    .sort((a, b) => a.date.localeCompare(b.date)), [weather, stay.city, stay.check_in, stay.check_out]);
+  const quotes = useMemo(() => quotedTransport(transport, on).filter((t) => t.city === stay.city), [transport, on, stay.city]);
   return (
     <section id={`city-${stay.city}`} aria-labelledby={`city-title-${stay.city}`} className="enter scroll-mt-6 space-y-8">
       {/* Hero del destino: imagen + overlay; compacto para que el contenido útil siga a la vista. */}
       <CityHero lat={info?.lat} lon={info?.lon}>
         <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-widest text-white/85">Destino {index + 1}{info ? ` · ${info.country}` : ""}</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-white/85">Destino {index + 1}{info ? ` · ${info.country} · moneda local ${info.currency}` : ""}</p>
           <h2 id={`city-title-${stay.city}`} className="font-display text-3xl font-black tracking-tight drop-shadow sm:text-5xl">
             {info?.name ?? stay.city}
           </h2>
@@ -78,7 +81,7 @@ export default function CityDashboard({ index, stay, req, weather, transport, ac
       <div className="grid gap-5 xl:grid-cols-2">
         <WeatherWidget days={days} maxRain={c.max_heavy_rain_prob} maxTmax={c.max_tmax_c} city={stay.city}
           cityName={info?.name ?? stay.city} start={stay.check_in} end={stay.check_out} />
-        <MobilityWidget quotes={quotedTransport(transport, on).filter((t) => t.city === stay.city)} costMinor={stay.transport_cost_minor} nights={stay.nights}
+        <MobilityWidget quotes={quotes} costMinor={stay.transport_cost_minor} nights={stay.nights}
           transfers={transfers} />
       </div>
 

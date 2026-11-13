@@ -97,3 +97,23 @@ test("sin vuelos: no pide origen ni escalas, y el itinerario arranca en el desti
   await expect(page.getByTestId("rubro-vuelos")).toHaveCount(0);
   await expect(page.getByTestId("checkout-total")).toHaveText(best ?? "");
 });
+
+test("Costa Oeste: Los Ángeles y Las Vegas se buscan y llegan a un itinerario, con su moneda y su norma", async ({ page }) => {
+  await skip(page, ["onboarding", "results"]);
+  const dialog = await openForm(page);
+  await expect(dialog.getByTestId("beta-scope")).toContainText("Los Ángeles");
+  await addCity(dialog, "Los Ángeles");
+  await addCity(dialog, "Las Vegas");
+  await dialog.getByRole("spinbutton", { name: "Noches en Los Ángeles" }).fill("4");
+  await dialog.getByRole("spinbutton", { name: "Noches en Las Vegas" }).fill("3");
+  await dialog.getByRole("button", { name: "Siguiente" }).click();
+  await dialog.getByLabel("Fecha de ida (primera noche)").fill("2027-07-08");
+  await dialog.getByLabel("Viajeros").fill("2");
+  await dialog.getByLabel("Presupuesto total (USD)").fill("15000");
+  await dialog.getByRole("button", { name: "Siguiente" }).click();
+  await dialog.getByRole("button", { name: "Optimizar itinerario" }).click();
+  await expect(page).toHaveURL(/\/runs\/[0-9a-f-]{36}$/, { timeout: 30_000 });
+  await expect(page.getByTestId("run-status")).toHaveText("done", { timeout: 60_000 });
+  await page.getByTestId("step-LAX").click();
+  await expect(page.locator("#city-LAX")).toContainText("moneda local USD");
+});

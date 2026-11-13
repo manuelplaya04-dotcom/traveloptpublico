@@ -16,7 +16,6 @@ import random
 from collections import Counter
 from datetime import date, datetime, timedelta
 from urllib.parse import quote_plus
-from zoneinfo import ZoneInfo
 
 from app.domain.models import (
     ActivityOffer,
@@ -27,27 +26,20 @@ from app.domain.models import (
     TripRequest,
     WeatherDay,
 )
+from app.domain.timezones import airport_tz
 from app.optimizer.skeletons import FlightQuery, Stay
 from app.providers.fixture import FixtureProvider
 
 # Orígenes del catálogo de la web (los destinos traen sus coordenadas en el pedido).
 ORIGIN_COORDS: dict[str, tuple[float, float]] = {"EZE": (-34.8222, -58.5358), "AEP": (-34.5592, -58.4156)}
-# Huso horario por aeropuerto: los horarios de vuelo son locales en origen y destino (como en una API real).
-# Aeropuerto sin huso conocido: se asume el mismo huso que el de origen (no se inventa una diferencia horaria).
-AIRPORT_TZ = {
-    **dict.fromkeys(("EZE", "AEP"), "America/Argentina/Buenos_Aires"),
-    **dict.fromkeys(("JFK", "LGA", "EWR", "MCO", "MIA", "PHL", "BOS", "IAD", "DCA"), "America/New_York"),
-    **dict.fromkeys(("ORD", "MDW"), "America/Chicago"),
-    **dict.fromkeys(("CDG", "ORY"), "Europe/Paris"), **dict.fromkeys(("FCO", "CIA"), "Europe/Rome"),
-    **dict.fromkeys(("HND", "NRT"), "Asia/Tokyo"), "SYD": "Australia/Sydney", "SCL": "America/Santiago",
-}
-
-
+# Huso horario por aeropuerto: los horarios de vuelo son locales en origen y destino (como en una API real). Sale de la
+# misma tabla que el adapter real (app/domain/timezones.py, 7.917 aeropuertos). Aeropuerto sin huso conocido: se asume
+# el mismo huso que el de origen (no se inventa una diferencia horaria).
 def _utc_offset_h(airport: str, day: date) -> float | None:
-    tz = AIRPORT_TZ.get(airport)
+    tz = airport_tz(airport)
     if tz is None:
         return None
-    off = datetime.combine(day, datetime.min.time(), tzinfo=ZoneInfo(tz)).utcoffset()
+    off = datetime.combine(day, datetime.min.time(), tzinfo=tz).utcoffset()
     return off.total_seconds() / 3600 if off is not None else None
 
 

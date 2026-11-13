@@ -1,7 +1,7 @@
 "use client";
 
 import { Map as MapIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import ExternalIcon from "@/components/ui/ExternalIcon";
 import Carousel from "@/components/ui/Carousel";
 import MapButton from "@/components/ui/MapButton";
@@ -13,7 +13,7 @@ export type Place = { id: string; name: string; kind: string; outdoor: boolean; 
 
 // Lugares reales para visitar (Wikidata, gratis). Son información: Wikidata no publica precios de entrada, así que no
 // se suman al total. Mientras carga, si falla o si no hay lugares, la sección no se muestra.
-export default function CityPlaces({ city, cityName }: { city: string; cityName: string }) {
+export default memo(function CityPlaces({ city, cityName }: { city: string; cityName: string }) {
   const [places, setPlaces] = useState<Place[] | null>(null);
   useEffect(() => {
     const ctl = new AbortController();
@@ -35,7 +35,7 @@ export default function CityPlaces({ city, cityName }: { city: string; cityName:
         {places.map((p) => {
           const href = safeHref(p.link);
           return (
-            <div role="listitem" key={p.id} className="flex flex-col rounded-2xl bg-white p-4 shadow-sm transition-all duration-300 hover:shadow-md" data-testid="city-place">
+            <div role="listitem" key={p.id} className="flex flex-col rounded-2xl bg-white p-4 shadow-sm lift transition-colors duration-300" data-testid="city-place">
               <span className="w-fit rounded-full bg-surface px-2.5 py-0.5 text-xs font-bold text-muted">
                 {p.kind} · {p.outdoor ? "al aire libre" : "bajo techo"}
               </span>
@@ -53,4 +53,4 @@ export default function CityPlaces({ city, cityName }: { city: string; cityName:
       </Carousel>
     </section>
   );
-}
+});

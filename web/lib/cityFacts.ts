@@ -30,6 +30,18 @@ export const CITY_FACTS: Record<string, string[]> = {
     "Brooklyn fue una ciudad independiente hasta 1898.",
     "Coney Island tiene una montaña rusa de madera de 1927, el Cyclone.",
   ],
+  LAX: [
+    "El cartel de Hollywood se levantó en 1923 como publicidad inmobiliaria: decía «Hollywoodland».",
+    "Los Ángeles fue sede de los Juegos Olímpicos de 1932 y 1984.",
+  ],
+  SFO: [
+    "El puente Golden Gate se inauguró en 1937.",
+    "Los cable cars de San Francisco circulan desde 1873.",
+  ],
+  LAS: [
+    "Las Vegas se fundó como ciudad en 1905.",
+    "La represa Hoover, a unos 50 km de la ciudad, se terminó en 1936.",
+  ],
 };
 
 export const factsFor = (codes: string[]): string[] => codes.flatMap((c) => CITY_FACTS[c] ?? []);

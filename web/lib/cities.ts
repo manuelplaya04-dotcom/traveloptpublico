@@ -4,10 +4,14 @@
 // las inactivas existen (perfil y reglas listos) para mostrar nombres y preparar expansiones.
 import { CATALOG_SNAPSHOT } from "@/lib/catalog.snapshot";
 
+export type Region = "us_east" | "us_west" | "europe";
+
 export type CityInfo = {
   code: string;
   name: string;
   country: string;
+  region: Region;
+  currency: string; // moneda local (ISO 4217), informativa: el motor cotiza en USD
   airports: string[];
   lat: number;
   lon: number;
@@ -60,3 +64,14 @@ export function searchCities(query: string, exclude: string[] = [], limit = 6): 
 }
 
 export const ORIGINS = [{ code: "EZE", name: "Buenos Aires (Ezeiza)", lat: -34.8222, lon: -58.5358 }];
+
+// Alcance de la beta en palabras, a partir de las regiones de las ciudades activas ("la Costa Este y la Costa Oeste de
+// EE. UU."). Activar una ciudad de otra región actualiza el aviso sin tocar código.
+const LIST = new Intl.ListFormat("es", { type: "conjunction" });
+const US_REGION: Partial<Record<Region, string>> = { us_east: "la Costa Este", us_west: "la Costa Oeste" };
+export function scopeLabel(cities: CityInfo[]): string {
+  const regions = new Set(cities.map((c) => c.region));
+  const us = (["us_east", "us_west"] as const).filter((r) => regions.has(r)).map((r) => US_REGION[r]!);
+  return LIST.format([...(us.length ? [`${LIST.format(us)} de EE. UU.`] : []), ...(regions.has("europe") ? ["Europa"] : [])]);
+}
+export const cityList = (cities: CityInfo[]) => LIST.format(cities.map((c) => c.name));

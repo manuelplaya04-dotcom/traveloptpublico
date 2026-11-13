@@ -31,7 +31,7 @@ export default function ServiceToggles({ value, onChange }: { value: Services; o
               </span>
               {/* Pista del switch: el estado ya lo da aria-checked */}
               <span aria-hidden className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${on ? "bg-accent" : "bg-line"}`}>
-                <span className={`absolute top-0.5 size-4 rounded-full bg-white shadow transition-[left] ${on ? "left-[1.125rem]" : "left-0.5"}`} />
+                <span className={`absolute left-0.5 top-0.5 size-4 rounded-full bg-white shadow transition-transform ${on ? "translate-x-4" : ""}`} />
               </span>
             </button>
           );

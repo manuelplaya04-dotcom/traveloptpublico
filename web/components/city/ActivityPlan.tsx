@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { safeHref } from "@/lib/links";
 import { MapPin } from "lucide-react";
 import ExternalIcon from "@/components/ui/ExternalIcon";
@@ -19,7 +20,7 @@ const ROW: Record<WeatherKind, string> = {
 
 // Esquema día por día de la estadía: lo que agendó el motor (imperdibles, con precio y link de compra) y por qué
 // los demás días quedan libres (viaje o lluvia).
-export default function ActivityPlan({ stay, lodging, weather, maxRain, travelDaysFree, roads }: {
+export default memo(function ActivityPlan({ stay, lodging, weather, maxRain, travelDaysFree, roads }: {
   stay: Stay; lodging: { name: string; lat?: number | null; lon?: number | null } | null; weather: WeatherDay[]; maxRain: number;
   travelDaysFree: boolean; roads?: Map<string, Trip>; // rutas reales por calle (OSRM) por nombre de actividad
 }) {
@@ -53,6 +54,7 @@ export default function ActivityPlan({ stay, lodging, weather, maxRain, travelDa
                 <ul className="flex flex-1 flex-col gap-2">
                   {acts.map((a) => {
                     const href = safeHref(a.deeplink);
+                    const trip = tripTo(a); // una vez por actividad (antes se recalculaba en cada uso)
                     return (
                       <li key={a.name} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
                         <span className="text-sm text-ink">
@@ -63,11 +65,11 @@ export default function ActivityPlan({ stay, lodging, weather, maxRain, travelDa
                               title="No pudimos consultar el clima de ese día" data-testid="weather-unverified">Clima sin verificar</span>
                           )}
                         </span>
-                        {tripTo(a) && (
+                        {trip && (
                           <span className="basis-full text-xs text-muted" data-testid="activity-distance"
-                            title={tripTo(a)!.estimated ? "Estimado: línea recta + 30% por calles, a velocidad media"
+                            title={trip.estimated ? "Estimado: línea recta + 30% por calles, a velocidad media"
                               : "Ruta real por calle (OSRM · OpenStreetMap)"}>
-                            <MapPin aria-hidden className="mr-1 inline size-3.5 align-text-bottom" />{fmtTrip(tripTo(a)!)} desde el alojamiento{tripTo(a)!.estimated ? " (estimado)" : " (ruta por calle)"}
+                            <MapPin aria-hidden className="mr-1 inline size-3.5 align-text-bottom" />{fmtTrip(trip)} desde el alojamiento{trip.estimated ? " (estimado)" : " (ruta por calle)"}
                           </span>
                         )}
                         <span className="flex items-center gap-3 text-sm">
@@ -88,4 +90,4 @@ export default function ActivityPlan({ stay, lodging, weather, maxRain, travelDa
       </ol>
     </section>
   );
-}
+});

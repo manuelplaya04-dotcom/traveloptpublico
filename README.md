@@ -103,6 +103,9 @@ flowchart LR
   Degradación elegante: si fallan el clima o las actividades, el itinerario sale igual con aviso.
 - **Cold start.** El plan gratuito duerme el motor a los 15 minutos sin uso. Hay un *warm-up* al abrir el formulario,
   un aviso de arranque y una pantalla de espera que muestra el recorrido y datos de los destinos sin esperar al motor.
+- **Rendimiento medido, no supuesto.** Build de producción con la CPU frenada 4x, Long Animation Frames y el Profiler
+  de React: elegir una tarjeta bajó de ~1.000 a 104–328 ms de bloqueo (paneles memoizados, formateadores `Intl`
+  reutilizados, mapa que no se reencuadra dentro del clic, sombras y posiciones animadas por GPU).
 - **Cotización modular.** Vuelos, alojamiento y actividades se pueden apagar ("ya lo tengo"): el módulo no se busca,
   no entra al modelo ni suma al total, y el explicador no puede nombrarlo. Un recorrido guiado liviano (sin
   dependencias) lo explica la primera vez.
@@ -114,8 +117,8 @@ flowchart LR
 - **Privacidad y legalidad.** Sesiones anónimas con CAPTCHA (Cloudflare Turnstile), sin registro. Las búsquedas se
   borran solas a los 30 días (Ley 25.326, minimización de datos). Las alertas operativas pasan por una lista blanca de
   campos, sin datos personales. Reglas de **alquiler temporario por ciudad** (por ejemplo, NYC Local Law 18: menos de
-  30 noches solo con anfitrión registrado), leídas de la base con fuente citada: el alquiler que no puede ser legal se
-  descarta y quedan los hoteles. Si la norma no se puede leer, se descartan todos los alquileres (fallo cerrado).
+  30 noches solo con anfitrión registrado; París: número de registro obligatorio), leídas de la base con fuente citada: el
+  alquiler que no puede ser legal se descarta y quedan los hoteles. Si la norma no se puede leer, se descartan todos los alquileres (fallo cerrado).
 - **Seguridad (OWASP).** CSP con nonce por request y `strict-dynamic`. Lista blanca de hosts de salida contra SSRF. Links
   externos saneados. Rate limits por usuario y globales en Postgres. Ningún secreto en variables `NEXT_PUBLIC_`.
 - **Accesibilidad.** Auditada con axe-core (WCAG 2.1 AA) en los E2E. Las ayudas funcionan con mouse, teclado y toque.

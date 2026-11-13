@@ -127,10 +127,10 @@ describe("buscador y reparto", () => {
 });
 
 describe("Fase 1: catálogo y calibración", () => {
-  it("solo las 7 ciudades de la costa este (V1)", async () => {
+  it("buscables: las 7 de la Costa Este y las 3 de la Costa Oeste (Europa cargada, todavía inactiva)", async () => {
     const { activeCities } = await import("../lib/cities");
-    expect(activeCities().map((c) => c.name).sort()).toEqual(
-      ["Boston", "Brooklyn", "Filadelfia", "Miami", "Nueva York", "Orlando", "Washington D.C."]);
+    expect(activeCities().map((c) => c.name).sort()).toEqual(["Boston", "Brooklyn", "Filadelfia", "Las Vegas",
+      "Los Ángeles", "Miami", "Nueva York", "Orlando", "San Francisco", "Washington D.C."]);
   });
   it("los imperdibles nunca superan lo que entra en las noches asignadas", () => {
     const req = (orl: number, nyc: number) =>

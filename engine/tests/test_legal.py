@@ -1,6 +1,7 @@
 """Reglas legales por ciudad: desde la base, como restricción dura, con fallo cerrado y explicadas en el embudo."""
 import asyncio
 import json
+import re
 from datetime import date, timedelta
 from pathlib import Path
 from types import SimpleNamespace
@@ -92,3 +93,28 @@ def test_las_reglas_se_cachean_y_el_fallo_cerrado_no():
 
     assert asyncio.run(go(SEED_RULES)) == 1
     assert asyncio.run(go(FAIL_CLOSED)) == 2  # sin cachear: el próximo pedido vuelve a intentar leer la base
+
+
+def test_paris_exige_registro_y_ninguna_estadia_lo_salva(req):
+    assert not SEED_RULES.rental_allowed("PAR", 1) and not SEED_RULES.rental_allowed("PAR", 365)
+    assert SEED_RULES.rental_allowed("LON", 2)  # Londres: el tope anual es del anfitrión, no de la estadía
+    paris = req.model_copy(update={"cities": [req.cities[0].model_copy(update={"code": "PAR", "name": "París"})]})
+    facts = legal_facts(paris, {"lodging.short_term_not_legal": 3}, SEED_RULES)
+    assert [(f.city, f.source) for f in facts] == [("París", "oficial")]
+    assert "número de registro" in facts[0].rule and not any(ch.isdigit() for ch in facts[0].rule)
+
+
+def test_el_respaldo_del_codigo_coincide_con_las_migraciones():
+    """SEED_RULES rige sin base (tests, modo local): tiene que decir lo mismo que lo que siembran las migraciones."""
+    rows: dict[tuple[str, str], tuple[int, str]] = {}
+    for path in sorted((Path(__file__).parents[2] / "supabase" / "migrations").glob("*.sql")):
+        for city, rule, value, kind in re.findall(
+                r"\('([A-Z]{3})', '(short_term_rental_[a-z_]+)', (\d+),\s*'(?:[^']|'')*',\s*'https://[^']+',\s*'(official|secondary)'",
+                path.read_text("utf-8")):
+            rows[(city, rule)] = (int(value), kind)  # una migración posterior corrige a la anterior
+    assert rows, "la expresión dejó de encontrar las reglas sembradas"
+    min_nights = {c: v for (c, r), (v, _) in rows.items() if r == "short_term_rental_min_nights"}
+    registration = {c for (c, r) in rows if r == "short_term_rental_registration_required"}
+    assert min_nights == SEED_RULES.short_term_min_nights
+    assert registration == SEED_RULES.registration_required
+    assert {c: k for (c, _), (_, k) in rows.items()} == SEED_RULES.sources

@@ -9,10 +9,10 @@ export const airlineName = (code: string) => AIRLINES[code] ?? code;
 export const isDemoProvider = (provider: string) => provider === "fixture" || provider === "simulado";
 
 // Las fechas del motor son locales sin zona: se formatean en UTC para no correrlas de día.
-export const fmtDay = (isoDate: string) =>
-  new Date(`${isoDate.slice(0, 10)}T00:00:00Z`).toLocaleDateString("es-AR", {
-    weekday: "short", day: "numeric", month: "short", timeZone: "UTC",
-  });
+// Un solo formateador por módulo: `toLocaleDateString` con opciones arma uno nuevo en cada llamada (~40 veces más lento),
+// y fmtDay se llama por cada fila de cada calendario y tarjeta.
+const DAY_FORMAT = new Intl.DateTimeFormat("es-AR", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
+export const fmtDay = (isoDate: string) => DAY_FORMAT.format(new Date(`${isoDate.slice(0, 10)}T00:00:00Z`));
 // Clima de un día para íconos y alertas (mismo umbral que el motor para actividades al aire libre).
 export type WeatherKind = "storm" | "cloud" | "sun";
 export const weatherKind = (rainProb: number, maxRain: number): WeatherKind =>

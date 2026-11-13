@@ -3,7 +3,7 @@ import { memo } from "react";
 import CitySearch from "@/components/onboarding/CitySearch";
 import CountControl from "@/components/ui/CountControl";
 import NumberField from "@/components/ui/NumberField";
-import { activeCities, cityByCode, MAX_CITIES } from "@/lib/cities";
+import { activeCities, cityByCode, cityList, MAX_CITIES, scopeLabel } from "@/lib/cities";
 import { assignedNights, NIGHTS_PER_CITY, TRIP_NIGHTS, type CityStop } from "@/lib/onboarding";
 
 // Destinos en orden de visita (array dinámico, hasta MAX_CITIES) elegidos con el buscador, y reparto de las noches
@@ -75,11 +75,11 @@ export default memo(function StepDestinations({ stops, totalNights, onChange, on
 // Alcance de la beta, visible antes de buscar (evita buscar destinos que todavía no existen). La lista sale del
 // catálogo de la base: si se activa una ciudad, el aviso se actualiza solo.
 function BetaScope() {
-  const names = new Intl.ListFormat("es", { type: "conjunction" }).format(activeCities().map((c) => c.name));
+  const active = activeCities();
   return (
     <p id="beta-scope" data-testid="beta-scope" className="mt-3 mb-4 rounded-xl bg-accent-soft/60 px-4 py-3 text-sm text-ink">
       <FlaskConical aria-hidden className="mr-1 inline size-4 align-text-bottom text-accent" />
-      <b>Fase de prueba (Beta):</b> por ahora funciona solo para la <b>Costa Este de EE. UU.</b>: {names}.
+      <b>Fase de prueba (Beta):</b> por ahora funciona solo en <b>{scopeLabel(active)}</b>: {cityList(active)}.
     </p>
   );
 }

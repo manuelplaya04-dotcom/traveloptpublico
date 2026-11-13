@@ -81,8 +81,8 @@ function Arrows({ target, controls, label }: { target: RefObject<HTMLDivElement 
   if (!edges.prev && !edges.next) return null; // todo entra: sin flechas
   const base = [
     "absolute top-1/2 z-10 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/95",
-    "text-lg font-bold text-ink shadow-md ring-1 ring-line backdrop-blur pointer-fine:flex print:hidden",
-    "transition-all duration-300 hover:scale-105 hover:bg-white hover:shadow-lg",
+    "text-lg font-bold text-ink shadow-md ring-1 ring-line pointer-fine:flex print:hidden",
+    "transition-[transform,opacity,background-color] duration-300 hover:scale-105 hover:bg-white",
     "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
     "disabled:pointer-events-none disabled:opacity-0",
   ].join(" ");

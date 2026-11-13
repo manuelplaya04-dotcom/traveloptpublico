@@ -13,7 +13,7 @@ from pathlib import Path
 
 # Aeropuertos de EE.UU. del catálogo (un tramo es doméstico si sale y llega a uno de estos).
 US_AIRPORTS = frozenset({"JFK", "LGA", "EWR", "MCO", "MIA", "PHL", "BOS", "IAD", "DCA", "FLL", "ORD", "ATL", "CLT",
-                         "DFW", "LAX", "SFO", "SEA", "DEN"})
+                         "DFW", "LAX", "SFO", "LAS", "SEA", "DEN"})
 
 
 @lru_cache(maxsize=1)

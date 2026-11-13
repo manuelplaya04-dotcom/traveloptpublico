@@ -210,8 +210,9 @@ def impossible_reason(skeleton_id: object, why: object, names_by_code: dict[str,
 
 
 def legal_facts(req: TripRequest, counts: dict[str, int], legal: LegalRules) -> list[LegalFact]:
-    """Normas locales que descartaron alquileres en esta búsqueda: solo si hubo descartes por legalidad y solo para las
-    ciudades cuya estadía es más corta que el mínimo. Sin reglas legibles (fallo cerrado), se dice que no se verificó."""
+    """Normas locales que descartaron alquileres en esta búsqueda: solo si hubo descartes por legalidad, y solo para las
+    ciudades que exigen registro o cuya estadía es más corta que el mínimo. Sin reglas legibles (fallo cerrado), se dice
+    que no se verificó."""
     if not counts.get("lodging.short_term_not_legal"):
         return []
     if not legal.complete:
@@ -220,9 +221,14 @@ def legal_facts(req: TripRequest, counts: dict[str, int], legal: LegalRules) -> 
     out = []
     for c in req.cities:
         minimum = legal.short_term_min_nights.get(c.code)
-        if minimum is not None and c.min_nights < minimum:
-            out.append(LegalFact(city=c.name or c.code, rule=f"alquiler temporario permitido solo desde {minimum} noches",
-                                 source="oficial" if legal.sources.get(c.code) == "official" else "secundaria"))
+        if c.code in legal.registration_required:
+            rule = "todo alquiler temporario exige un número de registro de la ciudad, que el anuncio no informa"
+        elif minimum is not None and c.min_nights < minimum:
+            rule = f"alquiler temporario permitido solo desde {minimum} noches"
+        else:
+            continue
+        out.append(LegalFact(city=c.name or c.code, rule=rule,
+                             source="oficial" if legal.sources.get(c.code) == "official" else "secundaria"))
     return out
 
 

@@ -42,7 +42,7 @@ export default function ItineraryTimeline({ groups }: { groups: DayGroup[] }) {
           <ol className="relative space-y-3 border-l-2 border-line pl-6">
             {g.days.map((d) => (
               <li key={d.date} className="relative break-inside-avoid">
-                <span className={`absolute -left-[33px] top-5 size-4 rounded-full ring-4 ring-white transition-all duration-300 ${
+                <span className={`absolute -left-[33px] top-5 size-4 rounded-full ring-4 ring-white transition-colors duration-300 ${
                   d.flights.length ? "bg-accent" : d.activities.length ? "bg-ink" : "bg-line"}`} aria-hidden />
                 <div className="rounded-2xl bg-white p-4 shadow-sm sm:p-5">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">

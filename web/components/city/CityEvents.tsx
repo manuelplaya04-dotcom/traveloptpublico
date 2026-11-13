@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import Carousel from "@/components/ui/Carousel";
 import MapButton from "@/components/ui/MapButton";
 import { pointFocus, venueFocus } from "@/lib/mapTargets";
@@ -23,7 +23,7 @@ const SOURCE = { ticketmaster: "Ticketmaster", google_events: "Google" } as cons
 
 // Eventos reales durante la estadía (Ticketmaster + Google Events pre-cargado). Es información para elegir: no entra
 // al total. Degradación elegante: mientras carga, si falla o si no hay eventos, la sección no se muestra.
-export default function CityEvents({ city, cityName, start, end }: {
+export default memo(function CityEvents({ city, cityName, start, end }: {
   city: string; cityName: string; start: string; end: string;
 }) {
   const [events, setEvents] = useState<CityEvent[] | null>(null);
@@ -50,7 +50,7 @@ export default function CityEvents({ city, cityName, start, end }: {
             ? `Desde ${fmtMinor(e.price_min_minor)}${e.price_max_minor && e.price_max_minor > e.price_min_minor ? ` hasta ${fmtMinor(e.price_max_minor)}` : ""}`
             : null;
           return (
-            <div role="listitem" key={e.id} className="flex flex-col rounded-2xl bg-white p-4 shadow-sm transition-all duration-300 hover:shadow-md" data-testid="city-event">
+            <div role="listitem" key={e.id} className="flex flex-col rounded-2xl bg-white p-4 shadow-sm lift transition-colors duration-300" data-testid="city-event">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded-full bg-surface px-2.5 py-0.5 text-xs font-bold text-muted">
                   {fmtDay(e.date)}{e.time ? ` · ${e.time}` : ""}
@@ -72,4 +72,4 @@ export default function CityEvents({ city, cityName, start, end }: {
       </Carousel>
     </section>
   );
-}
+});

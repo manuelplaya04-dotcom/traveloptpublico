@@ -55,6 +55,27 @@ dialog[open]::backdrop {
   #checkout a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; word-break: break-all; }
 }
 
+/* Sombra al pasar el mouse sin repintar la tarjeta en cada cuadro: animar box-shadow repinta en cada frame (y en un
+   carrusel que se desliza bajo el mouse, tarjeta tras tarjeta). La sombra ya está pintada en un pseudo-elemento y solo
+   se anima su opacidad, que resuelve el compositor (GPU). */
+.lift { position: relative; }
+.lift::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms ease-out;
+}
+@media (hover: hover) {
+  .lift:hover::after { opacity: 1; }
+}
+@media print {
+  .lift::after { display: none; }
+}
+
 /* Entrada de contenido nuevo (resultado, cambio de paso): fundido corto, sin mover el layout. */
 .enter {
   animation: fade-in 300ms ease-in-out;

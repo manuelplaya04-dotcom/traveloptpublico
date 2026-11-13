@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Trophy } from "lucide-react";
 import ExternalIcon from "@/components/ui/ExternalIcon";
 import { safeHref } from "@/lib/links";
@@ -7,7 +8,7 @@ import { venueFocus } from "@/lib/mapTargets";
 
 // Deportes en la ciudad: equipos, liga y estadio (datos reales y estáticos). Sin fechas ni precios: el calendario y las
 // entradas se consultan en la fuente oficial.
-export default function SportsTeams({ city, cityName }: { city: string; cityName: string }) {
+export default memo(function SportsTeams({ city, cityName }: { city: string; cityName: string }) {
   const teams = TEAMS_BY_CITY[city];
   if (!teams?.length) return null;
   return (
@@ -20,7 +21,7 @@ export default function SportsTeams({ city, cityName }: { city: string; cityName
         {teams.map((t) => {
           const href = safeHref(ticketsUrl(t));
           return (
-            <li key={t.name} className="flex flex-col rounded-2xl bg-white p-4 shadow-sm transition-all duration-300 hover:shadow-md" data-testid="sports-team">
+            <li key={t.name} className="flex flex-col rounded-2xl bg-white p-4 shadow-sm lift transition-colors duration-300" data-testid="sports-team">
               <span className="w-fit rounded-full bg-surface px-2.5 py-0.5 text-xs font-bold text-muted">{t.league}</span>
               <p className="mt-2 font-semibold text-ink">{t.name}</p>
               <p className="text-xs text-muted">{t.venue}</p>
@@ -35,4 +36,4 @@ export default function SportsTeams({ city, cityName }: { city: string; cityName
       </ul>
     </section>
   );
-}
+});

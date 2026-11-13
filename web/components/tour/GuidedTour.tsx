@@ -93,7 +93,7 @@ export default function GuidedTour({ tour }: { tour: Tour }) {
     <>
       {rect && (
         <div aria-hidden data-testid="tour-spotlight" style={spotlight(rect)}
-          className="pointer-events-none fixed z-50 rounded-2xl ring-2 ring-accent shadow-[0_0_0_9999px_rgb(17_24_39/0.35)] transition-all duration-200" />
+          className="pointer-events-none fixed z-50 rounded-2xl ring-2 ring-accent shadow-[0_0_0_9999px_rgb(17_24_39/0.35)] transition-transform duration-200 will-change-transform" />
       )}
       <div ref={box} role="dialog" aria-modal="false" aria-labelledby={titleId} aria-describedby={bodyId} tabIndex={-1}
         data-testid="guided-tour" style={rect ? bubble(rect) : { visibility: "hidden" }}
@@ -126,8 +126,10 @@ export default function GuidedTour({ tour }: { tour: Tour }) {
   );
 }
 
+// Posición por transform (la mueve el compositor, sin recalcular layout en cada paso del recorrido).
 function spotlight(r: DOMRect): CSSProperties {
-  return { top: r.top - PAD, left: r.left - PAD, width: r.width + PAD * 2, height: r.height + PAD * 2 };
+  return { top: 0, left: 0, width: r.width + PAD * 2, height: r.height + PAD * 2,
+    transform: `translate3d(${r.left - PAD}px, ${r.top - PAD}px, 0)` };
 }
 
 // Debajo del elemento si entra; si no, arriba. Siempre dentro de la pantalla.

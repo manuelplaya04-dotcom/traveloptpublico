@@ -29,5 +29,5 @@ export function pickRates(rows: z.infer<typeof dolarApiSchema>): FxRates | null 
 // Centavos de dólar -> pesos enteros (redondeo al peso más cercano; es una referencia, no un cobro).
 export const arsFromUsdMinor = (usdMinor: number, venta: number) => Math.round((usdMinor * venta) / 100);
 
-export const fmtArs = (pesos: number) =>
-  new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(pesos);
+const ARS_FORMAT = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
+export const fmtArs = (pesos: number) => ARS_FORMAT.format(pesos);

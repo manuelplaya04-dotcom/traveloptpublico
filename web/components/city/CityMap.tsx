@@ -1,7 +1,7 @@
 "use client";
 
 import "leaflet/dist/leaflet.css";
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { memo, useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { AttributionControl, CircleMarker, MapContainer, TileLayer, Tooltip, useMap } from "react-leaflet";
 import { onMapFocus, type MapFocus } from "@/lib/mapFocus";
 
@@ -18,7 +18,7 @@ const STYLE = {
 // Se carga en diferido y solo en el cliente desde CityDashboard: Leaflet usa `window` y pesa ~40 kB.
 // Marca el alojamiento elegido (violeta) y las actividades del itinerario (ámbar), y encuadra todos los puntos.
 // Se usan CircleMarker: el Marker por defecto de Leaflet depende de imágenes que los bundlers no resuelven.
-export default function CityMap({ city, name, lat, lon, points = [] }: {
+export default memo(function CityMap({ city, name, lat, lon, points = [] }: {
   city: string; name: string; lat: number; lon: number; points?: MapPoint[];
 }) {
   const box = useRef<HTMLDivElement>(null);
@@ -42,12 +42,7 @@ export default function CityMap({ city, name, lat, lon, points = [] }: {
             <Tooltip>{name}</Tooltip>
           </CircleMarker>
         )}
-        {points.map((p) => (
-          <CircleMarker key={`${p.kind}-${p.label}`} center={[p.lat, p.lon]} radius={STYLE[p.kind].radius}
-            pathOptions={STYLE[p.kind]}>
-            <Tooltip>{p.label}</Tooltip>
-          </CircleMarker>
-        ))}
+        {points.map((p) => <PointMarker key={`${p.kind}-${p.label}`} lat={p.lat} lon={p.lon} kind={p.kind} label={p.label} />)}
         <FitBounds points={points.filter((p) => p.kind !== "option")} />
         <FocusLayer city={city} box={box} />
       </MapContainer>
@@ -63,15 +58,39 @@ export default function CityMap({ city, name, lat, lon, points = [] }: {
       )}
     </div>
   );
-}
+});
+
+// Un punto del mapa. Memoizado y con coordenadas primitivas: react-leaflet compara `center` por referencia y, con un
+// array nuevo en cada render, movería (setLatLng) todos los marcadores al elegir otro alojamiento. Así solo se
+// actualizan los que cambiaron.
+const PointMarker = memo(function PointMarker({ lat, lon, kind, label }: MapPoint) {
+  const center = useMemo<[number, number]>(() => [lat, lon], [lat, lon]);
+  return (
+    <CircleMarker center={center} radius={STYLE[kind].radius} pathOptions={STYLE[kind]}>
+      <Tooltip>{label}</Tooltip>
+    </CircleMarker>
+  );
+});
 
 // Encuadra el mapa para que entren el alojamiento y todas las actividades (solo cuando cambian los puntos).
 function FitBounds({ points }: { points: MapPoint[] }) {
   const map = useMap();
   const key = points.map((p) => `${p.lat},${p.lon}`).join("|");
+  const first = useRef(true);
   useEffect(() => {
     if (points.length < 2) return;
-    map.fitBounds(points.map((p) => [p.lat, p.lon] as [number, number]), { padding: [32, 32], maxZoom: 14, animate: false });
+    const fit = () => map.fitBounds(points.map((p) => [p.lat, p.lon] as [number, number]),
+      { padding: [32, 32], maxZoom: 14, animate: false });
+    if (first.current) { // al montar, encuadre directo (no hay clic en curso)
+      first.current = false;
+      fit();
+      return;
+    }
+    // Después (p. ej. se eligió otro alojamiento): solo si algún punto quedó fuera de la vista, y en el cuadro siguiente.
+    // Reencuadrar reconstruye la grilla de mosaicos de Leaflet; hacerlo dentro del clic lo demoraba cientos de ms.
+    if (points.every((p) => map.getBounds().contains([p.lat, p.lon]))) return;
+    const frame = requestAnimationFrame(fit);
+    return () => cancelAnimationFrame(frame);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `key` resume los puntos; evita reencuadrar en cada render
   }, [map, key]);
   return null;

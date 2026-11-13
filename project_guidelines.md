@@ -254,3 +254,44 @@ Dado que el orquestador depende de múltiples APIs externas, implementa patrones
     (`components/tour/GuidedTour.tsx`, sin dependencias): pasos anclados a `data-tour`, una sola vez por navegador
     (`localStorage`, se marca al empezar; sin almacenamiento legible no se muestra), Esc lo cierra sin cerrar el
     `<dialog>`, foco en la burbuja y vuelta al cerrar. Los E2E que no lo prueban lo marcan como visto (`e2e/tour.ts`).
+21. **Rendimiento medido y expansión del catálogo (2026-11-13):** se reportó la interfaz "trabada". Se midió con un
+    build de producción, CPU frenada 4x, Long Animation Frames y `<Profiler>` de React (build `--profile`), y se
+    instrumentó solo de forma temporal. **Causas:**
+    1. Elegir una tarjeta re-renderizaba todo el panel de la ciudad, porque `CityDashboard` se suscribe al carrito.
+    2. `toLocaleDateString` y `toLocaleString` con opciones construyen un formateador `Intl` en cada llamada, unas 40
+       veces más lento que reutilizarlo, y se llaman por cada fila.
+    3. `FitBounds` reencuadraba el mapa dentro del clic y reconstruía la grilla de mosaicos de Leaflet.
+    4. Un `?? []` y arrays `center` nuevos rompían el `memo` de tarjetas y marcadores.
+    5. `transition-all` con sombras animadas y `backdrop-blur` en capas que se desplazan.
+
+    **Arreglos:**
+    - `memo` en los paneles independientes del carrito, con props estabilizadas.
+    - Formateadores `Intl` únicos por módulo.
+    - Reencuadre solo si un punto sale de la vista, y en el cuadro siguiente.
+    - Constantes estables (`NO_TAGS`) y un marcador memoizado con coordenadas primitivas.
+    - Utilidad `.lift`: la sombra va en un pseudo-elemento y solo se anima su opacidad.
+    - Posiciones por `transform` y sin desenfoque.
+
+    **Resultado** (6 selecciones): bloqueo de ~1.000 a 104–328 ms y peor interacción de ~500 a 160–344 ms; el
+    subárbol de la ciudad bajó de 314 a ~148 ms. El arrastre del mapa no bloquea JavaScript, porque Leaflet mueve sus
+    capas fuera de React; sus cuadros perdidos en headless son rasterizado por software. La capa de composición propia
+    para el mapa se probó, no mostró mejora y se revirtió.
+
+    **Sin virtualización:** la página tiene ~1.300 nodos y el carrusel más grande, 16 tarjetas. Virtualizar rompería la
+    impresión, el snap y la semántica de lista sin beneficio medible.
+
+    **Catálogo** (`20261113120000_catalog_scale_up.sql`, idempotente: correrla dos veces deja el estado idéntico):
+    - Moneda local ISO 4217, solo informativa (el motor cotiza en USD), y región `europe`.
+    - Costa Oeste activa. Londres y París cargadas pero inactivas hasta probarlas de punta a punta.
+    - No se siembran hoteles ni atracciones: los hoteles llegan en vivo del proveedor y las atracciones con coordenadas
+      salen de Wikidata.
+
+    **Normas legales:**
+    - Las Vegas pasa a fuente oficial del condado de Clark: hasta 30 días consecutivos es alquiler temporario y exige
+      licencia.
+    - París usa un tipo nuevo, `short_term_rental_registration_required`. Toda vivienda entera alquilada a turistas, por
+      día, semana o mes, exige número de registro, que el proveedor no informa; se descarta sin importar las noches.
+    - Londres no lleva regla: el tope de 90 noches por año es de la propiedad, no de la estadía.
+
+    `SEED_RULES` en el código tiene que coincidir con las migraciones y con la base real (`test_legal.py`,
+    `test_pg_cache.py`).

@@ -77,7 +77,7 @@ export default function InfoTooltip({ children, className = "" }: { children: Re
         onMouseLeave={() => { if (fine() && byHover.current) close(); }}
         // solo el foco de teclado abre (al tocar, el foco llega antes del clic y lo cerraría enseguida)
         onFocus={(e) => { if (e.currentTarget.matches(":focus-visible")) open(); }} onBlur={close}
-        className="inline-flex size-5 items-center justify-center rounded-full text-xs leading-none text-muted transition-all duration-300 hover:bg-accent-soft hover:text-accent focus-visible:bg-accent-soft focus-visible:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent print:hidden">
+        className="inline-flex size-5 items-center justify-center rounded-full text-xs leading-none text-muted transition-colors duration-300 hover:bg-accent-soft hover:text-accent focus-visible:bg-accent-soft focus-visible:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent print:hidden">
         <span aria-hidden>ⓘ</span>
       </button>
       <span id={id} role="tooltip" hidden={!pos} style={pos ?? undefined} data-testid="info-tooltip-text"

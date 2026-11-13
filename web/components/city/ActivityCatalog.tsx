@@ -2,7 +2,7 @@
 
 import { Bike, Drama, Landmark, RollerCoaster, Ship, Ticket, Trees, UtensilsCrossed, type LucideIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import { safeHref } from "@/lib/links";
 import Button from "@/components/ui/Button";
 import type { TripRequest } from "@/lib/contracts";
@@ -26,7 +26,7 @@ type Item = {
 // Todo lo que se puede hacer en la ciudad (catálogo del proveedor para las fechas de la estadía). El usuario marca
 // lo que quiere hacer y el motor re-optimiza el calendario: elige el día de cada actividad respetando clima, días
 // seguidos y capacidad diaria, al menor costo.
-export default function ActivityCatalog({ req, city, offers }: { req: TripRequest; city: string; offers: ActivityOfferRow[] }) {
+export default memo(function ActivityCatalog({ req, city, offers }: { req: TripRequest; city: string; offers: ActivityOfferRow[] }) {
   const router = useRouter();
   const current = req.cities.find((c) => c.code === city)?.must_do ?? [];
   const [chosen, setChosen] = useState<string[]>(current);
@@ -83,7 +83,7 @@ export default function ActivityCatalog({ req, city, offers }: { req: TripReques
           return (
             <div role="listitem" key={it.key}>
               {/* Tarjeta táctil: toda la tarjeta marca el checkbox nativo (teclado y lectores de pantalla intactos). */}
-              <label className={`flex h-full cursor-pointer gap-3 rounded-2xl p-4 transition-all duration-300 hover:shadow-md ${
+              <label className={`flex h-full cursor-pointer gap-3 rounded-2xl p-4 lift transition-colors duration-300 ${
                 on ? "bg-accent/5 shadow-md ring-2 ring-accent" : "bg-white shadow-sm"}`}>
                 <input type="checkbox" checked={on} onChange={() => toggle(it.key)} aria-label={it.name}
                   className="mt-0.5 size-5 shrink-0 cursor-pointer accent-[var(--color-accent)]" />
@@ -125,7 +125,7 @@ export default function ActivityCatalog({ req, city, offers }: { req: TripReques
       {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
     </section>
   );
-}
+});
 
 // Miniatura de proporción fija (sin saltos de layout) con un ícono según el tipo, hasta tener fotos con licencia
 // (Wikidata/Commons, Fase 6.3).

@@ -68,7 +68,7 @@ export default function TripOverview({ req, its, rank, onRank }: {
               return (
                 <li key={x.rank}>
                   <button type="button" onClick={() => onRank(x.rank)} aria-pressed={active} data-testid={`alt-${x.rank}`}
-                    className={`w-full rounded-2xl p-4 text-left transition ${active ? "bg-accent/5 shadow-md ring-2 ring-accent" : "bg-white shadow-sm hover:shadow-md"}`}>
+                    className={`w-full rounded-2xl p-4 text-left lift transition-colors ${active ? "bg-accent/5 shadow-md ring-2 ring-accent" : "bg-white shadow-sm"}`}>
                     <span className="flex items-center justify-between text-xs font-semibold">
                       <span className="text-muted">{fmtDay(x.payload.first_checkin)} · {x.payload.order.map((c) => `${cityByCode(c)?.name ?? c} ${x.payload.nights[c]}n`).join(" + ")}</span>
                       {x.rank === 1 && <span className="rounded-full bg-accent-soft px-2 py-0.5 text-accent">Óptimo</span>}
