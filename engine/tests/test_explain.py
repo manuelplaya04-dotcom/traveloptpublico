@@ -113,7 +113,7 @@ def test_respaldo_usa_solo_los_hechos_y_pasa_su_propio_control():
     assert violations(text, FACTS) == []
     none_feasible = FACTS.model_copy(update={"relaxations": [FACTS.relaxations[0].model_copy(
         update={"feasible": False, "best_total": None})]})
-    assert "Ni flexibilizando escalas máximas por tramo" in fallback_text(none_feasible)
+    assert "Aun flexibilizando escalas máximas por tramo" in fallback_text(none_feasible)
     assert violations(fallback_text(none_feasible), none_feasible) == []
 
 
@@ -241,3 +241,64 @@ def test_endpoint_solo_para_el_duenio_y_solo_sin_resultados(api):
         assert body["facts"]["relaxations"][0]["proposed"] == "1"
 
     asyncio.run(go())
+
+
+# ---------------------------------------------------------------- caso real: falla total sin alternativas
+
+FALLA_TOTAL = FunnelFacts(
+    destinations=["Orlando", "Nueva York"], travelers=2, rejections=[], impossible_date_options=1, date_options=1,
+    impossible_reasons=[RejectionFact(what="sin vuelos para la ida a Orlando", count=1)], relaxations=[],
+)
+# Texto que Gemini generó en producción el 2026-11-11 para este caso: afirmaba que no había alternativas (no se
+# evaluó ninguna), unía los destinos con "o" y abría con una muletilla.
+TEXTO_REAL_RECHAZABLE = ("Che, probamos con 1 opción de fecha y la verdad es que no encontramos ningún viaje disponible "
+                         "para 2 personas rumbo a Orlando o Nueva York. No hay opciones alternativas posibles en este "
+                         "momento.")
+
+
+def test_el_texto_real_de_produccion_ahora_se_rechaza():
+    problems = violations(TEXTO_REAL_RECHAZABLE, FALLA_TOTAL)
+    assert "habla de alternativas sin que se haya calculado ninguna" in problems
+    assert "muletilla o disculpa" in problems
+
+
+def test_falla_total_sin_alternativas_un_texto_fiel_pasa():
+    ok = ("No encontramos un viaje para Orlando y Nueva York: en la única combinación de fechas evaluada no hay "
+          "vuelos para la ida a Orlando.")
+    assert violations(ok, FALLA_TOTAL) == []
+
+
+def test_falla_total_sin_alternativas_el_respaldo_da_el_motivo_y_no_sugiere_nada():
+    text = fallback_text(FALLA_TOTAL)
+    assert text == ("No encontramos un viaje que cumpla todas tus condiciones. Motivo de fondo: sin vuelos para la "
+                    "ida a Orlando (1 de 1 combinaciones de fechas).")
+    assert violations(text, FALLA_TOTAL) == []
+
+
+@pytest.mark.parametrize(("skeleton", "why", "expected"), [
+    ("ORL-NYC|2026-11-11|7-4", "sin_vuelo:tramo_0", "sin vuelos para la ida a Orlando"),
+    ("ORL-NYC|2026-11-11|7-4", "sin_vuelo:tramo_1", "sin vuelos para el tramo Orlando → Nueva York"),
+    ("ORL-NYC|2026-11-11|7-4", "sin_vuelo:tramo_2", "sin vuelos para la vuelta desde Nueva York"),
+    ("ORL-NYC|2026-11-11|7-4", "sin_alojamiento:NYC", "sin alojamiento que cumpla tus condiciones en Nueva York"),
+    ("ORL-NYC|2026-11-11|7-4", "actividades_infactibles:ORL", "los imperdibles no entran en las noches de Orlando"),
+    ("ORL-NYC|2026-11-11|7-4", "motivo_nuevo:ORL", None),   # desconocido: no se traduce a medias
+    ("ORL-NYC|2026-11-11|7-4", "sin_vuelo:tramo_x", None),
+    ("ORL-NYC|2026-11-11|7-4", "sin_texto", None),
+    (None, "sin_vuelo:tramo_0", None),
+    ("ORL-NYC|2026-11-11|7-4", 3, None),
+])
+def test_motivo_de_cada_combinacion_imposible(skeleton, why, expected):
+    from app.explain.facts import impossible_reason
+    assert impossible_reason(skeleton, why, {"ORL": "Orlando", "NYC": "Nueva York"}) == expected
+
+
+def test_los_motivos_de_fondo_viajan_en_los_hechos(req):
+    named = req.model_copy(update={"cities": [c.model_copy(update={"name": n}) for c, n in
+                                              zip(req.cities, ["Orlando", "Nueva York"])]})
+    summary = {"diagnostics": {"rejections": {}, "infeasible_skeletons": {
+        "ORL-NYC|2027-07-08|8-4": "sin_vuelo:tramo_0", "ORL-NYC|2027-07-09|8-4": "sin_vuelo:tramo_0",
+        "ORL-NYC|2027-07-10|8-4": "sin_alojamiento:NYC"}}, "stats": {"skeletons_total": 3}}
+    facts = build_facts(named, summary, [])
+    assert [(r.what, r.count) for r in facts.impossible_reasons] == [
+        ("sin vuelos para la ida a Orlando", 2), ("sin alojamiento que cumpla tus condiciones en Nueva York", 1)]
+    assert "Orlando" in facts.destinations and facts.relaxations == []

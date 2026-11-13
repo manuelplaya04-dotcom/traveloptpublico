@@ -9,8 +9,9 @@ from __future__ import annotations
 
 import httpx
 
+from app.domain.legal import SEED_RULES, LegalRules
 from app.domain.models import TripRequest
-from app.providers.base import KINDS, fetch
+from app.providers.base import KINDS, fetch, planned
 from app.providers.curated import NoTransportQuotes, RealActivities
 from app.providers.fixture import get_fixture
 from app.providers.flights import SerpApiFlights
@@ -32,7 +33,7 @@ class ProviderNotConfigured(LookupError):
 
 def build_providers(
     mode: str, req: TripRequest, s: Settings, client: httpx.AsyncClient, cache: Cache, stats: RequestStats,
-    rentals: bool = True,
+    rentals: bool = True, legal: LegalRules = SEED_RULES,
 ) -> dict[str, object]:
     demo = _demo_provider(req) if mode in ("fixture", "hybrid") else None
     if mode == "fixture":
@@ -51,7 +52,7 @@ def build_providers(
                                  s.serpapi_quota_reserve, req.constraints.checked_bags_per_pax)
         names = {c.code: c.name or c.code for c in req.cities}
         lodging = SerpApiHotels(s.serpapi_api_key, client, cache, stats, names, req.pax,
-                                s.max_lodging_queries_per_run, s.serpapi_quota_reserve, rentals)
+                                s.max_lodging_queries_per_run, s.serpapi_quota_reserve, rentals, legal)
     if mode == "hybrid" and not s.serpapi_api_key:
         # sin precios reales de vuelos y hoteles, el resto también es de ejemplo (todo con su sello, coherente)
         return {"flights": demo, "lodging": demo, "activities": demo, "transport": demo, "weather": weather}
@@ -83,6 +84,8 @@ async def serpapi_cost(providers: dict[str, object], plan) -> int:
 
 
 async def extract(providers: dict[str, object], kind: str, plan) -> list:
+    if not planned(plan, kind):  # módulo no pedido: nada que buscar, aunque esa categoría no tenga proveedor
+        return []
     p = providers.get(kind)
     if p is None:
         raise ProviderNotConfigured(f"sin proveedor para '{kind}'")

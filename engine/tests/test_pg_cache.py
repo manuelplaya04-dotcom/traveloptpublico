@@ -184,3 +184,14 @@ def test_limite_por_conexion_en_postgres_real():
                 await conn.execute("delete from auth.users where id = any(%s::uuid[])", (users,))  # cascada
 
     _run(t)
+
+
+def test_reglas_legales_desde_postgres_real():
+    async def t(repo, cache, key):
+        rules = await repo.legal_rules()
+        assert rules.complete
+        assert rules.short_term_min_nights["NYC"] == 30 and rules.short_term_min_nights["LAX"] == 31
+        assert rules.sources["NYC"] == "official" and rules.sources["LAS"] == "secondary"
+        assert not rules.rental_allowed("NYC", 4) and rules.rental_allowed("MIA", 2)
+
+    _run(t)

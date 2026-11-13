@@ -24,22 +24,25 @@ export default function StepDates({ s, set }: { s: OnboardingState; set: (patch:
         <p className="mt-1 text-sm text-muted">La vuelta se calcula sola con la duración del viaje, o elegila y ajustamos las noches.</p>
       </div>
 
-      <label className="flex flex-col gap-1.5">
-        <span className="text-sm font-medium text-ink">Salís desde</span>
-        <select className={input} value={s.origin} onChange={(e) => set({ origin: e.target.value })}>
-          {ORIGINS.map((o) => <option key={o.code} value={o.code}>{o.name}</option>)}
-        </select>
-      </label>
+      {/* Sin vuelos (ya tiene pasajes) no hay origen que elegir: el viaje arranca en el primer destino. */}
+      {s.services.flights && (
+        <label className="flex flex-col gap-1.5">
+          <span className="text-sm font-medium text-ink">Salís desde</span>
+          <select className={input} value={s.origin} onChange={(e) => set({ origin: e.target.value })}>
+            {ORIGINS.map((o) => <option key={o.code} value={o.code}>{o.name}</option>)}
+          </select>
+        </label>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-ink">Fecha de ida (primera noche)</span>
+          <span className="text-sm font-medium text-ink">{s.services.flights ? "Fecha de ida (primera noche)" : "Primera noche del viaje"}</span>
           <input type="date" className={input} value={s.departDate} min={today} max={addDays(today, MAX_DAYS_AHEAD)}
             onChange={(e) => set({ departDate: e.target.value })} />
-          <span className="text-xs text-muted">Si conviene, el vuelo sale la noche anterior.</span>
+          {s.services.flights && <span className="text-xs text-muted">Si conviene, el vuelo sale la noche anterior.</span>}
         </label>
         <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-ink">Fecha de vuelta</span>
+          <span className="text-sm font-medium text-ink">{s.services.flights ? "Fecha de vuelta" : "Último día (check-out)"}</span>
           <input type="date" className={input} value={back ?? ""} min={bounds?.min} max={bounds?.max}
             disabled={!bounds} onChange={(e) => set(withReturnDate(s, e.target.value))} />
           <span className="text-xs text-muted" data-testid="trip-length">

@@ -20,7 +20,7 @@ const ROW: Record<WeatherKind, string> = {
 // Esquema día por día de la estadía: lo que agendó el motor (imperdibles, con precio y link de compra) y por qué
 // los demás días quedan libres (viaje o lluvia).
 export default function ActivityPlan({ stay, lodging, weather, maxRain, travelDaysFree, roads }: {
-  stay: Stay; lodging: { name: string; lat?: number | null; lon?: number | null }; weather: WeatherDay[]; maxRain: number;
+  stay: Stay; lodging: { name: string; lat?: number | null; lon?: number | null } | null; weather: WeatherDay[]; maxRain: number;
   travelDaysFree: boolean; roads?: Map<string, Trip>; // rutas reales por calle (OSRM) por nombre de actividad
 }) {
   // Distancia desde el alojamiento elegido a cada actividad: ruta real si la hay; si no, estimación en línea recta.

@@ -5,14 +5,17 @@ DATABASE_URL prod  : cadena del Session pooler de Supabase (IPv4), con sslmode=r
 """
 from __future__ import annotations
 
+import psycopg
 from psycopg import AsyncConnection
 from psycopg.rows import DictRow, dict_row
 from psycopg.types.json import Jsonb
-from psycopg_pool import AsyncConnectionPool
+from psycopg_pool import AsyncConnectionPool, PoolTimeout
 
+from app.domain.legal import FAIL_CLOSED, LegalRules
 from app.domain.models import OfferSet, TripRequest
 from app.repo.base import NON_TERMINAL, RunLimits, RunRecord, build_offer_set, check_limits, offer_key
 from app.optimizer.price_advice import PriceStats
+from app.services.alerts import report
 from app.services.cache import Entry
 
 
@@ -191,6 +194,18 @@ class PgRepository:
             ).fetchone())
         f = lambda v: None if v is None else float(v)  # noqa: E731
         return PriceStats(row["snapshots"], row["observations"], f(row["p20"]), f(row["median"]), f(row["p80"]))
+
+    async def legal_rules(self) -> LegalRules:
+        try:
+            async with self.pool.connection() as conn:
+                rows = await (await conn.execute(
+                    """select city_code, value, source_kind from public.city_legal_rules
+                       where rule = 'short_term_rental_min_nights'""")).fetchall()
+        except (psycopg.Error, PoolTimeout) as exc:
+            report("legal_rules_unavailable", "error", error=type(exc).__name__)
+            return FAIL_CLOSED
+        return LegalRules(short_term_min_nights={r["city_code"]: r["value"] for r in rows},
+                          sources={r["city_code"]: r["source_kind"] for r in rows})
 
     async def create_share(self, run_id: str, user_id: str) -> str:
         async with self.pool.connection() as conn:

@@ -9,6 +9,7 @@ from typing import Protocol
 from pydantic import BaseModel
 
 from app.domain import models
+from app.domain.legal import LegalRules
 from app.domain.models import OfferSet, TripRequest
 
 NON_TERMINAL = {"queued", "extracting", "optimizing"}
@@ -108,6 +109,10 @@ class Repository(Protocol):
 
     async def flight_price_stats(self, origin: str, destination: str, day: str) -> PriceStats:
         """Historial de 30 días de precios reales de la ruta y fecha (ver public.flight_price_stats)."""
+        ...
+
+    async def legal_rules(self) -> LegalRules:
+        """Reglas legales por ciudad (public.city_legal_rules). Si no se pueden leer: FAIL_CLOSED."""
         ...
 
     async def create_share(self, run_id: str, user_id: str) -> str:

@@ -230,3 +230,27 @@ Dado que el orquestador depende de múltiples APIs externas, implementa patrones
     si falla, o si el LLM tarda más de 8 s, da 429 o no hay clave, se muestra la explicación por plantillas. Solo se
     cachea el texto que pasó el control (30 días). **Límite conocido del control:** verifica números y códigos, no
     nombres propios en prosa; un destino alternativo inventado lo frena el prompt, no el chequeo.
+19. **Catálogo de destinos y reglas legales en la base (2026-11-13):** se pidió mover destinos, actividades y reglas
+    legales a tablas (`destinos`, `actividades`, `reglas_legales`). Las tablas van en inglés (`catalog_cities`,
+    `catalog_must_do`, `city_legal_rules`) por consistencia con el resto del esquema. Lectura pública con RLS, escritura
+    solo `service_role` (el motor sigue siendo el único escritor). Las actividades con **precio curado** siguen en el JSON
+    del motor (`engine/app/data/`), validado por contrato: en la base solo está qué actividad es imperdible y en qué
+    orden; un test exige que cada imperdible sembrado tenga precio publicado. **Reglas legales:** el motor las lee de
+    `city_legal_rules` (caché 10 min). Si la base no responde, **fallo cerrado**: se descartan todos los alquileres
+    temporarios y el explicador dice que la norma no se pudo verificar; ese estado no se cachea. Siguen siendo un filtro
+    con motivo antes de CP-SAT (invariante), no una restricción dentro del modelo. **Web:** el catálogo se lee en el
+    servidor (timeout 2,5 s, memo 5 min) y, si falla, rige `web/lib/catalog.snapshot.ts`; un test obliga a que esa copia
+    coincida con la migración. Las ciudades de la Costa Oeste quedan cargadas pero inactivas.
+20. **Optimización modular y recorrido guiado (2026-11-13):** se pidió que vuelos, alojamiento y actividades sean
+    opcionales. `TripRequest.services` (`Services`: booleanos estrictos, sin campos de más, al menos uno; si no, 422
+    "Debes seleccionar al menos un servicio"). Default: todo encendido, así el golden y las corridas viejas no cambian.
+    Un módulo apagado deja vacía su parte del plan de consultas: `fetch`/`extract` no llaman al proveedor (cero
+    búsquedas pagas). En el solver el bloque no existe: sin tramos aéreos, `StayPlan.lodging = None` o actividades
+    vacías; la descomposición sigue siendo exacta y CP-SAT coincide con la fuerza bruta en cada combinación
+    (`test_modular.py`). Sin vuelos tampoco se cotizan traslados al aeropuerto. El origen es obligatorio solo con
+    vuelos. El explicador recibe `quoted` (hechos v3), afloja solo restricciones de módulos cotizados y el control de
+    integridad rechaza un texto que nombre un módulo no cotizado. Web: switches `role="switch"` en el primer paso; las
+    preferencias, el itinerario, el checkout y el `.ics` muestran solo lo cotizado. **Recorrido guiado** propio
+    (`components/tour/GuidedTour.tsx`, sin dependencias): pasos anclados a `data-tour`, una sola vez por navegador
+    (`localStorage`, se marca al empezar; sin almacenamiento legible no se muestra), Esc lo cierra sin cerrar el
+    `<dialog>`, foco en la burbuja y vuelta al cerrar. Los E2E que no lo prueban lo marcan como visto (`e2e/tour.ts`).

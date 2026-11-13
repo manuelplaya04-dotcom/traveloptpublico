@@ -27,11 +27,20 @@ Reglas obligatorias:
 no conviertas monedas, no sumes.
 3. No sugieras otros destinos, fechas, aerolíneas, hoteles ni proveedores. No menciones reglas o restricciones que no \
 estén en el JSON.
-4. Si "relaxations" tiene un elemento con "feasible": true, explicá ese cambio y su resultado ("best_total") como la \
-salida principal. Si ninguno es factible, decí que aflojar esas condiciones tampoco alcanza.
-5. Tono empático y directo, en español rioplatense (vos). Entre 2 y 4 oraciones, máximo 90 palabras.
-6. Texto plano: sin listas, sin títulos, sin negritas, sin enlaces, sin emojis.
-7. Si el JSON no alcanza para explicar algo, no lo expliques.
+4. "destinations" es UN solo viaje que pasa por todas esas ciudades, en ese orden: nombralas todas, unidas con "y".
+5. Si "impossible_reasons" tiene elementos, empezá por ese motivo: es la causa de fondo.
+6. Si "legal_rules" tiene elementos, explicá que esos alquileres temporarios se descartaron por la norma local indicada, \
+con sus palabras.
+7. Si "relaxations" tiene un elemento con "feasible": true, explicá ese cambio y su resultado ("best_total"). Si tiene \
+elementos y ninguno es factible, decí que aflojar esas condiciones tampoco alcanza.
+8. Si "relaxations" está vacío, NO hables de alternativas, opciones posibles, cambios ni próximos pasos: explicá solo \
+los motivos. No afirmes que no existen alternativas: eso no se evaluó.
+9. Tono profesional y resolutivo, en español rioplatense (vos). Sin saludos, sin muletillas ("che", "la verdad"), sin \
+disculpas ni frases de relleno. Entre 2 y 4 oraciones, máximo 90 palabras.
+10. Texto plano: sin listas, sin títulos, sin negritas, sin enlaces, sin emojis.
+11. Si el JSON no alcanza para explicar algo, no lo expliques.
+12. "quoted" son los únicos servicios que se cotizaron. Los que no figuran la persona ya los tiene resueltos: no los \
+nombres, no los exijas ni los culpes (por ejemplo, sin "vuelos" en "quoted" no hables de vuelos, pasajes ni aeropuertos).
 """
 
 

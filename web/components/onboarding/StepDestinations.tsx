@@ -3,7 +3,7 @@ import { memo } from "react";
 import CitySearch from "@/components/onboarding/CitySearch";
 import CountControl from "@/components/ui/CountControl";
 import NumberField from "@/components/ui/NumberField";
-import { CITIES, cityByCode, MAX_CITIES } from "@/lib/cities";
+import { activeCities, cityByCode, MAX_CITIES } from "@/lib/cities";
 import { assignedNights, NIGHTS_PER_CITY, TRIP_NIGHTS, type CityStop } from "@/lib/onboarding";
 
 // Destinos en orden de visita (array dinámico, hasta MAX_CITIES) elegidos con el buscador, y reparto de las noches
@@ -24,7 +24,7 @@ export default memo(function StepDestinations({ stops, totalNights, onChange, on
 
   return (
     <div className="space-y-8">
-      <div>
+      <div data-tour="destinations">
         <h3 className="flex flex-wrap items-center gap-2 font-display text-lg font-bold text-ink">
           ¿Adónde vas?
           <span className="rounded-full bg-accent-soft px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-accent">Beta</span>
@@ -73,13 +73,13 @@ export default memo(function StepDestinations({ stops, totalNights, onChange, on
 });
 
 // Alcance de la beta, visible antes de buscar (evita buscar destinos que todavía no existen). La lista sale del
-// catálogo: si se suma una ciudad, el aviso se actualiza solo.
-export const BETA_CITIES = new Intl.ListFormat("es", { type: "conjunction" }).format(CITIES.map((c) => c.name));
+// catálogo de la base: si se activa una ciudad, el aviso se actualiza solo.
 function BetaScope() {
+  const names = new Intl.ListFormat("es", { type: "conjunction" }).format(activeCities().map((c) => c.name));
   return (
     <p id="beta-scope" data-testid="beta-scope" className="mt-3 mb-4 rounded-xl bg-accent-soft/60 px-4 py-3 text-sm text-ink">
       <FlaskConical aria-hidden className="mr-1 inline size-4 align-text-bottom text-accent" />
-      <b>Fase de prueba (Beta):</b> por ahora funciona solo para la <b>Costa Este de EE. UU.</b>: {BETA_CITIES}.
+      <b>Fase de prueba (Beta):</b> por ahora funciona solo para la <b>Costa Este de EE. UU.</b>: {names}.
     </p>
   );
 }

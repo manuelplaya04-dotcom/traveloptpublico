@@ -33,14 +33,13 @@ import httpx
 
 from app.domain.models import PHOTO_HOSTS, LodgingOffer, LodgingUnit
 from app.optimizer.skeletons import Stay
+from app.domain.legal import SEED_RULES, LegalRules
 from app.services.cache import TTL_S, Cache
 from app.services.http import RequestStats, UpstreamError
 from app.services.serpapi import NO_RESULTS, SerpApi, gather_partial
 
 ROOM_GUESTS = 2  # huéspedes por habitación estándar (la búsqueda de hoteles se hace con adults=2)
 RENTALS_FROM_PAX = 3  # desde este tamaño de grupo también se buscan alquileres temporarios
-# Mínimo de noches para alquilar una vivienda completa, por ciudad del catálogo (regla verificada).
-SHORT_TERM_MIN_NIGHTS = {"NYC": 30, "BKN": 30}  # Nueva York, Local Law 18 (2023)
 
 _SLEEPS = re.compile(r"^Sleeps (\d+)$")
 _BEDROOMS = re.compile(r"^(\d+) bedrooms?$")
@@ -112,7 +111,7 @@ def kitchen(amenities: object, rental: bool) -> bool | None:
 
 
 def normalize(p: dict, stay: Stay, provider: str, pax: int, fallback_link: str | None,
-              fetched_at: datetime | None = None) -> LodgingOffer | None:
+              fetched_at: datetime | None = None, legal: LegalRules = SEED_RULES) -> LodgingOffer | None:
     """Una propiedad de `properties` -> `LodgingOffer`. None si falta algo imprescindible (precio, nombre, capacidad)."""
     name, price = p.get("name"), _price(p)
     if not isinstance(name, str) or not name.strip() or price is None:
@@ -136,7 +135,6 @@ def normalize(p: dict, stay: Stay, provider: str, pax: int, fallback_link: str |
     link = p.get("link")
     ref = p.get("property_token") or name
     digest = hashlib.sha256(f"{stay.city}|{stay.check_in}|{stay.check_out}|{ref}".encode()).hexdigest()[:16]
-    min_legal = SHORT_TERM_MIN_NIGHTS.get(stay.city)
     return LodgingOffer(
         id=f"{provider}:{digest}",
         provider=provider,
@@ -145,7 +143,7 @@ def normalize(p: dict, stay: Stay, provider: str, pax: int, fallback_link: str |
         check_in=stay.check_in,
         check_out=stay.check_out,
         units=[unit],
-        short_term_legal=not (rental and min_legal is not None and stay.nights < min_legal),
+        short_term_legal=not rental or legal.rental_allowed(stay.city, stay.nights),
         stars=stars if stars is not None and 1 <= stars <= 5 else None,
         rating=round(min(10.0, rating * 2), 1) if isinstance(rating, (int, float)) and rating >= 0 else None,
         lat=lat if valid_gps else None,
@@ -158,7 +156,8 @@ def normalize(p: dict, stay: Stay, provider: str, pax: int, fallback_link: str |
     )
 
 
-def parse(data: dict, stay: Stay, provider: str, pax: int, fetched_at: datetime | None = None) -> list[LodgingOffer]:
+def parse(data: dict, stay: Stay, provider: str, pax: int, fetched_at: datetime | None = None,
+          legal: LegalRules = SEED_RULES) -> list[LodgingOffer]:
     error = data.get("error")
     if error:
         if NO_RESULTS in str(error):
@@ -166,7 +165,7 @@ def parse(data: dict, stay: Stay, provider: str, pax: int, fetched_at: datetime 
         raise UpstreamError(provider, 200, str(error)[:200])
     url = (data.get("search_metadata") or {}).get("google_hotels_url")
     fallback = url if isinstance(url, str) and url.startswith("https://") else None
-    offers = (normalize(p, stay, provider, pax, fallback, fetched_at) for p in data.get("properties") or [])
+    offers = (normalize(p, stay, provider, pax, fallback, fetched_at, legal) for p in data.get("properties") or [])
     return [o for o in offers if o is not None]
 
 
@@ -184,8 +183,10 @@ class SerpApiHotels:
         max_queries: int = 8,
         reserve: int = 0,
         rentals: bool = True,
+        legal: LegalRules = SEED_RULES,
     ):
         self.api = SerpApi(self.name, api_key, client, cache, stats, reserve=reserve)
+        self.legal = legal
         self.city_names, self.pax, self.max_queries = city_names, pax, max_queries
         self.rentals = rentals and pax >= RENTALS_FROM_PAX  # False: recorte de cuota (solo hoteles)
 
@@ -205,7 +206,7 @@ class SerpApiHotels:
 
     async def _search(self, stay: Stay, rentals: bool) -> list[LodgingOffer]:
         quote = await self.api.search(self.params(stay, rentals), TTL_S["lodging"])
-        return parse(quote.data, stay, self.name, self.pax, quote.fetched_at)
+        return parse(quote.data, stay, self.name, self.pax, quote.fetched_at, self.legal)
 
     def _todo(self, stays: list[Stay]) -> list[tuple[Stay, bool]]:
         modes = (False, True) if self.rentals else (False,)

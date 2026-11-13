@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { ensureCatalog } from "@/lib/catalog";
 import { cityByCode } from "@/lib/cities";
 import { engineFetch } from "@/lib/engine";
 import { createClient } from "@/lib/supabase/server";
@@ -13,6 +14,7 @@ export async function GET(req: Request) {
   if (!user) return NextResponse.json({ code: "no_session" }, { status: 401 });
 
   const q = new URL(req.url).searchParams;
+  await ensureCatalog();
   const city = cityByCode(q.get("city") ?? "");
   const [start, end] = [q.get("start") ?? "", q.get("end") ?? ""];
   if (!city ||!ISO.test(start) || !ISO.test(end)) {

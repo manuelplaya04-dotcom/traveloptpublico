@@ -1,5 +1,9 @@
-// Catálogo de destinos (V1: 7 ciudades de la costa este de EE.UU.). El motor usa el caso de prueba para Orlando + Nueva
-// York dentro de sus rangos y genera datos simulados, calibrados al pedido, para cualquier otra combinación.
+// Acceso al catálogo de destinos. Los datos viven en Supabase (tablas catalog_cities y catalog_must_do): el servidor
+// los carga (lib/catalog.ts) y los entrega al navegador (components/CatalogProvider.tsx). Hasta que llegan, o si la
+// base no responde, rige la copia de respaldo (lib/catalog.snapshot.ts). Solo las ciudades activas se pueden elegir;
+// las inactivas existen (perfil y reglas listos) para mostrar nombres y preparar expansiones.
+import { CATALOG_SNAPSHOT } from "@/lib/catalog.snapshot";
+
 export type CityInfo = {
   code: string;
   name: string;
@@ -13,24 +17,26 @@ export type CityInfo = {
   mustDoByNights?: number[];
   sameAreaAs?: string; // comparte aeropuertos con otra ciudad: no se pueden combinar (no hay vuelo entre ambas)
   defaultNights: number;
+  active: boolean; // se puede elegir en el buscador
 };
 
 export const MAX_CITIES = 4; // mismo tope que el motor (TripRequest.cities): acota la combinatoria de esqueletos
 
-const US = "Estados Unidos";
-export const CITIES: CityInfo[] = [
-  { code: "NYC", name: "Nueva York", country: US, airports: ["JFK", "LGA", "EWR"], lat: 40.758, lon: -73.9855,
-    mustDo: ["SOL", "TOR", "MOMA"], mustDoByNights: [0, 2, 3], defaultNights: 4 },
-  { code: "ORL", name: "Orlando", country: US, airports: ["MCO"], lat: 28.3852, lon: -81.5639,
-    mustDo: ["MK", "EPCOT", "HS", "AK", "EPIC"], mustDoByNights: [0, 0, 1, 2, 3, 3, 4, 5], defaultNights: 7 },
-  { code: "MIA", name: "Miami", country: US, airports: ["MIA"], lat: 25.7617, lon: -80.1918, mustDo: [], defaultNights: 4 },
-  { code: "PHL", name: "Filadelfia", country: US, airports: ["PHL"], lat: 39.9526, lon: -75.1652, mustDo: [], defaultNights: 2 },
-  { code: "BOS", name: "Boston", country: US, airports: ["BOS"], lat: 42.3601, lon: -71.0589, mustDo: [], defaultNights: 3 },
-  { code: "WAS", name: "Washington D.C.", country: US, airports: ["IAD", "DCA"], lat: 38.9072, lon: -77.0369,
-    mustDo: [], defaultNights: 3 },
-  { code: "BKN", name: "Brooklyn", country: US, airports: ["JFK", "LGA"], lat: 40.6782, lon: -73.9442, mustDo: [],
-    sameAreaAs: "NYC", defaultNights: 3 },
-];
+let catalog: CityInfo[] = CATALOG_SNAPSHOT;
+let byCode = new Map(catalog.map((c) => [c.code, c]));
+
+/** Reemplaza el catálogo vigente. Una lista vacía se ignora: nunca se queda la web sin destinos. */
+export function setCatalog(cities: CityInfo[]): void {
+  if (cities.length === 0 || cities === catalog) return;
+  catalog = cities;
+  byCode = new Map(cities.map((c) => [c.code, c]));
+}
+
+/** Ciudades que se pueden elegir, en el orden del catálogo. */
+export const activeCities = (): CityInfo[] => catalog.filter((c) => c.active);
+
+/** Cualquier ciudad del catálogo, activa o no (nombres de búsquedas viejas, links compartidos). */
+export const cityByCode = (code: string): CityInfo | undefined => byCode.get(code);
 
 /** Imperdibles que caben en esas noches (nunca más días de actividades obligatorias que los de la estadía). */
 export function mustDoFor(c: CityInfo, nights: number): string[] {
@@ -47,13 +53,10 @@ const fold = (s: string) => s.normalize("NFD").replace(/\p{Diacritic}/gu, "").to
 export function searchCities(query: string, exclude: string[] = [], limit = 6): CityInfo[] {
   const q = fold(query);
   if (!q) return [];
-  const hits = CITIES.filter((c) => !exclude.includes(c.code)
+  const hits = activeCities().filter((c) => !exclude.includes(c.code)
     && (fold(c.name).includes(q) || fold(c.country).includes(q) || c.code.toLowerCase() === q));
   // primero las que empiezan con lo escrito
   return hits.sort((a, b) => Number(!fold(a.name).startsWith(q)) - Number(!fold(b.name).startsWith(q))).slice(0, limit);
 }
 
 export const ORIGINS = [{ code: "EZE", name: "Buenos Aires (Ezeiza)", lat: -34.8222, lon: -58.5358 }];
-
-const BY_CODE = new Map(CITIES.map((c) => [c.code, c]));
-export const cityByCode = (code: string) => BY_CODE.get(code);

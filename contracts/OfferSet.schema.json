@@ -88,6 +88,21 @@
           ],
           "default": null,
           "title": "Deeplink"
+        },
+        "price_source": {
+          "default": "provider",
+          "enum": [
+            "provider",
+            "curated",
+            "box_office"
+          ],
+          "title": "Price Source",
+          "type": "string"
+        },
+        "price_date_based": {
+          "default": false,
+          "title": "Price Date Based",
+          "type": "boolean"
         }
       },
       "required": [
@@ -137,6 +152,45 @@
           "title": "Arrive At",
           "type": "string"
         },
+        "depart_utc": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Depart Utc"
+        },
+        "arrive_utc": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Arrive Utc"
+        },
+        "duration_min": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Min"
+        },
         "stops": {
           "minimum": 0,
           "title": "Stops",
@@ -163,6 +217,11 @@
           "title": "Bag Fee Minor",
           "type": "integer"
         },
+        "bag_fee_known": {
+          "default": true,
+          "title": "Bag Fee Known",
+          "type": "boolean"
+        },
         "seats_available": {
           "minimum": 0,
           "title": "Seats Available",
@@ -179,6 +238,19 @@
           ],
           "default": null,
           "title": "Deeplink"
+        },
+        "fetched_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fetched At"
         }
       },
       "required": [
@@ -317,6 +389,40 @@
           "default": null,
           "title": "Lon"
         },
+        "amenities": {
+          "default": [],
+          "items": {
+            "maxLength": 60,
+            "type": "string"
+          },
+          "maxItems": 12,
+          "title": "Amenities",
+          "type": "array"
+        },
+        "kitchen": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kitchen"
+        },
+        "photo_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Photo Url"
+        },
         "deeplink": {
           "anyOf": [
             {
@@ -328,6 +434,19 @@
           ],
           "default": null,
           "title": "Deeplink"
+        },
+        "fetched_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fetched At"
         }
       },
       "required": [
@@ -367,7 +486,8 @@
           "default": "explicit",
           "enum": [
             "explicit",
-            "inferred_per_room"
+            "inferred_per_room",
+            "inferred_minimum"
           ],
           "title": "Bathrooms Source",
           "type": "string"

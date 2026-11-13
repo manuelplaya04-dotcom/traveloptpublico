@@ -108,15 +108,19 @@ def generate_skeletons(req: TripRequest) -> list[Skeleton]:
 
 
 def build_query_plan(req: TripRequest, skeletons: list[Skeleton]) -> QueryPlan:
-    """Conjunto MÍNIMO de consultas externas que cubre todos los esqueletos (deduplicado)."""
+    """Conjunto MÍNIMO de consultas externas que cubre todos los esqueletos (deduplicado). Un módulo apagado en
+    `req.services` no genera consultas: sus proveedores no se llaman (ver providers/base.py::fetch)."""
+    on = req.services
     flights = {
         FlightQuery(leg.origin_airports, leg.dest_airports, d)
         for s in skeletons
         for leg in s.legs
         for d in leg.depart_dates
-    }
-    stays = {st for s in skeletons for st in s.stays}
-    city_days = {(st.city, d) for st in stays for d in usable_days(st, req.constraints)}
+    } if on.flights else set()
+    all_stays = {st for s in skeletons for st in s.stays}
+    stays = all_stays if on.lodging else set()
+    # clima: solo filtra actividades al aire libre, así que va con ellas
+    city_days = {(st.city, d) for st in all_stays for d in usable_days(st, req.constraints)} if on.activities else set()
     return QueryPlan(
         flights=tuple(sorted(flights, key=lambda q: (q.date, q.origins, q.destinations))),
         stays=tuple(sorted(stays, key=lambda st: (st.city, st.check_in, st.check_out))),

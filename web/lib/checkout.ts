@@ -1,8 +1,9 @@
 // Checkout (Pantalla 5): resumen por rubro, reparto por persona y calendario día por día con lo que eligió el
 // usuario. Funciones puras en centavos enteros.
 import type { Totals } from "@/lib/cart";
+import type { Services } from "@/lib/contracts";
 import type { Leg } from "@/lib/flights";
-import type { FlightOffer, ItineraryPayload } from "@/lib/types";
+import type { FlightOffer, ItineraryPayload, TransportQuote } from "@/lib/types";
 
 // Igual que el motor (resto mayor): las primeras personas absorben los centavos sobrantes.
 export function splitPerPax(totalMinor: number, pax: number): number[] {
@@ -13,17 +14,25 @@ export function splitPerPax(totalMinor: number, pax: number): number[] {
 
 export type Rubro = { key: string; label: string; minor: number };
 
-// Vuelos (ida + vuelta) e interconexiones por separado; el resto sale de las categorías del carrito.
-export function rubros(t: Totals, legs: Leg[], flightCost: (leg: Leg) => number): Rubro[] {
+// Vuelos (ida + vuelta) e interconexiones por separado; el resto sale de las categorías del carrito. Un módulo no
+// cotizado no aparece (no es "USD 0": la persona ya lo tiene resuelto).
+export function rubros(t: Totals, legs: Leg[], flightCost: (leg: Leg) => number, on: Services): Rubro[] {
   const inter = legs.filter((l) => l.from !== "HOME" && l.to !== "HOME").reduce((a, l) => a + flightCost(l), 0);
   return [
-    { key: "vuelos", label: "Vuelos (ida y vuelta)", minor: (t.byCategory.vuelos ?? 0) - inter },
+    ...(on.flights ? [{ key: "vuelos", label: "Vuelos (ida y vuelta)", minor: (t.byCategory.vuelos ?? 0) - inter }] : []),
     ...(legs.length > 2 ? [{ key: "interconexiones", label: "Interconexiones", minor: inter }] : []),
-    { key: "alojamiento", label: "Alojamiento", minor: t.byCategory.alojamiento ?? 0 },
-    { key: "actividades", label: "Actividades", minor: t.byCategory.actividades ?? 0 },
+    ...(on.lodging ? [{ key: "alojamiento", label: "Alojamiento", minor: t.byCategory.alojamiento ?? 0 }] : []),
+    ...(on.activities ? [{ key: "actividades", label: "Actividades", minor: t.byCategory.actividades ?? 0 }] : []),
     { key: "transporte", label: "Movilidad", minor: t.byCategory.transporte ?? 0 },
   ];
 }
+
+// Traslados al aeropuerto: solo tienen sentido si cotizamos los vuelos (el motor tampoco los suma sin ellos).
+export const quotedTransport = (quotes: TransportQuote[], on: Services) =>
+  on.flights ? quotes : quotes.filter((q) => q.mode !== "transfers");
+
+// Nombre del alojamiento en el calendario cuando la persona ya tiene el suyo.
+export const OWN_LODGING = "Tu alojamiento";
 
 // Señales del día según los horarios de los vuelos (horas locales sin zona, como las da el motor).
 export type DayTag = { kind: "transfer" | "last_usable" | "drop_off"; text: string };

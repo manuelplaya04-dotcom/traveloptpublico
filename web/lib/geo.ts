@@ -34,8 +34,9 @@ export function roadTrip(r: { distance_m: number; duration_s: number }): Trip {
   return { km: Math.round(km * 10) / 10, minutes, mode: walk ? "a pie" : "en auto", estimated: false };
 }
 
-export const hasCoords = <T extends { lat?: number | null; lon?: number | null }>(p: T): p is T & LatLon =>
-  typeof p.lat === "number" && typeof p.lon === "number";
+// Acepta null/undefined (p. ej. sin alojamiento cotizado): no hay punto que ubicar.
+export const hasCoords = <T extends { lat?: number | null; lon?: number | null }>(p: T | null | undefined): p is T & LatLon =>
+  typeof p?.lat === "number" && typeof p?.lon === "number";
 
 export const fmtTrip = (t: Trip) =>
   `${t.km.toLocaleString("es-AR", { maximumFractionDigits: 1 })} km · ~${t.minutes} min ${t.mode}`;

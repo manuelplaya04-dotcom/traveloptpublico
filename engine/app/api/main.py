@@ -11,6 +11,7 @@ import logging
 import re
 import secrets
 from contextlib import asynccontextmanager
+import time
 from time import perf_counter
 from datetime import date
 from collections.abc import Awaitable, Callable, Coroutine
@@ -24,6 +25,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from starlette.datastructures import Headers
 from starlette.types import ASGIApp, Receive, Scope, Send
 
+from app.domain.legal import LegalRules
 from app.domain.models import CASE_KEY_PATTERN, TripRequest
 from app.explain.gemini import GeminiExplainer
 from app.explain.service import explain as explain_run
@@ -204,6 +206,18 @@ async def _trigger_n8n(request: Request, run_id: str) -> None:
 
 
 CLIENT_KEY = re.compile(r"^[0-9a-f]{32}$")
+LEGAL_RULES_TTL_S = 600
+
+
+async def current_legal_rules(app: FastAPI, repo: Repository) -> LegalRules:
+    """Reglas legales con caché de 10 min. Un fallo cerrado (base inaccesible) no se cachea: el próximo pedido reintenta."""
+    cached = getattr(app.state, "legal_rules", None)
+    if cached is not None and time.monotonic() - cached[1] < LEGAL_RULES_TTL_S:
+        return cached[0]
+    rules = await repo.legal_rules()
+    if rules.complete:
+        app.state.legal_rules = (rules, time.monotonic())
+    return rules
 
 
 async def _create(request: Request, body: CreateRunIn, repo: Repository) -> dict:
@@ -346,7 +360,8 @@ async def extract_kind(run_id: UUID, kind: Kind,
     plan = plan_for(req)
     try:
         providers = build_providers(run.mode, req, get_settings(), request.app.state.http, request.app.state.cache,
-                                    stats, rentals="rentals" not in narrowed_steps(run.summary))
+                                    stats, rentals="rentals" not in narrowed_steps(run.summary),
+                                    legal=await current_legal_rules(request.app, repo))
         if kind in NON_CRITICAL_KINDS:
             offers = await _extract_degradable(str(run_id), kind, extract(providers, kind, plan), repo,
                                                get_settings().noncritical_deadline_s)
@@ -591,7 +606,7 @@ async def run_explanation(run_id: UUID, uid: UUID, request: Request, repo: Repos
                                 s.explain_timeout_s) if s.gemini_api_key else None
     out = await explain_run(str(run.id), effective_request(run.request, run.summary), run.summary or {},
                             lambda: repo.load_offers(run.id), request.app.state.cache,
-                            request.app.state.optimize_slots, explainer)
+                            request.app.state.optimize_slots, explainer, await current_legal_rules(request.app, repo))
     return out.model_dump(mode="json")
 
 

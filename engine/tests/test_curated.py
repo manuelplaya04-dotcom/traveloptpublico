@@ -1,6 +1,7 @@
 """Actividades reales: precios publicados validados (data contract) + lugares de Wikidata como entrada en taquilla."""
 import asyncio
 import json
+import re
 from datetime import date
 from pathlib import Path
 
@@ -13,7 +14,8 @@ from app.services.cache import MemoryCache
 from app.services.http import BREAKERS
 
 PLACES = json.loads((Path(__file__).parent / "contracts" / "wikidata_places_nyc.json").read_text("utf-8"))
-WEB_CITIES = (Path(__file__).parents[2] / "web" / "lib" / "cities.ts").read_text("utf-8")
+# Los imperdibles que muestra la web salen de la base: la migración que siembra el catálogo es la fuente.
+CATALOG_SQL = (Path(__file__).parents[2] / "supabase" / "migrations" / "20261111130000_city_catalog.sql").read_text("utf-8")
 DAY = date(2027, 1, 15)
 
 
@@ -38,9 +40,9 @@ def test_el_catalogo_curado_cumple_su_contrato():
 
 def test_los_imperdibles_de_la_web_tienen_precio_publicado():
     keys = {(a.city, a.key) for a in catalog().activities}
-    for city, must in (("NYC", ["SOL", "TOR", "MOMA"]), ("ORL", ["MK", "EPCOT", "HS", "AK", "EPIC"])):
-        assert "mustDo: [" + ", ".join(f'"{k}"' for k in must) + "]" in WEB_CITIES  # el catálogo de la web no cambió
-        assert all((city, k) in keys for k in must)
+    must_do = re.findall(r"\('([A-Z]{3})', '([A-Za-z0-9_-]+)', \d+\)", CATALOG_SQL)
+    assert {c for c, _ in must_do} >= {"NYC", "ORL"}  # la expresión sigue encontrando las filas sembradas
+    assert [k for k in must_do if k not in keys] == []
 
 
 def _real(handler):

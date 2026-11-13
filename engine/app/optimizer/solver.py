@@ -37,7 +37,7 @@ class ChosenFlight:
 @dataclass(frozen=True)
 class StayPlan:
     stay: Stay
-    lodging: LodgingChoice
+    lodging: LodgingChoice | None  # None: alojamiento no pedido (la persona ya lo tiene)
     activities: ActivityPlan
     transport: TransportQuote | None
     transport_cost_minor: int
@@ -52,6 +52,8 @@ class Itinerary:
     total_minor: int
     within_budget: bool
 
+
+NO_ACTIVITIES = ActivityPlan((), 0, True)  # actividades no pedidas: el bloque no existe en el modelo
 
 Status = Literal["ok", "over_budget", "infeasible"]
 
@@ -89,7 +91,7 @@ def optimize(req: TripRequest, offers: OfferSet, engine: Engine = "cpsat",
     solve_l = solve_lodging if engine == "cpsat" else oracle.solve_lodging_brute
     solve_a = solve_activities if engine == "cpsat" else oracle.solve_activities_brute
     t0 = perf_counter()
-    c, pax = req.constraints, req.pax
+    c, pax, on = req.constraints, req.pax, req.services
     diag = Diagnostics()
     weather = {(w.city, w.date): w for w in offers.weather}
     # Índices por clave de consulta: cada bloque recibe solo sus ofertas (mismo orden relativo que la lista original).
@@ -104,6 +106,8 @@ def optimize(req: TripRequest, offers: OfferSet, engine: Engine = "cpsat",
         activities_by_city[a.city].append(a)
     transport: dict[str, TransportQuote] = {}
     for q in sorted(offers.transport, key=lambda q: q.id):
+        if q.mode == "transfers" and not on.flights:  # traslados al aeropuerto: solo si cotizamos los vuelos
+            continue
         transport.setdefault(q.city, q)
     must_do = {p.code: p.must_do for p in req.cities}
     if "activities" in degraded:
@@ -120,7 +124,7 @@ def optimize(req: TripRequest, offers: OfferSet, engine: Engine = "cpsat",
     for s in skeletons:
         reason = None
         flights: list[ChosenFlight] = []
-        for i, leg in enumerate(s.legs):
+        for i, leg in enumerate(s.legs if on.flights else ()):
             if leg not in flight_memo:
                 found = {
                     pos: f
@@ -137,27 +141,33 @@ def optimize(req: TripRequest, offers: OfferSet, engine: Engine = "cpsat",
             flights.append(ChosenFlight(i, offer, cost))
         plans: list[StayPlan] = []
         for st in s.stays if reason is None else ():
-            if st not in lodging_memo:
-                lodging_memo[st] = solve_l(st, lodging_by_stay.get((st.city, st.check_in, st.check_out), []), c, pax, diag)
-            if lodging_memo[st] is None:
-                reason = f"sin_alojamiento:{st.city}"
-                break
-            if st not in act_memo:
-                act_memo[st] = solve_a(st, must_do[st.city], activities_by_city.get(st.city, []), weather, c, pax, diag)
-            if act_memo[st] is None:
-                reason = f"actividades_infactibles:{st.city}"
-                break
+            lodging: LodgingChoice | None = None
+            if on.lodging:
+                if st not in lodging_memo:
+                    lodging_memo[st] = solve_l(st, lodging_by_stay.get((st.city, st.check_in, st.check_out), []),
+                                               c, pax, diag)
+                lodging = lodging_memo[st]
+                if lodging is None:
+                    reason = f"sin_alojamiento:{st.city}"
+                    break
+            acts = NO_ACTIVITIES
+            if on.activities:
+                if st not in act_memo:
+                    act_memo[st] = solve_a(st, must_do[st.city], activities_by_city.get(st.city, []), weather, c, pax,
+                                           diag)
+                acts = act_memo[st]
+                if acts is None:
+                    reason = f"actividades_infactibles:{st.city}"
+                    break
             quote = transport.get(st.city)
             if quote is None:
                 diag.warnings.add(f"sin_transporte:{st.city}")
-            plans.append(
-                StayPlan(st, lodging_memo[st], act_memo[st], quote, transport_cost(quote, st) if quote else 0)
-            )
+            plans.append(StayPlan(st, lodging, acts, quote, transport_cost(quote, st) if quote else 0))
         if reason:
             diag.infeasible_skeletons[s.id] = reason
             continue
         total = sum(f.cost_minor for f in flights) + sum(
-            p.lodging.cost_minor + p.activities.cost_minor + p.transport_cost_minor for p in plans
+            (p.lodging.cost_minor if p.lodging else 0) + p.activities.cost_minor + p.transport_cost_minor for p in plans
         )
         feasible.append(Itinerary(0, s, flights, plans, total, total <= req.budget_minor))
 

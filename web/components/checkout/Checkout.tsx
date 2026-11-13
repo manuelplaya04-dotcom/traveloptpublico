@@ -8,7 +8,7 @@ import { lodgingSlot } from "@/components/city/LodgingFeed";
 import { flightSlot } from "@/components/flights/FlightHub";
 import Button from "@/components/ui/Button";
 import ExternalIcon from "@/components/ui/ExternalIcon";
-import { groupByStay, rubros, splitPerPax, timeline } from "@/lib/checkout";
+import { groupByStay, OWN_LODGING, quotedTransport, rubros, splitPerPax, timeline } from "@/lib/checkout";
 import { cityByCode } from "@/lib/cities";
 import type { TripRequest } from "@/lib/contracts";
 import type { FlightOption, Leg } from "@/lib/flights";
@@ -33,17 +33,18 @@ export default function Checkout({ best, req, legs, options, transport }: {
   const lodging = (city: string) => best.stays.find((s) => s.city === city)?.lodging_options
     ?.find((o) => o.offer_id === pickId(lodgingSlot(city)));
   const days = timeline(best, flights.flatMap((f) => (f ? [f.offer] : [])),
-    (city) => cart.selected[lodgingSlot(city)]?.label ?? cart.optimal[lodgingSlot(city)]?.label ?? city,
+    (city) => cart.selected[lodgingSlot(city)]?.label ?? cart.optimal[lodgingSlot(city)]?.label ?? (req.services.lodging ? city : OWN_LODGING),
     (city) => cityByCode(city)?.name ?? city);
-  const r = rubros(t, legs, (l) => flights[legs.indexOf(l)]?.costMinor ?? 0);
+  const r = rubros(t, legs, (l) => flights[legs.indexOf(l)]?.costMinor ?? 0, req.services);
   const perPax = splitPerPax(t.totalMinor, req.pax);
   const over = t.totalMinor - budgetMinor;
 
   const links: Link[] = [
     ...flights.flatMap((f) => (f ? [{ label: `Vuelo ${f.offer.origin}→${f.offer.destination} · ${airlineName(f.offer.carrier)}`, href: safeHref(f.offer.deeplink) }] : [])),
-    ...best.stays.map((s) => ({ label: `Alojamiento · ${lodging(s.city)?.name ?? s.lodging.name}`, href: safeHref(lodging(s.city)?.deeplink ?? s.lodging.deeplink) })),
+    ...best.stays.flatMap((s) => (s.lodging ? [{ label: `Alojamiento · ${lodging(s.city)?.name ?? s.lodging.name}`,
+      href: safeHref(lodging(s.city)?.deeplink ?? s.lodging.deeplink) }] : [])),
     ...best.stays.flatMap((s) => s.activities.map((a) => ({ label: `Entradas · ${a.name}`, href: safeHref(a.deeplink) }))),
-    ...transport.filter((q) => best.stays.some((s) => s.city === q.city)).map((q) => ({ label: `${TRANSPORT_MODE[q.mode] ?? q.mode} · ${q.city}`, href: safeHref(q.deeplink) })),
+    ...quotedTransport(transport, req.services).filter((q) => best.stays.some((s) => s.city === q.city)).map((q) => ({ label: `${TRANSPORT_MODE[q.mode] ?? q.mode} · ${q.city}`, href: safeHref(q.deeplink) })),
   ];
 
   return (

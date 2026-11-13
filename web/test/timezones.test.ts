@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { dayTags, groupByStay, timeline } from "../lib/checkout";
-import { CITIES } from "../lib/cities";
+import { activeCities } from "../lib/cities";
 import { CITY_FACTS, factsFor } from "../lib/cityFacts";
 import { dayOffset, fmtDayOffset, fmtDuration } from "../lib/format";
 import { buildIcs } from "../lib/ics";
@@ -92,7 +92,7 @@ describe("interfaz sin emojis", () => {
 
 describe("datos curiosos de la pantalla de espera", () => {
   it("todas las ciudades del catálogo tienen, y sin datos no se muestra nada", () => {
-    for (const c of CITIES) expect(CITY_FACTS[c.code]?.length, c.code).toBeGreaterThan(0);
+    for (const c of activeCities()) expect(CITY_FACTS[c.code]?.length, c.code).toBeGreaterThan(0);
     expect(factsFor(["XXX"])).toEqual([]);
   });
 });

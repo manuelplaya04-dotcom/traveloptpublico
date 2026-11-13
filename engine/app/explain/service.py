@@ -16,14 +16,16 @@ from typing import Awaitable, Callable, Literal
 from pydantic import BaseModel
 
 from app.domain.models import OfferSet, TripRequest
-from app.explain.facts import FunnelFacts, build_facts, rejection_counts, relaxation_fact, relaxed_requests
+from app.domain.legal import SEED_RULES, LegalRules
+from app.explain.facts import (FunnelFacts, build_facts, legal_facts, rejection_counts, relaxation_fact,
+                               relaxed_requests)
 from app.explain.gemini import GeminiExplainer, ExplanationUnavailable
 from app.explain.integrity import fallback_text, violations
 from app.optimizer.solver import optimize
 from app.services.alerts import report
 from app.services.cache import Cache, cache_key, cached_entry
 
-FACTS_VERSION = "explain-facts-v1"
+FACTS_VERSION = "explain-facts-v3"
 CACHE_TTL_S = 30 * 24 * 3600  # lo mismo que vive la búsqueda (retención de 30 días)
 
 
@@ -33,7 +35,8 @@ class Explanation(BaseModel):
     facts: FunnelFacts
 
 
-async def compute_facts(req: TripRequest, summary: dict, offers: OfferSet, slots: asyncio.Semaphore) -> FunnelFacts:
+async def compute_facts(req: TripRequest, summary: dict, offers: OfferSet, slots: asyncio.Semaphore,
+                        legal: LegalRules = SEED_RULES) -> FunnelFacts:
     """Corre el optimizador una vez por restricción aflojada, sobre las mismas ofertas (ninguna API externa)."""
     counts = rejection_counts(summary.get("diagnostics"))
     relaxations = []
@@ -42,14 +45,15 @@ async def compute_facts(req: TripRequest, summary: dict, offers: OfferSet, slots
             res = await asyncio.to_thread(optimize, relaxed, offers, "cpsat")
         best = res.itineraries[0].total_minor if res.itineraries else None
         relaxations.append(relaxation_fact(lever, current, proposed, best))
-    return build_facts(req, summary, relaxations)
+    return build_facts(req, summary, relaxations, legal_facts(req, counts, legal))
 
 
 async def explain(run_id: str, req: TripRequest, summary: dict, load_offers: Callable[[], Awaitable[OfferSet]],
-                  cache: Cache, slots: asyncio.Semaphore, explainer: GeminiExplainer | None) -> Explanation:
+                  cache: Cache, slots: asyncio.Semaphore, explainer: GeminiExplainer | None,
+                  legal: LegalRules = SEED_RULES) -> Explanation:
     async def facts_fetch() -> dict:
         offers = await load_offers()
-        return (await compute_facts(req, summary, offers, slots)).model_dump(mode="json")
+        return (await compute_facts(req, summary, offers, slots, legal)).model_dump(mode="json")
 
     entry, _ = await cached_entry(cache, cache_key(FACTS_VERSION, "run", {"run": run_id}), FACTS_VERSION, CACHE_TTL_S,
                                   facts_fetch)

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import SiteFooter from "@/components/landing/SiteFooter";
 import CalendarButton from "@/components/planner/CalendarButton";
+import { ensureCatalog } from "@/lib/catalog";
 import { cityByCode } from "@/lib/cities";
 import { engineFetch } from "@/lib/engine";
 import { airlineName, fmtDay, fmtTime } from "@/lib/format";
@@ -33,6 +34,7 @@ export default async function SharedPage({ params }: { params: Promise<{ token: 
   const data = await load(token);
   const p = data?.itineraries?.find((it) => it.rank === 1) ?? data?.itineraries?.[0];
   if (!data || !p?.stays?.length) notFound();
+  await ensureCatalog();
   const name = (c: string) => cityByCode(c)?.name ?? c;
   return (
     <>
@@ -65,7 +67,7 @@ export default async function SharedPage({ params }: { params: Promise<{ token: 
             {p.stays.map((s) => (
               <li key={`${s.city}-${s.check_in}`} className="rounded-2xl bg-white p-4 shadow-sm">
                 <p className="font-semibold text-ink">{name(s.city)} · {s.nights} noches</p>
-                <p className="text-sm text-muted">{s.lodging.name} · {fmtDay(s.check_in)} → {fmtDay(s.check_out)}</p>
+                <p className="text-sm text-muted">{s.lodging?.name ?? "Alojamiento propio"} · {fmtDay(s.check_in)} → {fmtDay(s.check_out)}</p>
                 {s.activities.length > 0 && (
                   <p className="mt-1 text-sm text-muted">Actividades: {s.activities.map((a) => a.name).join(", ")}</p>
                 )}

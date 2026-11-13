@@ -4,10 +4,13 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import StepDates from "@/components/onboarding/StepDates";
 import StepDestinations from "@/components/onboarding/StepDestinations";
+import ServiceToggles from "@/components/onboarding/ServiceToggles";
 import StepPreferences from "@/components/onboarding/StepPreferences";
+import GuidedTour from "@/components/tour/GuidedTour";
+import { ONBOARDING_TOUR } from "@/lib/tour";
 import Button from "@/components/ui/Button";
 import Stepper from "@/components/ui/Stepper";
-import type { Constraints } from "@/lib/contracts";
+import type { Constraints, Services } from "@/lib/contracts";
 import { buildTripRequest, initialState, toggleCity, validate, withCities, type CityStop, type OnboardingState, type StepErrors } from "@/lib/onboarding";
 import { COLD_START_AFTER_MS, COLD_START_NOTICE } from "@/lib/format";
 import { createRun, runErrorMessage } from "@/lib/runs";
@@ -74,6 +77,7 @@ export default function OnboardingModal({ session, open, onClose }: { session: n
   const setCities = useCallback((cities: CityStop[]) => setS((prev) => ({ ...prev, ...withCities(prev, cities) })), []);
   const toggle = useCallback((code: string) => setS((prev) => ({ ...prev, ...toggleCity(prev, code) })), []);
   const setTotal = useCallback((totalNights: number) => set({ totalNights }), [set]);
+  const setServices = useCallback((services: Services) => set({ services }), [set]);
 
   function next() {
     const errs = validate(s)[STEP_KEYS[step]];
@@ -142,16 +146,19 @@ export default function OnboardingModal({ session, open, onClose }: { session: n
               ✕
             </button>
           </div>
-          <Stepper steps={[...STEPS]} current={step} />
+          <div data-tour="stepper"><Stepper steps={[...STEPS]} current={step} /></div>
         </header>
 
         <div className="flex-1 overflow-y-auto px-6 py-8 sm:px-8">
           {step === 0 && (
-            <StepDestinations stops={s.cities} totalNights={s.totalNights}
-              onChange={setCities} onToggle={toggle} onTotalChange={setTotal} />
+            <div className="space-y-8">
+              <ServiceToggles value={s.services} onChange={setServices} />
+              <StepDestinations stops={s.cities} totalNights={s.totalNights}
+                onChange={setCities} onToggle={toggle} onTotalChange={setTotal} />
+            </div>
           )}
           {step === 1 && <StepDates s={s} set={set} />}
-          {step === 2 && <StepPreferences c={s.constraints} set={setC} />}
+          {step === 2 && <StepPreferences c={s.constraints} services={s.services} set={setC} />}
 
           {busy && slow && (
             <p role="status" data-testid="cold-start-notice" className="mt-6 rounded-2xl bg-amber-50 p-4 text-sm text-amber-900">
@@ -178,6 +185,7 @@ export default function OnboardingModal({ session, open, onClose }: { session: n
             <Button size="lg" onClick={next}>Siguiente →</Button>
           )}
         </footer>
+        {open && step === 0 && <GuidedTour tour={ONBOARDING_TOUR} />}
       </div>
     </dialog>
   );

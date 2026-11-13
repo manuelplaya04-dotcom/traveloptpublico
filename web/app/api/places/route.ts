@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { ensureCatalog } from "@/lib/catalog";
 import { cityByCode } from "@/lib/cities";
 import { engineFetch } from "@/lib/engine";
 import { createClient } from "@/lib/supabase/server";
@@ -9,6 +10,7 @@ export async function GET(req: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ code: "no_session" }, { status: 401 });
+  await ensureCatalog();
   const city = cityByCode(new URL(req.url).searchParams.get("city") ?? "");
   if (!city) return NextResponse.json({ code: "invalid_request" }, { status: 422 });
   let r: Response;

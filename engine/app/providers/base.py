@@ -42,8 +42,16 @@ class Provider(Protocol):
     async def transport(self, cities: list[str]) -> list[TransportQuote]: ...
 
 
+def planned(plan: QueryPlan, kind: str) -> bool:
+    """¿El plan pide algo de esta categoría? Un módulo apagado deja su parte del plan vacía."""
+    return bool(getattr(plan, _PLAN_FIELD[kind]))
+
+
 async def fetch(provider: object, kind: str, plan: QueryPlan) -> list:
-    """Pide a `provider` las ofertas de una categoría usando la parte del plan que le corresponde."""
+    """Pide a `provider` las ofertas de una categoría usando la parte del plan que le corresponde. Sin consultas
+    (módulo no pedido) no se llama al proveedor: cero búsquedas pagas y cero dependencia de que esté disponible."""
+    if not planned(plan, kind):
+        return []
     return await getattr(provider, kind)(list(getattr(plan, _PLAN_FIELD[kind])))
 
 

@@ -12,12 +12,22 @@ from __future__ import annotations
 
 import re
 
-from app.explain.facts import FunnelFacts
+from app.explain.facts import MODULES, FunnelFacts
 
 MAX_CHARS = 900
 _NUMBER = re.compile(r"\d+(?:[.,:]\d+)*")
 _CODE = re.compile(r"\b[A-Z]{3}\b")
 _FORBIDDEN = re.compile(r"https?://|www\.|@|^\s*(?:#|[-*•]\s|\d+\.\s)", re.MULTILINE)
+# Hablar de alternativas solo vale si el optimizador calculó alguna (contrafactuales); si no, es una afirmación inventada.
+_ALTERNATIVES = re.compile(r"alternativ|otras? opci[oó]n|otras? fechas?|prob[aá]\s+(?:con|otr)|te (?:recomiendo|sugiero)|"
+                           r"podr[ií]as|cambi[aá]|flexibiliz", re.IGNORECASE)
+_FILLER = re.compile(r"\bch[eé]\b|la verdad|lamentablemente|lo sentimos|perd[oó]n", re.IGNORECASE)
+# Un módulo no cotizado (la persona ya lo tiene) no puede aparecer: ni exigirlo ni culparlo de nada.
+_MODULE_WORDS: dict[str, re.Pattern[str]] = {
+    "vuelos": re.compile(r"vuel[oa]|pasaje|aerol[ií]nea|aeropuerto|\bescalas?\b|\btramos?\b", re.IGNORECASE),
+    "alojamiento": re.compile(r"aloj|hotel|alquiler|hosped|\bba[ñn]os?\b|dormitorio|cocina", re.IGNORECASE),
+    "actividades": re.compile(r"actividad|imperdible|excursi|lluvia", re.IGNORECASE),
+}
 
 
 def _numbers(text: str) -> set[str]:
@@ -46,6 +56,13 @@ def violations(text: str, facts: FunnelFacts) -> list[str]:
     for code in sorted(set(_CODE.findall(text))):
         if code not in source:
             problems.append(f"código ausente en los hechos: {code}")
+    if not facts.relaxations and _ALTERNATIVES.search(text):
+        problems.append("habla de alternativas sin que se haya calculado ninguna")
+    if _FILLER.search(text):
+        problems.append("muletilla o disculpa")
+    for module, words in _MODULE_WORDS.items():
+        if module not in facts.quoted and words.search(text):
+            problems.append(f"menciona un módulo no cotizado: {module}")
     return problems
 
 
@@ -56,6 +73,14 @@ def _join(items: list[str]) -> str:
 def fallback_text(facts: FunnelFacts) -> str:
     """Explicación determinística, sin LLM: misma información, redacción por plantilla."""
     parts = ["No encontramos un viaje que cumpla todas tus condiciones."]
+    if len(facts.quoted) < len(MODULES):
+        parts.append(f"Cotizamos solo {_join(list(facts.quoted))}, como pediste.")
+    if facts.impossible_reasons:
+        of = f" de {facts.date_options}" if facts.date_options else ""
+        reasons = [f"{r.what} ({r.count}{of} combinaciones de fechas)" for r in facts.impossible_reasons[:3]]
+        parts.append(f"Motivo de fondo: {_join(reasons)}.")
+    for rule in facts.legal_rules:
+        parts.append(f"En {rule.city} descartamos alquileres temporarios por la norma local: {rule.rule}.")
     if facts.rejections:
         top = [f"{r.count} {r.what}" for r in facts.rejections[:3]]
         parts.append(f"Lo que más opciones descartó: {_join(top)}.")
@@ -65,5 +90,5 @@ def fallback_text(facts: FunnelFacts) -> str:
                      f"hay itinerario desde {feasible.best_total}.")
     elif facts.relaxations:
         tried = _join([r.setting for r in facts.relaxations])
-        parts.append(f"Ni flexibilizando {tried} aparece un viaje posible: probá con otras fechas o más noches.")
+        parts.append(f"Aun flexibilizando {tried}, el optimizador no encuentra un viaje posible.")
     return " ".join(parts)

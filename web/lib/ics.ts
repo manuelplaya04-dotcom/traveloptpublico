@@ -42,10 +42,11 @@ export function buildIcs(p: ItineraryPayload, cityName: (code: string) => string
       `DESCRIPTION:${esc(`${f.stops === 0 ? "Directo" : `${f.stops} escala(s)`}. Sale ${f.depart_at.slice(11, 16)} y llega ${f.arrive_at.slice(11, 16)}, horarios locales de cada aeropuerto.`)}`,
       `LOCATION:${esc(f.origin)}`,
     ]),
-    ...p.stays.map((s) => [
+    // sin alojamiento cotizado no hay reserva que agendar (la persona ya tiene la suya)
+    ...p.stays.filter((s) => s.lodging).map((s) => [
       `UID:${uid(`estadia-${s.city}-${s.check_in}`)}`, `DTSTAMP:${dtstamp}`,
       `DTSTART;VALUE=DATE:${day(s.check_in)}`, `DTEND;VALUE=DATE:${day(s.check_out)}`,
-      `SUMMARY:${esc(`Alojamiento: ${cityName(s.city)} · ${s.lodging.name}`)}`,
+      `SUMMARY:${esc(`Alojamiento: ${cityName(s.city)} · ${s.lodging?.name}`)}`,
       `DESCRIPTION:${esc(`${s.nights} noches. Check-in ${s.check_in}, check-out ${s.check_out}.`)}`,
     ]),
   ];

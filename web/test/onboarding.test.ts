@@ -10,7 +10,7 @@ const constraints = (patch: Partial<OnboardingState["constraints"]>) =>
 
 describe("onboarding", () => {
   it("CP-4b.1: los valores por defecto piden el caso golden con el reparto de su óptimo (8 + 4 noches)", () => {
-    const fixed = { ...demo, case_key: null, cities: demo.cities.map((c) => {
+    const fixed = { ...demo, case_key: null, services: { flights: true, lodging: true, activities: true }, cities: demo.cities.map((c) => {
       const n = c.code === "ORL" ? 8 : 4;
       return { ...c, name: c.code === "ORL" ? "Orlando" : "Nueva York", min_nights: n, max_nights: n };
     }) };
@@ -128,8 +128,8 @@ describe("buscador y reparto", () => {
 
 describe("Fase 1: catálogo y calibración", () => {
   it("solo las 7 ciudades de la costa este (V1)", async () => {
-    const { CITIES } = await import("../lib/cities");
-    expect(CITIES.map((c) => c.name).sort()).toEqual(
+    const { activeCities } = await import("../lib/cities");
+    expect(activeCities().map((c) => c.name).sort()).toEqual(
       ["Boston", "Brooklyn", "Filadelfia", "Miami", "Nueva York", "Orlando", "Washington D.C."]);
   });
   it("los imperdibles nunca superan lo que entra en las noches asignadas", () => {

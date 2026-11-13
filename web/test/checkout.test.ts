@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { totals, type Cart } from "../lib/cart";
 import { dayTags, groupByStay, hourOf, rubros, splitPerPax, timeline } from "../lib/checkout";
+import { ALL_SERVICES } from "../lib/contracts";
 import type { Leg } from "../lib/flights";
 import type { FlightOffer, ItineraryPayload } from "../lib/types";
 
@@ -18,7 +19,7 @@ describe("checkout", () => {
       selected: {},
     };
     const legs = [{ index: 0, from: "HOME", to: "ORL" }, { index: 1, from: "ORL", to: "NYC" }, { index: 2, from: "NYC", to: "HOME" }] as Leg[];
-    const r = rubros(totals(cart), legs, (l) => cart.optimal[`flight:${l.index}`].costMinor);
+    const r = rubros(totals(cart), legs, (l) => cart.optimal[`flight:${l.index}`].costMinor, ALL_SERVICES);
     expect(Object.fromEntries(r.map((x) => [x.key, x.minor]))).toEqual({
       vuelos: 960000, interconexiones: 88500, alojamiento: 355662, actividades: 508000, transporte: 96200,
     });

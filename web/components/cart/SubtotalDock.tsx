@@ -17,6 +17,7 @@ export default function SubtotalDock() {
   return (
     <aside
       aria-label="Subtotal del viaje"
+      data-tour="subtotal"
       // Capa superior: vidrio oscuro (translúcido + desenfoque) y sombra amplia para separarlo del contenido.
       className="fixed inset-x-3 bottom-3 z-40 rounded-3xl bg-ink/90 p-4 text-white shadow-xl ring-1 ring-white/10 backdrop-blur-md lg:sticky lg:inset-auto lg:top-6 lg:p-6"
     >

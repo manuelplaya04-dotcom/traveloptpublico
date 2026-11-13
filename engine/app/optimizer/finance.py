@@ -11,7 +11,7 @@ from typing import Literal
 from app.domain.models import TripRequest
 from app.domain.money import apply_bps, split_evenly
 from app.optimizer.filters import flight_extra_bags, transport_base
-from app.optimizer.solver import Itinerary
+from app.optimizer.solver import Itinerary, StayPlan
 
 Category = Literal["vuelos", "alojamiento", "actividades", "transporte"]
 
@@ -48,6 +48,26 @@ def _line(cat, desc, qty, unit, ref, link, tax_bps: int = 0) -> Line:
     return Line(cat, desc, qty, unit, sub, tax, sub + tax, ref, link)
 
 
+def _lodging_lines(sp: StayPlan) -> list[Line]:
+    """Líneas del alojamiento de una estadía; ninguna si no se pidió cotizarlo."""
+    if sp.lodging is None:
+        return []
+    o, nights = sp.lodging.offer, sp.stay.nights
+
+    def lodging_line(desc: str, qty: int, unit: int) -> Line:
+        return _line("alojamiento", desc, qty, unit, o.id, o.deeplink, o.tax_bps)
+
+    lines: list[Line] = []
+    for j, qty in sp.lodging.units:
+        u = o.units[j]
+        lines.append(lodging_line(f"{o.name} · {u.unit_type} · {nights} noches", qty, u.base_total_minor))
+        if u.fees_total_minor:
+            lines.append(lodging_line(f"Resort/facility fee · {u.unit_type}", qty, u.fees_total_minor))
+    if o.stay_fee_minor:
+        lines.append(lodging_line(f"Limpieza / cargo por reserva · {o.name}", 1, o.stay_fee_minor))
+    return lines
+
+
 def build_breakdown(it: Itinerary, req: TripRequest) -> Breakdown:
     c, pax = req.constraints, req.pax
     lines: list[Line] = []
@@ -60,18 +80,7 @@ def build_breakdown(it: Itinerary, req: TripRequest) -> Breakdown:
             lines.append(_line("vuelos", f"Valijas {route}", extra, f.bag_fee_minor, f.id, f.deeplink))
 
     for sp in it.stays:
-        o, nights = sp.lodging.offer, sp.stay.nights
-
-        def lodging_line(desc: str, qty: int, unit: int, o=o) -> Line:
-            return _line("alojamiento", desc, qty, unit, o.id, o.deeplink, o.tax_bps)
-
-        for j, qty in sp.lodging.units:
-            u = o.units[j]
-            lines.append(lodging_line(f"{o.name} · {u.unit_type} · {nights} noches", qty, u.base_total_minor))
-            if u.fees_total_minor:
-                lines.append(lodging_line(f"Resort/facility fee · {u.unit_type}", qty, u.fees_total_minor))
-        if o.stay_fee_minor:
-            lines.append(lodging_line(f"Limpieza / cargo por reserva · {o.name}", 1, o.stay_fee_minor))
+        lines.extend(_lodging_lines(sp))
         for a in sp.activities.items:
             lines.append(_line("actividades", f"{a.name} · {a.date:%d/%m}", pax, a.price_per_pax_minor, a.id, a.deeplink))
         if sp.transport:

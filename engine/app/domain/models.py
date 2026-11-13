@@ -10,7 +10,7 @@ from datetime import date, datetime
 from typing import Annotated, Literal
 from urllib.parse import urlparse
 
-from pydantic import AfterValidator, BaseModel, Field, StringConstraints, model_validator
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, StrictBool, StringConstraints, model_validator
 
 IATA = Annotated[str, StringConstraints(pattern=r"^[A-Z]{3}$")]
 CASE_KEY_PATTERN = r"^[a-z0-9_]{1,64}$"
@@ -85,9 +85,30 @@ class CityPlan(BaseModel):
         return self
 
 
+NO_SERVICE_SELECTED = "Debes seleccionar al menos un servicio"
+
+
+class Services(BaseModel):
+    """Módulos que la persona quiere cotizar. Uno apagado = ya lo resolvió por su cuenta: no se busca, no se optimiza
+    ni se suma al total. Booleanos estrictos (un "false" en texto no pasa) y sin campos de más."""
+    model_config = ConfigDict(extra="forbid")
+
+    flights: StrictBool = True
+    lodging: StrictBool = True
+    activities: StrictBool = True
+
+    @model_validator(mode="after")
+    def _at_least_one(self) -> "Services":
+        if not (self.flights or self.lodging or self.activities):
+            raise ValueError(NO_SERVICE_SELECTED)
+        return self
+
+
 class TripRequest(BaseModel):
     case_key: CaseKey | None = None
-    origin_airports: list[IATA] = Field(min_length=1, max_length=5)
+    # aeropuertos de salida: obligatorios solo si se cotizan vuelos
+    origin_airports: list[IATA] = Field(default_factory=list, max_length=5)
+    services: Services = Services()
     cities: list[CityPlan] = Field(min_length=1, max_length=4)
     fixed_order: bool = True
     first_checkin_from: date
@@ -102,6 +123,8 @@ class TripRequest(BaseModel):
 
     @model_validator(mode="after")
     def _window(self) -> "TripRequest":
+        if self.services.flights and not self.origin_airports:
+            raise ValueError("origin_airports: obligatorio para cotizar vuelos")
         if self.first_checkin_to < self.first_checkin_from:
             raise ValueError("first_checkin_to < first_checkin_from")
         if self.total_nights_max < self.total_nights_min:

@@ -2,7 +2,9 @@
 
 import { Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
+import GuidedTour from "@/components/tour/GuidedTour";
 import { parseExplanation, type Explanation } from "@/lib/explanation";
+import { INFEASIBLE_TOUR } from "@/lib/tour";
 
 const TIMEOUT_MS = 45_000; // contrafactuales del optimizador + posible arranque en frío del motor
 
@@ -29,7 +31,8 @@ export default function FunnelExplanation({ runId }: { runId: string }) {
     return <p className="mt-2 animate-pulse text-sm font-normal text-muted" role="status">Analizando por qué no hubo resultados…</p>;
   }
   return (
-    <div className="mt-2 rounded-xl bg-white/70 p-3 font-normal" data-testid="funnel-explanation">
+    <div className="mt-2 rounded-xl bg-white/70 p-3 font-normal" data-testid="funnel-explanation" data-tour="explanation">
+      <GuidedTour tour={INFEASIBLE_TOUR} />
       <p className="text-sm text-ink">{state.value.text}</p>
       <p className="mt-1 flex items-center gap-1 text-xs text-muted" data-testid="funnel-explanation-source">
         {state.value.source === "ai" ? (

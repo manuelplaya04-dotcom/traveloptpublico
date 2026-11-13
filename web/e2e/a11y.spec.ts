@@ -1,10 +1,12 @@
 // Accesibilidad automática (axe-core, WCAG 2.1 A/AA): sin violaciones serias ni críticas en las pantallas clave.
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
+import { skipTours } from "./tour";
 
 // Consola limpia: cualquier error no capturado del navegador (p. ej. "_leaflet_pos") hace fallar el test.
 const pageErrors = new Map<object, Error[]>();
-test.beforeEach(({ page }) => {
+test.beforeEach(async ({ page }) => {
+  await skipTours(page);
   const errors: Error[] = [];
   pageErrors.set(page, errors);
   page.on("pageerror", (e) => errors.push(e));

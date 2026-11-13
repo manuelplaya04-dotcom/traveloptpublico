@@ -10,6 +10,7 @@ import FlightHub, { flightSlot } from "@/components/flights/FlightHub";
 import CalendarButton from "@/components/planner/CalendarButton";
 import ShareButton from "@/components/planner/ShareButton";
 import TripOverview from "@/components/planner/TripOverview";
+import GuidedTour from "@/components/tour/GuidedTour";
 import Button from "@/components/ui/Button";
 import RetryAlert from "@/components/ui/RetryAlert";
 import type { Pick } from "@/lib/cart";
@@ -18,6 +19,7 @@ import { onMapFocus } from "@/lib/mapFocus";
 import { usePrintMode } from "@/hooks/usePrintMode";
 import { useRunData, type RunData } from "@/hooks/useRunData";
 import { legOptions, legsFor } from "@/lib/flights";
+import { RESULTS_TOUR } from "@/lib/tour";
 import { airlineName, isDemoProvider } from "@/lib/format";
 import type { ItineraryPayload, ItineraryRow } from "@/lib/types";
 
@@ -64,16 +66,18 @@ function Steps({ runId, rank, best, data, children }: {
     return () => cancelIdleCallback(id);
   }, []);
   // Derivados de la corrida: se calculan una vez por combinación de fechas, no en cada cambio de paso.
-  const legs = useMemo(() => legsFor(data.req, best), [data.req, best]);
+  const on = data.req.services;
+  // Sin vuelos cotizados no hay tramos que elegir: el viaje arranca en el primer destino.
+  const legs = useMemo(() => (on.flights ? legsFor(data.req, best) : []), [on.flights, data.req, best]);
   const options = useMemo(() => legs.map((l) => legOptions(l, data.flights, data.req)), [legs, data.flights, data.req]);
   const optimal: Record<string, Pick> = useMemo(() => ({
     ...Object.fromEntries(best.flights.map((f) => [flightSlot(f.leg), {
       id: f.offer.id, category: "vuelos", costMinor: f.cost_minor,
       label: `${airlineName(f.offer.carrier)} ${f.offer.origin}→${f.offer.destination}`,
     } satisfies Pick])),
-    ...Object.fromEntries(best.stays.map((st) => [lodgingSlot(st.city), {
+    ...Object.fromEntries(best.stays.flatMap((st) => (st.lodging ? [[lodgingSlot(st.city), {
       id: st.lodging.offer_id, category: "alojamiento", costMinor: st.lodging.cost_minor, label: st.lodging.name,
-    } satisfies Pick])),
+    } satisfies Pick]] : []))),
   }), [best]);
   // Únicas elecciones aceptadas (también al restaurar desde el navegador): opciones elegibles con su costo real.
   const allowed: Allowed = useMemo(() => ({
@@ -84,8 +88,9 @@ function Steps({ runId, rank, best, data, children }: {
       .filter((o) => !o.rejection && o.cost_minor !== null)
       .map((o) => [o.offer_id, { id: o.offer_id, category: "alojamiento", costMinor: o.cost_minor!, label: o.name } satisfies Pick]))])),
   }), [legs, options, best]);
+  const first = on.flights ? 1 : 0; // índice del paso de la primera ciudad
   const steps = [
-    { id: "vuelos", label: "Vuelos" },
+    ...(on.flights ? [{ id: "vuelos", label: "Vuelos" }] : []),
     ...best.stays.map((st) => ({ id: st.city, label: cityByCode(st.city)?.name ?? st.city })),
     { id: "viaje", label: "Tu viaje" },
   ];
@@ -99,10 +104,10 @@ function Steps({ runId, rank, best, data, children }: {
   useEffect(() => { stepRef.current = step; }, [step]);
   const cities = useMemo(() => best.stays.map((st) => st.city), [best]);
   useEffect(() => onMapFocus(null, (f) => {
-    const i = cities.indexOf(f.city) + 1;
-    if (i > 0 && i !== stepRef.current) setStep(i);
-  }), [cities]);
-  const stay = best.stays[step - 1];
+    const i = cities.indexOf(f.city) + first;
+    if (i >= first && i !== stepRef.current) setStep(i);
+  }), [cities, first]);
+  const stay = best.stays[step - first];
 
   return (
     <CartProvider base={best.breakdown.by_category} optimal={optimal} allowed={allowed} budgetMinor={data.req.budget_minor}
@@ -110,7 +115,7 @@ function Steps({ runId, rank, best, data, children }: {
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start lg:gap-12">
         <div ref={top} className="scroll-mt-6 space-y-10">
           <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
-          <nav aria-label="Pasos del viaje" className="flex gap-2 overflow-x-auto rounded-full bg-surface p-1.5 ring-1 ring-line sm:inline-flex">
+          <nav aria-label="Pasos del viaje" data-tour="trip-steps" className="flex gap-2 overflow-x-auto rounded-full bg-surface p-1.5 ring-1 ring-line sm:inline-flex">
             {steps.map((s, i) => (
               <button key={s.id} type="button" onClick={() => go(i)} aria-current={i === step ? "step" : undefined}
                 data-testid={`step-${s.id}`}
@@ -124,7 +129,7 @@ function Steps({ runId, rank, best, data, children }: {
               </button>
             ))}
           </nav>
-          <div className="flex flex-wrap items-start gap-2">
+          <div data-tour="trip-actions" className="flex flex-wrap items-start gap-2">
             <CalendarButton payload={best} />
             <ShareButton runId={runId} />
             <Button variant="secondary" onClick={print} data-testid="print"><Printer aria-hidden className="mr-1.5 inline size-4 align-text-bottom" />Imprimir / PDF</Button>
@@ -133,9 +138,9 @@ function Steps({ runId, rank, best, data, children }: {
 
           {/* En papel solo va el itinerario completo (checkout); los pasos interactivos se ocultan. */}
           <div className="space-y-10 print:hidden">
-          {step === 0 && <FlightHub req={data.req} legs={legs} options={options} runId={runId} />}
+          {on.flights && step === 0 && <FlightHub req={data.req} legs={legs} options={options} runId={runId} />}
           {stay && (
-            <CityDashboard key={stay.city} index={step - 1} stay={stay} req={data.req} weather={data.weather}
+            <CityDashboard key={stay.city} index={step - first} stay={stay} req={data.req} weather={data.weather}
               transport={data.transport} activities={data.activities} />
           )}
           </div>
@@ -152,6 +157,7 @@ function Steps({ runId, rank, best, data, children }: {
           </div>
         </div>
         <div className="print:hidden"><SubtotalDock /></div>
+        {!printing && <GuidedTour tour={RESULTS_TOUR} />}
       </div>
     </CartProvider>
   );

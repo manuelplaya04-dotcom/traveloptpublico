@@ -1,11 +1,12 @@
 import { ChefHat, CloudRain, Sun } from "lucide-react";
 import InfoTooltip from "@/components/ui/InfoTooltip";
 import NumberField from "@/components/ui/NumberField";
-import type { Constraints } from "@/lib/contracts";
+import type { Constraints, Services } from "@/lib/contracts";
 
 // Restricciones duras: el motor descarta lo que no cumple y lo explica en el embudo.
-export default function StepPreferences({ c, set }: {
-  c: Constraints; set: <K extends keyof Constraints>(k: K, v: Constraints[K]) => void;
+// Solo las condiciones de los módulos que se cotizan: sin vuelos no hay escalas que limitar.
+export default function StepPreferences({ c, services, set }: {
+  c: Constraints; services: Services; set: <K extends keyof Constraints>(k: K, v: Constraints[K]) => void;
 }) {
   return (
     <div className="space-y-8">
@@ -15,26 +16,36 @@ export default function StepPreferences({ c, set }: {
           Son condiciones obligatorias: descartamos toda opción que no las cumpla y te decimos cuántas quedaron afuera.
         </p>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <NumberField label="Baños mínimos" value={c.min_bathrooms} min={0} max={10} onChange={(v) => set("min_bathrooms", v)}
-          info={HELP.bathrooms} />
-        <NumberField label="Escalas máximas" value={c.max_stops} min={0} max={3} onChange={(v) => set("max_stops", v)}
-          info={HELP.stops} />
-        <NumberField label="Valijas despachadas por persona" value={c.checked_bags_per_pax} min={0} max={3}
-          onChange={(v) => set("checked_bags_per_pax", v)} info={HELP.bags} />
-      </div>
-      <div className="flex items-start gap-1 rounded-2xl bg-surface p-5 ring-1 ring-line">
-        <label className="flex min-w-0 flex-1 cursor-pointer items-start gap-3">
-          <input type="checkbox" checked={c.require_kitchen ?? false} onChange={(e) => set("require_kitchen", e.target.checked)}
-            data-testid="require-kitchen" className="mt-0.5 size-5 shrink-0 cursor-pointer accent-[var(--color-accent)]" />
-          <span className="min-w-0">
-            <span className="block text-sm font-medium text-ink"><ChefHat aria-hidden className="mr-1 inline size-4 align-text-bottom text-accent" />Exigir alojamiento con cocina</span>
-            <span className="mt-0.5 block text-xs text-muted">Cocina o kitchenette, según lo que informa cada alojamiento.</span>
-          </span>
-        </label>
-        <InfoTooltip>{HELP.kitchen}</InfoTooltip>
-      </div>
-      <RainSlider value={c.max_heavy_rain_prob} onChange={(v) => set("max_heavy_rain_prob", v)} />
+      {(services.lodging || services.flights) && (
+        <div className="grid gap-4 sm:grid-cols-2">
+          {services.lodging && (
+            <NumberField label="Baños mínimos" value={c.min_bathrooms} min={0} max={10} onChange={(v) => set("min_bathrooms", v)}
+              info={HELP.bathrooms} />
+          )}
+          {services.flights && (
+            <>
+              <NumberField label="Escalas máximas" value={c.max_stops} min={0} max={3} onChange={(v) => set("max_stops", v)}
+                info={HELP.stops} />
+              <NumberField label="Valijas despachadas por persona" value={c.checked_bags_per_pax} min={0} max={3}
+                onChange={(v) => set("checked_bags_per_pax", v)} info={HELP.bags} />
+            </>
+          )}
+        </div>
+      )}
+      {services.lodging && (
+        <div className="flex items-start gap-1 rounded-2xl bg-surface p-5 ring-1 ring-line">
+          <label className="flex min-w-0 flex-1 cursor-pointer items-start gap-3">
+            <input type="checkbox" checked={c.require_kitchen ?? false} onChange={(e) => set("require_kitchen", e.target.checked)}
+              data-testid="require-kitchen" className="mt-0.5 size-5 shrink-0 cursor-pointer accent-[var(--color-accent)]" />
+            <span className="min-w-0">
+              <span className="block text-sm font-medium text-ink"><ChefHat aria-hidden className="mr-1 inline size-4 align-text-bottom text-accent" />Exigir alojamiento con cocina</span>
+              <span className="mt-0.5 block text-xs text-muted">Cocina o kitchenette, según lo que informa cada alojamiento.</span>
+            </span>
+          </label>
+          <InfoTooltip>{HELP.kitchen}</InfoTooltip>
+        </div>
+      )}
+      {services.activities && <RainSlider value={c.max_heavy_rain_prob} onChange={(v) => set("max_heavy_rain_prob", v)} />}
     </div>
   );
 }

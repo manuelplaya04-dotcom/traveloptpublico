@@ -1,9 +1,11 @@
 // Requiere motor (8000), n8n (5678) y Supabase local corriendo. Ver fase_4_frontend.md y fase_4b_frontend_ux.md.
 import { expect, test, type Locator, type Page } from "@playwright/test";
+import { skipTours } from "./tour";
 
 // Consola limpia: cualquier error no capturado del navegador (p. ej. "_leaflet_pos") hace fallar el test.
 const pageErrors = new Map<object, Error[]>();
-test.beforeEach(({ page }) => {
+test.beforeEach(async ({ page }) => {
+  await skipTours(page);
   const errors: Error[] = [];
   pageErrors.set(page, errors);
   page.on("pageerror", (e) => errors.push(e));

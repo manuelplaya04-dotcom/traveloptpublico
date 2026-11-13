@@ -113,7 +113,7 @@ export type ItineraryPayload = {
     check_in: string;
     check_out: string;
     nights: number;
-    lodging: {
+    lodging: { // null: alojamiento no cotizado (la persona ya tiene el suyo)
       offer_id: string;
       name: string;
       lat?: number | null; // ubicación, si el proveedor la informa
@@ -121,7 +121,7 @@ export type ItineraryPayload = {
       deeplink: string | null;
       cost_minor: number;
       units: { unit_type: string; qty: number; bathrooms: number; bathrooms_source: string; capacity: number }[];
-    };
+    } | null;
     activities: {
       date: string; name: string; outdoor: boolean; cost_minor: number; deeplink: string | null;
       price_source?: "provider" | "curated" | "box_office"; price_date_based?: boolean;

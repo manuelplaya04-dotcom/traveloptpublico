@@ -4,6 +4,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime, timedelta, timezone
 
+from app.domain.legal import SEED_RULES, LegalRules
 from app.domain.models import OfferSet, TripRequest
 from app.optimizer.price_advice import PriceStats, percentiles
 from app.repo.base import NON_TERMINAL, RunLimits, RunRecord, build_offer_set, check_limits, offer_key
@@ -106,6 +107,9 @@ class MemoryRepository:
         token = str(uuid.uuid4())
         self.shares[token] = {"run_id": run_id, "user_id": user_id, "expires_at": _now() + timedelta(days=30)}
         return token
+
+    async def legal_rules(self) -> LegalRules:
+        return SEED_RULES
 
     async def get_share(self, token: str) -> str | None:
         sh = self.shares.get(token)

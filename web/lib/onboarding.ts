@@ -1,6 +1,8 @@
 // Estado del onboarding → TripRequest (contrato del motor). Funciones puras: se testean sin React.
 import { cityByCode, MAX_CITIES, mustDoFor, sameArea } from "@/lib/cities";
-import { constraintsSchema, tripRequestSchema, type Constraints, type TripRequest } from "@/lib/contracts";
+import {
+  ALL_SERVICES, constraintsSchema, NO_SERVICE_SELECTED, tripRequestSchema, type Constraints, type Services, type TripRequest,
+} from "@/lib/contracts";
 import { addDays, diffDays, isIsoDate, MAX_DAYS_AHEAD, todayIso } from "@/lib/dates";
 import demoCase from "@/lib/demo-case.json";
 import { minorToUnits, toMinor } from "@/lib/money";
@@ -17,6 +19,7 @@ export type CityStop = { code: string; nights: number };
 
 // Fechas: se guardan la ida y la duración; la vuelta se DERIVA (ida + noches), así nunca puede quedar incongruente.
 export type OnboardingState = {
+  services: Services; // qué cotizamos: lo que la persona ya tiene resuelto no se busca ni se suma
   origin: string;
   cities: CityStop[]; // en orden de visita
   departDate: string; // primera noche del viaje (el vuelo puede salir la noche anterior)
@@ -33,6 +36,7 @@ const GOLDEN_NIGHTS: Record<string, number> = { ORL: 8, NYC: 4 };
 
 // Caso de ejemplo (golden): se carga a pedido desde el formulario y lo usan los tests de punta a punta.
 export const GOLDEN: OnboardingState = {
+  services: ALL_SERVICES,
   origin: DEMO.origin_airports[0],
   cities: DEMO.cities.map((c) => ({ code: c.code, nights: GOLDEN_NIGHTS[c.code] ?? c.min_nights })),
   departDate: DEMO.first_checkin_from,
@@ -45,8 +49,8 @@ export const GOLDEN: OnboardingState = {
 
 /** Estado de un viaje nuevo: sin destinos y saliendo hoy (fecha de la persona, nunca una fija). */
 export function initialState(today = todayIso()): OnboardingState {
-  return { origin: DEMO.origin_airports[0], cities: [], departDate: today, flexDays: 0, totalNights: 7, pax: 2,
-    budget: 5000, constraints: DEMO.constraints };
+  return { services: ALL_SERVICES, origin: DEMO.origin_airports[0], cities: [], departDate: today, flexDays: 0,
+    totalNights: 7, pax: 2, budget: 5000, constraints: DEMO.constraints };
 }
 
 export type StepErrors = { destinations: string[]; dates: string[]; preferences: string[] };
@@ -103,6 +107,7 @@ export function validate(s: OnboardingState, today = todayIso()): StepErrors {
   const e: StepErrors = { destinations: [], dates: [], preferences: [] };
   const name = (code: string) => cityByCode(code)?.name ?? code;
 
+  if (!(s.services.flights || s.services.lodging || s.services.activities)) e.destinations.push(NO_SERVICE_SELECTED);
   if (s.cities.length === 0) e.destinations.push("Elegí al menos un destino.");
   if (s.cities.length > MAX_CITIES) e.destinations.push(`Podés elegir hasta ${MAX_CITIES} destinos.`);
   for (const c of s.cities) {
@@ -154,12 +159,13 @@ export const hasErrors = (e: StepErrors) => Object.values(e).some((list) => list
 export function buildTripRequest(s: OnboardingState): TripRequest {
   return tripRequestSchema.parse({
     case_key: null, // el motor reconoce solo su caso de prueba (ruta, fechas y noches): la web no conoce datos de prueba
-    origin_airports: [s.origin],
+    origin_airports: s.services.flights ? [s.origin] : [], // sin vuelos no hay desde dónde salir
+    services: s.services,
     cities: s.cities.map((c) => {
       const info = cityByCode(c.code);
       if (!info) throw new Error(`Destino desconocido: ${c.code}`);
       return { code: info.code, name: info.name, airports: info.airports, lat: info.lat, lon: info.lon,
-        min_nights: c.nights, max_nights: c.nights, must_do: mustDoFor(info, c.nights) };
+        min_nights: c.nights, max_nights: c.nights, must_do: s.services.activities ? mustDoFor(info, c.nights) : [] };
     }),
     fixed_order: true, // el orden lo elige el usuario
     first_checkin_from: s.departDate,

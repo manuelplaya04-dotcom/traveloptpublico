@@ -16,6 +16,7 @@ import LodgingFeed from "@/components/city/LodgingFeed";
 import SportsTeams from "@/components/city/SportsTeams";
 import MobilityWidget from "@/components/city/MobilityWidget";
 import WeatherWidget from "@/components/city/WeatherWidget";
+import { quotedTransport } from "@/lib/checkout";
 import { cityByCode } from "@/lib/cities";
 import type { TripRequest } from "@/lib/contracts";
 import { fmtDay } from "@/lib/format";
@@ -34,6 +35,7 @@ export default function CityDashboard({ index, stay, req, weather, transport, ac
   index: number; stay: Stay; req: TripRequest; weather: WeatherDay[]; transport: TransportQuote[]; activities: ActivityOfferRow[];
 }) {
   const c = req.constraints;
+  const on = req.services;
   const lodging = useChosenLodging(stay);
   // Puntos del mapa: alojamiento elegido, las otras propiedades disponibles y las actividades del itinerario; solo
   // los que tienen ubicación real (nada de coordenadas inventadas).
@@ -45,7 +47,8 @@ export default function CityDashboard({ index, stay, req, weather, transport, ac
   ], [lodging, stay.activities, stay.lodging_options]);
   const info = cityByCode(stay.city);
   // Rutas reales por calle desde el alojamiento elegido: a los aeropuertos de la ciudad y a cada actividad.
-  const airports = useMemo(() => (info?.airports ?? []).filter((c) => AIRPORT_COORDS[c]), [info]);
+  // sin vuelos cotizados no hay traslado al aeropuerto que mostrar
+  const airports = useMemo(() => (on.flights ? info?.airports ?? [] : []).filter((c) => AIRPORT_COORDS[c]), [on.flights, info]);
   const acts = useMemo(() => stay.activities.filter(hasCoords), [stay.activities]);
   const dests = useMemo(() => [...airports.map((c) => AIRPORT_COORDS[c]), ...acts], [airports, acts]);
   const routes = useRoutes(hasCoords(lodging) ? { lat: lodging.lat, lon: lodging.lon } : null, dests);
@@ -75,7 +78,7 @@ export default function CityDashboard({ index, stay, req, weather, transport, ac
       <div className="grid gap-5 xl:grid-cols-2">
         <WeatherWidget days={days} maxRain={c.max_heavy_rain_prob} maxTmax={c.max_tmax_c} city={stay.city}
           cityName={info?.name ?? stay.city} start={stay.check_in} end={stay.check_out} />
-        <MobilityWidget quotes={transport.filter((t) => t.city === stay.city)} costMinor={stay.transport_cost_minor} nights={stay.nights}
+        <MobilityWidget quotes={quotedTransport(transport, on).filter((t) => t.city === stay.city)} costMinor={stay.transport_cost_minor} nights={stay.nights}
           transfers={transfers} />
       </div>
 
@@ -84,12 +87,14 @@ export default function CityDashboard({ index, stay, req, weather, transport, ac
           checkOut={stay.check_out} pax={req.pax} options={stay.lodging_options} />
       )}
 
-      <ActivityCatalog req={req} city={stay.city} offers={activities} />
+      {on.activities && <ActivityCatalog req={req} city={stay.city} offers={activities} />}
       <CityPlaces city={stay.city} cityName={info?.name ?? stay.city} />
       <CityEvents city={stay.city} cityName={info?.name ?? stay.city} start={stay.check_in} end={stay.check_out} />
       <SportsTeams city={stay.city} cityName={info?.name ?? stay.city} />
-      <ActivityPlan stay={stay} lodging={lodging} weather={days} maxRain={c.max_heavy_rain_prob} travelDaysFree={c.activity_free_travel_days}
-        roads={roads} />
+      {on.activities && (
+        <ActivityPlan stay={stay} lodging={lodging} weather={days} maxRain={c.max_heavy_rain_prob}
+          travelDaysFree={c.activity_free_travel_days} roads={roads} />
+      )}
     </section>
   );
 }

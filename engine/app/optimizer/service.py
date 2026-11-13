@@ -6,10 +6,26 @@ from dataclasses import asdict
 
 from app.domain.models import OfferSet, TripRequest
 from app.optimizer.finance import Breakdown, build_breakdown
-from app.optimizer.lodging import lodging_options
+from app.optimizer.lodging import LodgingChoice, lodging_options
 from app.services.quota_plan import effective_request
 from app.optimizer.solver import Itinerary, optimize
 from app.repo.base import Repository, RunRecord
+
+
+def lodging_dict(choice: LodgingChoice | None) -> dict | None:
+    """Alojamiento elegido para el payload; None si la persona no pidió cotizarlo."""
+    if choice is None:
+        return None
+    o = choice.offer
+    return {
+        "offer_id": o.id,
+        "name": o.name,
+        "lat": o.lat,
+        "lon": o.lon,
+        "deeplink": o.deeplink,
+        "cost_minor": choice.cost_minor,
+        "units": [{**o.units[j].model_dump(mode="json"), "qty": q} for j, q in choice.units],
+    }
 
 
 def itinerary_to_dict(it: Itinerary, b: Breakdown, pax: int, alternatives: tuple[TripRequest, OfferSet] | None = None) -> dict:
@@ -42,22 +58,11 @@ def itinerary_to_dict(it: Itinerary, b: Breakdown, pax: int, alternatives: tuple
                 "check_in": sp.stay.check_in.isoformat(),
                 "check_out": sp.stay.check_out.isoformat(),
                 "nights": sp.stay.nights,
-                "lodging": {
-                    "offer_id": sp.lodging.offer.id,
-                    "name": sp.lodging.offer.name,
-                    "lat": sp.lodging.offer.lat,
-                    "lon": sp.lodging.offer.lon,
-                    "deeplink": sp.lodging.offer.deeplink,
-                    "cost_minor": sp.lodging.cost_minor,
-                    "units": [
-                        {**sp.lodging.offer.units[j].model_dump(mode="json"), "qty": q}
-                        for j, q in sp.lodging.units
-                    ],
-                },
+                "lodging": lodging_dict(sp.lodging),
                 "activities": [activity(a) for a in sp.activities.items],
                 "transport_cost_minor": sp.transport_cost_minor,
                 **({"lodging_options": lodging_options(sp.stay, alternatives[1].lodging, alternatives[0].constraints, pax)}
-                   if alternatives else {}),
+                   if alternatives and sp.lodging else {}),
             }
             for sp in it.stays
         ],
