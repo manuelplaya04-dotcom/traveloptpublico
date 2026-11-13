@@ -3,7 +3,7 @@ import { memo } from "react";
 import CitySearch from "@/components/onboarding/CitySearch";
 import CountControl from "@/components/ui/CountControl";
 import NumberField from "@/components/ui/NumberField";
-import { activeCities, cityByCode, cityList, MAX_CITIES, scopeLabel } from "@/lib/cities";
+import { activeCities, cityByCode, MAX_CITIES, scopeGroups } from "@/lib/cities";
 import { assignedNights, NIGHTS_PER_CITY, TRIP_NIGHTS, type CityStop } from "@/lib/onboarding";
 
 // Destinos en orden de visita (array dinámico, hasta MAX_CITIES) elegidos con el buscador, y reparto de las noches
@@ -44,15 +44,18 @@ export default memo(function StepDestinations({ stops, totalNights, onChange, on
               const name = info?.name ?? s.code;
               return (
                 <li key={s.code} data-testid={`stop-${s.code}`}
-                  className="flex flex-wrap items-center gap-3 rounded-2xl bg-surface p-4 ring-1 ring-line">
-                  <span className="flex size-8 items-center justify-center rounded-full bg-accent text-sm font-bold text-white">{i + 1}</span>
-                  <div className="min-w-0 flex-1">
+                  className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl bg-surface p-4 ring-1 ring-line">
+                  {/* Celular: número, nombre y botones arriba; el contador abajo, alineado con el nombre. Desde sm, una fila. */}
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-bold text-white">{i + 1}</span>
+                  <div className="order-1 min-w-0 flex-1 sm:order-none">
                     <p className="font-semibold text-ink">{name}</p>
                     <p className="text-xs text-muted">{info?.country} · {info?.airports.join(" · ")}</p>
                   </div>
-                  <CountControl label={`Noches en ${name}`} value={s.nights} min={NIGHTS_PER_CITY.min}
-                    max={NIGHTS_PER_CITY.max} onChange={(v) => update(i, v)} />
-                  <div className="flex gap-1">
+                  <div className="order-3 w-full pl-11 sm:order-none sm:w-auto sm:pl-0">
+                    <CountControl label={`Noches en ${name}`} value={s.nights} min={NIGHTS_PER_CITY.min}
+                      max={NIGHTS_PER_CITY.max} onChange={(v) => update(i, v)} unit={NIGHTS_UNIT} />
+                  </div>
+                  <div className="order-2 flex gap-1 sm:order-none">
                     <IconButton label={`Subir ${s.code}`} disabled={i === 0} onClick={() => move(i, -1)}>↑</IconButton>
                     <IconButton label={`Bajar ${s.code}`} disabled={i === stops.length - 1} onClick={() => move(i, 1)}>↓</IconButton>
                     <IconButton label={`Quitar ${s.code}`} onClick={() => onToggle(s.code)}>✕</IconButton>
@@ -74,13 +77,25 @@ export default memo(function StepDestinations({ stops, totalNights, onChange, on
 
 // Alcance de la beta, visible antes de buscar (evita buscar destinos que todavía no existen). La lista sale del
 // catálogo de la base: si se activa una ciudad, el aviso se actualiza solo.
+const NIGHTS_UNIT = ["noche", "noches"] as const;
+
+// Un renglón por región: se escanea de un vistazo en vez de leer un párrafo largo.
 function BetaScope() {
-  const active = activeCities();
   return (
-    <p id="beta-scope" data-testid="beta-scope" className="mt-3 mb-4 rounded-xl bg-accent-soft/60 px-4 py-3 text-sm text-ink">
-      <FlaskConical aria-hidden className="mr-1 inline size-4 align-text-bottom text-accent" />
-      <b>Fase de prueba (Beta):</b> por ahora funciona solo en <b>{scopeLabel(active)}</b>: {cityList(active)}.
-    </p>
+    <div id="beta-scope" data-testid="beta-scope" className="mt-3 mb-4 rounded-xl bg-accent-soft/60 px-4 py-3 text-sm text-ink">
+      <p className="font-semibold">
+        <FlaskConical aria-hidden className="mr-1 inline size-4 align-text-bottom text-accent" />
+        Fase de prueba (Beta): por ahora, solo estas ciudades.
+      </p>
+      <ul className="mt-2 space-y-1.5">
+        {scopeGroups(activeCities()).map((g) => (
+          <li key={g.region} className="flex gap-2">
+            <span aria-hidden className="mt-2 size-1.5 shrink-0 rounded-full bg-accent" />
+            <span><b>{g.title}:</b> {g.cities}.</span>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

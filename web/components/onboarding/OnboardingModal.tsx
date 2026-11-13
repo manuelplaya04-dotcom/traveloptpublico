@@ -139,7 +139,7 @@ export default function OnboardingModal({ session, open, onClose }: { session: n
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2 id="onboarding-title" className="font-display text-2xl font-black tracking-tight">Armemos tu viaje</h2>
-              <p className="mt-1 text-sm text-muted">Paso {step + 1} de {STEPS.length}</p>
+              <p className="mt-1 text-sm text-muted">Paso {step + 1} de {STEPS.length} · <span className="font-medium text-ink">{STEPS[step]}</span></p>
             </div>
             <button type="button" aria-label="Cerrar" disabled={busy} onClick={handleClose}
               className="flex size-9 items-center justify-center rounded-full text-muted hover:bg-surface hover:text-ink">

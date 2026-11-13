@@ -26,9 +26,10 @@ body {
 dialog[open] {
   animation: modal-in 220ms ease-out;
 }
+/* Velo sólido, sin backdrop-filter: el desenfoque de toda la pantalla se recalculaba en cada repintado del modal y
+   costaba hasta 3 de cada 4 cuadros al tocar los switches (medido con CPU frenada 4x). Un poco más opaco compensa. */
 dialog[open]::backdrop {
-  background: rgb(17 24 39 / 0.45);
-  backdrop-filter: blur(4px);
+  background: rgb(17 24 39 / 0.55);
   animation: fade-in 220ms ease-out;
 }
 @keyframes modal-in {

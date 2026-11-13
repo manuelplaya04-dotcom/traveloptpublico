@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { AIRPORT_COORDS } from "../lib/airports";
 import { CATALOG_SNAPSHOT } from "../lib/catalog.snapshot";
 import { toCities } from "../lib/catalogRows";
-import { activeCities, cityByCode, scopeLabel, searchCities, setCatalog } from "../lib/cities";
+import { activeCities, cityByCode, scopeGroups, scopeLabel, searchCities, setCatalog } from "../lib/cities";
 
 // Todas las migraciones, en orden: una posterior puede agregar ciudades o activarlas.
 const DIR = new URL("../../supabase/migrations/", import.meta.url);
@@ -85,6 +85,13 @@ describe("la copia de respaldo coincide con las migraciones que siembran la base
 describe("alcance de la beta", () => {
   const only = (...regions: string[]) => CATALOG_SNAPSHOT.map((c) => ({ ...c, active: regions.includes(c.region) }))
     .filter((c) => c.active);
+  it("un renglón por región, en orden, con sus ciudades", () => {
+    expect(scopeGroups(activeCities()).map((g) => g.title)).toEqual(["Costa Este de EE. UU.", "Costa Oeste de EE. UU."]);
+    expect(scopeGroups(activeCities())[1].cities).toBe("Los Ángeles, San Francisco y Las Vegas");
+    expect(scopeGroups(only("us_east", "us_west", "europe")).map((g) => g.region)).toEqual(["us_east", "us_west", "europe"]);
+    expect(scopeGroups([])).toEqual([]);
+  });
+
   it("se arma con las regiones activas", () => {
     expect(scopeLabel(only("us_east"))).toBe("la Costa Este de EE. UU.");
     expect(scopeLabel(only("us_east", "us_west"))).toBe("la Costa Este y la Costa Oeste de EE. UU.");

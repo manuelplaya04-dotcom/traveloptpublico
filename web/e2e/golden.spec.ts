@@ -339,7 +339,9 @@ test("nuevo viaje: el formulario vuelve a cero (hoy, sin destinos) y los destino
   await expect(dialog.getByRole("option", { name: /^Filadelfia/ })).toBeVisible();
   await dialog.getByRole("combobox").fill("París"); // fuera del catálogo de la Fase 1
   await expect(dialog.getByText("Todavía no tenemos")).toBeVisible();
-  await expect(dialog.getByTestId("beta-scope")).toContainText("la Costa Este y la Costa Oeste de EE. UU.");
+  await expect(dialog.getByTestId("beta-scope")).toContainText("Costa Este de EE. UU.: Nueva York");
+  await expect(dialog.getByTestId("beta-scope")).toContainText("Costa Oeste de EE. UU.: Los Ángeles");
+  await expect(dialog.getByText("En la beta solo hay ciudades de la Costa Este y la Costa Oeste de EE. UU.")).toBeVisible();
   await expect(dialog.getByRole("combobox")).toHaveAccessibleDescription(/Fase de prueba \(Beta\)/);
   await dialog.getByRole("combobox").fill("Ciudad Inventada");
   await expect(dialog.getByText("Todavía no tenemos")).toBeVisible();

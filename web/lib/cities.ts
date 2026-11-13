@@ -74,4 +74,17 @@ export function scopeLabel(cities: CityInfo[]): string {
   const us = (["us_east", "us_west"] as const).filter((r) => regions.has(r)).map((r) => US_REGION[r]!);
   return LIST.format([...(us.length ? [`${LIST.format(us)} de EE. UU.`] : []), ...(regions.has("europe") ? ["Europa"] : [])]);
 }
-export const cityList = (cities: CityInfo[]) => LIST.format(cities.map((c) => c.name));
+const cityList = (cities: CityInfo[]) => LIST.format(cities.map((c) => c.name));
+
+// Ciudades activas agrupadas por región, en el orden del catálogo: el aviso de la beta las muestra en renglones
+// separados ("Costa Este de EE. UU.: …") para leerlas de un vistazo.
+const REGION_TITLE: Record<Region, string> = {
+  us_east: "Costa Este de EE. UU.", us_west: "Costa Oeste de EE. UU.", europe: "Europa",
+};
+const REGION_ORDER: Region[] = ["us_east", "us_west", "europe"];
+export function scopeGroups(cities: CityInfo[]): { region: Region; title: string; cities: string }[] {
+  return REGION_ORDER.flatMap((region) => {
+    const inRegion = cities.filter((c) => c.region === region);
+    return inRegion.length ? [{ region, title: REGION_TITLE[region], cities: cityList(inRegion) }] : [];
+  });
+}

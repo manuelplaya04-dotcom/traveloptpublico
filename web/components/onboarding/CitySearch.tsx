@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useMemo, useState, type KeyboardEvent } from "react";
-import { searchCities, type CityInfo } from "@/lib/cities";
+import { activeCities, scopeLabel, searchCities, type CityInfo } from "@/lib/cities";
 
 // Buscador de destinos con autocompletado (combobox accesible: ↑ ↓ para moverse, Enter para elegir, Esc para cerrar).
 // Busca en el catálogo de ciudades con aeropuerto y coordenadas; si no está, lo dice en vez de inventarla.
@@ -42,7 +42,7 @@ export default function CitySearch({ exclude, disabled, onPick, describedBy }: {
           className="absolute z-10 mt-2 max-h-72 w-full overflow-auto rounded-xl bg-white p-1 shadow-lg ring-1 ring-line">
           {results.length === 0 ? (
             <li className="px-3 py-2.5 text-sm text-muted" role="option" aria-selected={false} aria-disabled>
-              Todavía no tenemos “{query.trim()}”. En la beta solo hay ciudades de la Costa Este de EE. UU.
+              Todavía no tenemos “{query.trim()}”. En la beta solo hay ciudades de {scopeLabel(activeCities())}
             </li>
           ) : results.map((c, i) => (
             <li key={c.code} id={`${id}-${c.code}`} role="option" aria-selected={i === active}

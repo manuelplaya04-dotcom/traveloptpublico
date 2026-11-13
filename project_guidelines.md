@@ -295,3 +295,18 @@ Dado que el orquestador depende de múltiples APIs externas, implementa patrones
 
     `SEED_RULES` en el código tiene que coincidir con las migraciones y con la base real (`test_legal.py`,
     `test_pg_cache.py`).
+22. **Modal "Armemos tu viaje": velo sin desenfoque (2026-11-13):** se reportó el modal lento. Medido con un build de
+    producción y la CPU frenada 4x: al tocar los switches se perdía el 75% de los cuadros y el scroll perdía cuadros
+    sin ejecutar JS. Un A/B sin `backdrop-filter` en `dialog::backdrop` bajó los cuadros perdidos a ~6% (switches) y a
+    3–4 (scroll), y la peor interacción de 168 a ~90 ms. El desenfoque de toda la pantalla se recalculaba en cada
+    repintado: el velo pasó a sólido (55%). **Sin debounce en el buscador:** ya tiene estado local y tipear no
+    re-renderiza el modal; demorarlo solo sumaría latencia. La apertura (~55–100 ms en una CPU normal) es el
+    `showModal()` nativo, que vuelve inerte la landing; se acepta a cambio del foco atrapado y la accesibilidad del
+    `<dialog>`. Pulido:
+    - Los switches muestran su descripción completa, con salto de línea.
+    - El aviso Beta tiene un renglón por región, armado desde el catálogo.
+    - Los contadores muestran la unidad ("4 noches").
+    - En el celular, la tarjeta de destino pone el contador en otra fila.
+    - El encabezado muestra el nombre del paso.
+    - El slider de lluvia usa 0% y 100%.
+    - El mensaje "sin resultados" del buscador sale del catálogo (decía "solo Costa Este").

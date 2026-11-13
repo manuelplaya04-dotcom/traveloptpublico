@@ -69,9 +69,9 @@ function RainSlider({ value, onChange }: { value: number; onChange: (v: number) 
       </span>
       <input type="range" min={0} max={1} step={0.05} value={value} aria-valuetext={`${pct}% de probabilidad de lluvia fuerte`}
         onChange={(e) => onChange(e.target.valueAsNumber)} className="mt-4 w-full accent-accent" />
-      <span className="mt-1 flex justify-between text-xs text-muted">
-        <span><Sun aria-hidden className="mr-1 inline size-3.5 align-text-bottom" />0 · sin riesgo</span>
-        <span><CloudRain aria-hidden className="mr-1 inline size-3.5 align-text-bottom" />1 · no importa la lluvia</span>
+      <span className="mt-1 flex justify-between gap-3 text-xs text-muted">
+        <span><Sun aria-hidden className="mr-1 inline size-3.5 align-text-bottom" />0% · sin riesgo</span>
+        <span className="text-right"><CloudRain aria-hidden className="mr-1 inline size-3.5 align-text-bottom" />100% · no importa la lluvia</span>
       </span>
       <span className="mt-2 block text-xs text-muted">
         Los días con más probabilidad de lluvia fuerte que esto no agendamos actividades al aire libre.
