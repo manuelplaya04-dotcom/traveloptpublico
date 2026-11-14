@@ -9,8 +9,8 @@ select ok((select relrowsecurity from pg_class where oid = 'public.city_legal_ru
 
 -- Lectura pública
 set local role anon;
-select is((select count(*) from public.catalog_cities)::int, 12, 'anon lee las 12 ciudades');
-select is((select count(*) from public.catalog_cities where active)::int, 10, 'activas: las 7 del este y las 3 del oeste (Europa todavía no)');
+select is((select count(*) from public.catalog_cities)::int, 32, 'anon lee las 32 ciudades');
+select is((select count(*) from public.catalog_cities where active)::int, 24, 'activas: EE. UU. (10), Patagonia (4) y costa de Brasil (10); Europa todavía no');
 select is((select count(*) from public.catalog_must_do where city_code = 'ORL')::int, 5, 'anon lee los imperdibles');
 select is((select value from public.city_legal_rules where city_code = 'NYC'), 30, 'anon lee las reglas');
 
@@ -28,7 +28,7 @@ set local role authenticated;
 select throws_ok($$ update public.city_legal_rules set value = 1 $$, '42501', null, 'authenticated no relaja reglas');
 select throws_ok($$ delete from public.catalog_cities $$, '42501', null, 'authenticated no borra ciudades');
 select throws_ok($$ insert into public.catalog_must_do values ('NYC', 'X', 9) $$, '42501', null, 'authenticated no agrega imperdibles');
-select is((select count(*) from public.catalog_cities)::int, 12, 'authenticated lee');
+select is((select count(*) from public.catalog_cities)::int, 32, 'authenticated lee');
 reset role;
 
 -- Service role escribe

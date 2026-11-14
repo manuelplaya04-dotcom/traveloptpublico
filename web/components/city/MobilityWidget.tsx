@@ -4,7 +4,7 @@ import ExternalIcon from "@/components/ui/ExternalIcon";
 import { safeHref } from "@/lib/links";
 import { Widget } from "@/components/city/WeatherWidget";
 import { TRANSPORT_MODE } from "@/lib/format";
-import { fmtMinor } from "@/lib/money";
+import { useMoney } from "@/components/money/MoneyProvider";
 import { fmtTrip, type Trip } from "@/lib/geo";
 import type { TransportQuote } from "@/lib/types";
 
@@ -13,6 +13,7 @@ export default memo(function MobilityWidget({ quotes, costMinor, nights, transfe
   quotes: TransportQuote[]; costMinor: number; nights: number;
   transfers?: { airport: string; trip: Trip }[]; // alojamiento → aeropuerto, ruta real por calle (solo logística)
 }) {
+  const money = useMoney(); // precios en la moneda elegida (USD o pesos)
   return (
     <Widget title="Movilidad" subtitle="Incluida en tu total">
       {transfers.length > 0 && (
@@ -36,8 +37,8 @@ export default memo(function MobilityWidget({ quotes, costMinor, nights, transfe
           {quotes.map((q) => {
             const href = safeHref(q.deeplink);
             const detail = q.mode === "car_rental"
-              ? `${nights} días × ${fmtMinor(q.per_day_minor)}${q.fixed_minor ? ` + ${fmtMinor(q.fixed_minor)} fijo` : ""}`
-              : `${q.trips} viajes × ${fmtMinor(q.per_trip_minor)}`;
+              ? `${nights} días × ${money(q.per_day_minor)}${q.fixed_minor ? ` + ${money(q.fixed_minor)} fijo` : ""}`
+              : `${q.trips} viajes × ${money(q.per_trip_minor)}`;
             return (
               <li key={q.id} className="flex items-center gap-4 rounded-2xl bg-surface p-4">
                 <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-white text-xl" aria-hidden>
@@ -56,7 +57,7 @@ export default memo(function MobilityWidget({ quotes, costMinor, nights, transfe
       {quotes.length > 0 && (
         <p className="mt-4 flex items-baseline justify-between border-t border-line pt-3 text-sm">
           <span className="text-muted">Total movilidad (con impuestos)</span>
-          <span className="font-display text-lg font-extrabold text-ink" data-testid="mobility-total">{fmtMinor(costMinor)}</span>
+          <span className="font-display text-lg font-extrabold text-ink" data-testid="mobility-total">{money(costMinor)}</span>
         </p>
       )}
       <p className="mt-3 text-xs text-muted">Por ahora cotizamos una opción por ciudad.</p>

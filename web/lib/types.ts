@@ -17,7 +17,7 @@ export type Run = {
     stats?: Record<string, unknown>;
     // datos no críticos que no se pudieron traer, o precios históricos / búsquedas parciales de vuelos y alojamiento
     degraded?: Partial<Record<"weather" | "activities" | "flights" | "lodging" | "transport", string>>;
-    quota_narrowed?: string[]; // recortes del plan para cuidar la cuota de precios en vivo (flex, overnight, rentals)
+    quota_narrowed?: string[]; // recortes del plan para cuidar la cuota de precios en vivo (flex, overnight, rentals, order)
   };
   error: { code: string; message?: string; node?: string } | null;
   timings: Record<string, string>;

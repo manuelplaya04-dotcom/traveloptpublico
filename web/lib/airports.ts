@@ -16,4 +16,23 @@ export const AIRPORT_COORDS: Record<string, { lat: number; lon: number; name: st
   SFO: { lat: 37.6213, lon: -122.379, name: "San Francisco (SFO)" },
   OAK: { lat: 37.7126, lon: -122.2197, name: "Oakland (OAK)" },
   LAS: { lat: 36.084, lon: -115.1537, name: "Las Vegas (LAS)" },
+  // Patagonia y Brasil
+  BRC: { lat: -41.1512, lon: -71.1578, name: "Bariloche (BRC)" },
+  CPC: { lat: -40.0754, lon: -71.1373, name: "Chapelco (CPC)" },
+  NQN: { lat: -38.949, lon: -68.1557, name: "Neuquén (NQN)" },
+  GIG: { lat: -22.809, lon: -43.2506, name: "Galeão (GIG)" },
+  SDU: { lat: -22.9105, lon: -43.1631, name: "Santos Dumont (SDU)" },
+  CFB: { lat: -22.9217, lon: -42.0743, name: "Cabo Frío (CFB)" },
+  SSA: { lat: -12.9086, lon: -38.3225, name: "Salvador (SSA)" },
+  MCZ: { lat: -9.5108, lon: -35.7917, name: "Maceió (MCZ)" },
+  AJU: { lat: -10.984, lon: -37.0703, name: "Aracaju (AJU)" },
+  FLN: { lat: -27.6703, lon: -48.5525, name: "Florianópolis (FLN)" },
+  // Europa (ciudades inactivas: listas para cuando se activen)
+  MAD: { lat: 40.4983, lon: -3.5676, name: "Madrid-Barajas (MAD)" },
+  BCN: { lat: 41.2974, lon: 2.0833, name: "Barcelona-El Prat (BCN)" },
+  IBZ: { lat: 38.8729, lon: 1.3731, name: "Ibiza (IBZ)" },
+  TFS: { lat: 28.0445, lon: -16.5725, name: "Tenerife Sur (TFS)" },
+  TFN: { lat: 28.4827, lon: -16.3415, name: "Tenerife Norte (TFN)" },
+  AMS: { lat: 52.3105, lon: 4.7683, name: "Schiphol (AMS)" },
+  BRU: { lat: 50.9014, lon: 4.4844, name: "Bruselas (BRU)" },
 };

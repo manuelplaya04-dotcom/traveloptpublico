@@ -98,7 +98,7 @@ export default function RunView({ runId }: { runId: string }) {
       {itsFailed && <RetryAlert message="La búsqueda terminó, pero no pudimos cargar los resultados." onRetry={retry} />}
 
       {its.length > 0 ? (
-        <TripPlanner key={runId} runId={runId} its={its}>
+        <TripPlanner key={runId} runId={runId} its={its} orderNarrowed={s.quota_narrowed?.includes("order")}>
           {s.diagnostics && <Funnel diagnostics={s.diagnostics} />}
         </TripPlanner>
       ) : (

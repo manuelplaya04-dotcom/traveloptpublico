@@ -1,16 +1,19 @@
 import { FlaskConical } from "lucide-react";
 import { memo } from "react";
 import CitySearch from "@/components/onboarding/CitySearch";
+import RouteOrderSwitch from "@/components/onboarding/RouteOrderSwitch";
 import CountControl from "@/components/ui/CountControl";
 import NumberField from "@/components/ui/NumberField";
 import { activeCities, cityByCode, MAX_CITIES, scopeGroups } from "@/lib/cities";
 import { assignedNights, NIGHTS_PER_CITY, TRIP_NIGHTS, type CityStop } from "@/lib/onboarding";
 
 // Destinos en orden de visita (array dinámico, hasta MAX_CITIES) elegidos con el buscador, y reparto de las noches
-// del viaje entre ellos con − / +.
-export default memo(function StepDestinations({ stops, totalNights, onChange, onToggle, onTotalChange }: {
+// del viaje entre ellos con − / +. Con "Optimizar el orden" la lista deja de numerarse: el orden lo elige el motor.
+export default memo(function StepDestinations({ stops, totalNights, optimizeOrder, onChange, onToggle, onTotalChange, onOptimizeOrder }: {
   stops: CityStop[];
   totalNights: number;
+  optimizeOrder: boolean;
+  onOptimizeOrder: (on: boolean) => void;
   onChange: (s: CityStop[]) => void;
   onToggle: (code: string) => void;
   onTotalChange: (n: number) => void;
@@ -20,6 +23,7 @@ export default memo(function StepDestinations({ stops, totalNights, onChange, on
     [next[i], next[i + d]] = [next[i + d], next[i]];
     onChange(next);
   };
+  const free = optimizeOrder && stops.length > 1; // con una sola ciudad no hay orden que optimizar
   const update = (i: number, nights: number) => onChange(stops.map((s, j) => (j === i ? { ...s, nights } : s)));
 
   return (
@@ -30,7 +34,7 @@ export default memo(function StepDestinations({ stops, totalNights, onChange, on
           <span className="rounded-full bg-accent-soft px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-accent">Beta</span>
         </h3>
         <p className="mt-1 text-sm text-muted">
-          Buscá hasta {MAX_CITIES} ciudades y agregalas en el orden en que las querés visitar.
+          Buscá hasta {MAX_CITIES} ciudades y agregalas en el orden en que las querés visitar, o dejá que elijamos el más barato.
         </p>
         <BetaScope />
         <CitySearch describedBy="beta-scope" exclude={stops.map((s) => s.code)} disabled={stops.length >= MAX_CITIES} onPick={onToggle} />
@@ -38,7 +42,8 @@ export default memo(function StepDestinations({ stops, totalNights, onChange, on
 
       {stops.length > 0 && (
         <>
-          <ol className="space-y-3">
+          {stops.length > 1 && <RouteOrderSwitch on={optimizeOrder} cities={stops.length} onChange={onOptimizeOrder} />}
+          <ol className="space-y-3" aria-label={free ? "Destinos (el orden lo elige el optimizador)" : "Destinos en orden de visita"}>
             {stops.map((s, i) => {
               const info = cityByCode(s.code);
               const name = info?.name ?? s.code;
@@ -46,7 +51,8 @@ export default memo(function StepDestinations({ stops, totalNights, onChange, on
                 <li key={s.code} data-testid={`stop-${s.code}`}
                   className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl bg-surface p-4 ring-1 ring-line">
                   {/* Celular: número, nombre y botones arriba; el contador abajo, alineado con el nombre. Desde sm, una fila. */}
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-bold text-white">{i + 1}</span>
+                  <span aria-hidden={free} className={`flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
+                    free ? "bg-accent-soft text-accent" : "bg-accent text-white"}`}>{free ? "•" : i + 1}</span>
                   <div className="order-1 min-w-0 flex-1 sm:order-none">
                     <p className="font-semibold text-ink">{name}</p>
                     <p className="text-xs text-muted">{info?.country} · {info?.airports.join(" · ")}</p>
@@ -56,8 +62,10 @@ export default memo(function StepDestinations({ stops, totalNights, onChange, on
                       max={NIGHTS_PER_CITY.max} onChange={(v) => update(i, v)} unit={NIGHTS_UNIT} />
                   </div>
                   <div className="order-2 flex gap-1 sm:order-none">
-                    <IconButton label={`Subir ${s.code}`} disabled={i === 0} onClick={() => move(i, -1)}>↑</IconButton>
-                    <IconButton label={`Bajar ${s.code}`} disabled={i === stops.length - 1} onClick={() => move(i, 1)}>↓</IconButton>
+                    {!free && <>
+                      <IconButton label={`Subir ${s.code}`} disabled={i === 0} onClick={() => move(i, -1)}>↑</IconButton>
+                      <IconButton label={`Bajar ${s.code}`} disabled={i === stops.length - 1} onClick={() => move(i, 1)}>↓</IconButton>
+                    </>}
                     <IconButton label={`Quitar ${s.code}`} onClick={() => onToggle(s.code)}>✕</IconButton>
                   </div>
                 </li>

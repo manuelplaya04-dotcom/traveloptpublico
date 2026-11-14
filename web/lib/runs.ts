@@ -24,6 +24,7 @@ const MESSAGES: Record<string, string> = {
   engine_unavailable: "El optimizador no está disponible ahora. Probá de nuevo en unos minutos.",
   orchestrator_not_configured: "El optimizador no está disponible ahora. Probá de nuevo en unos minutos.",
   invalid_request: "Algunos datos del viaje no son válidos. Revisá el formulario.",
+  depart_too_soon: "La primera noche tiene que ser dentro de 2 días o más: antes casi no quedan vuelos ni lugar. Elegí otra fecha.",
   no_session: "Tu sesión venció. Recargá la página y volvé a intentar.",
   empty_response: "El servidor respondió sin crear la búsqueda. Probá de nuevo.",
   cancelled: "Búsqueda cancelada.",

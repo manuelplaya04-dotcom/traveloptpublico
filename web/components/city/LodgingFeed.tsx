@@ -8,7 +8,7 @@ import { isDemoProvider, REJECTION_LABEL } from "@/lib/format";
 import { lodgingCompareLinks, safeHref } from "@/lib/links";
 import { photoSrc } from "@/lib/photo";
 import { groupStats, priceTags, vsAverage, type PriceTag } from "@/lib/market";
-import { fmtMinor } from "@/lib/money";
+import { useMoney } from "@/components/money/MoneyProvider";
 import type { LodgingOption } from "@/lib/types";
 import Carousel from "@/components/ui/Carousel";
 import { ChefHat, Hotel, House } from "lucide-react";
@@ -110,6 +110,7 @@ const LodgingCard = memo(function LodgingCard({ o, city, nights, optimal, select
   o: LodgingOption; city: string; nights: number; optimal: boolean; selected: boolean; tags: PriceTag[]; diff: number | undefined;
   onSelect: (o: LodgingOption) => void;
 }) {
+  const money = useMoney(); // precios en la moneda elegida (USD o pesos)
   const href = safeHref(o.deeplink);
   const real = !isDemoProvider(o.provider);
   const focus = useMemo(() => pointFocus(city, o.name, "lodging", o), [city, o]);
@@ -135,7 +136,7 @@ const LodgingCard = memo(function LodgingCard({ o, city, nights, optimal, select
       <footer className="mt-auto flex flex-col gap-4 border-t border-line pt-4">
         {o.cost_minor !== null && (
           <div>
-            <p className="whitespace-nowrap font-display text-2xl font-extrabold text-ink">{fmtMinor(o.cost_minor)}</p>
+            <p className="whitespace-nowrap font-display text-2xl font-extrabold text-ink">{money(o.cost_minor)}</p>
             <p className="text-xs text-muted">{nights} noches · impuestos y limpieza incluidos</p>
             {!o.rejection && <VsAverage diff={diff} />}
           </div>

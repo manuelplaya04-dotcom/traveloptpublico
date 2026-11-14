@@ -1,9 +1,10 @@
 // Estado del onboarding → TripRequest (contrato del motor). Funciones puras: se testean sin React.
-import { cityByCode, MAX_CITIES, mustDoFor, sameArea } from "@/lib/cities";
+import { cityByCode, MAX_CITIES, mustDoFor, ORIGINS, sameArea } from "@/lib/cities";
 import {
   ALL_SERVICES, constraintsSchema, NO_SERVICE_SELECTED, tripRequestSchema, type Constraints, type Services, type TripRequest,
 } from "@/lib/contracts";
-import { addDays, diffDays, isIsoDate, MAX_DAYS_AHEAD, todayIso } from "@/lib/dates";
+import { addDays, diffDays, earliestDepart, isIsoDate, MAX_DAYS_AHEAD, MIN_LEAD_DAYS, todayIso } from "@/lib/dates";
+import { fmtDay } from "@/lib/format";
 import demoCase from "@/lib/demo-case.json";
 import { minorToUnits, toMinor } from "@/lib/money";
 
@@ -21,7 +22,8 @@ export type CityStop = { code: string; nights: number };
 export type OnboardingState = {
   services: Services; // qué cotizamos: lo que la persona ya tiene resuelto no se busca ni se suma
   origin: string;
-  cities: CityStop[]; // en orden de visita
+  cities: CityStop[]; // en orden de visita (si `optimizeOrder`, es solo el orden en que se eligieron)
+  optimizeOrder: boolean; // el motor prueba todos los órdenes y elige el más barato (`fixed_order: false`)
   departDate: string; // primera noche del viaje (el vuelo puede salir la noche anterior)
   flexDays: number; // la ida puede correrse hasta N días más tarde (el motor prueba cada día)
   totalNights: number;
@@ -39,6 +41,7 @@ export const GOLDEN: OnboardingState = {
   services: ALL_SERVICES,
   origin: DEMO.origin_airports[0],
   cities: DEMO.cities.map((c) => ({ code: c.code, nights: GOLDEN_NIGHTS[c.code] ?? c.min_nights })),
+  optimizeOrder: !DEMO.fixed_order,
   departDate: DEMO.first_checkin_from,
   flexDays: diffDays(DEMO.first_checkin_from, DEMO.first_checkin_to),
   totalNights: DEMO.total_nights_min,
@@ -47,9 +50,11 @@ export const GOLDEN: OnboardingState = {
   constraints: DEMO.constraints,
 };
 
-/** Estado de un viaje nuevo: sin destinos y saliendo hoy (fecha de la persona, nunca una fija). */
+/** Estado de un viaje nuevo: sin destinos y con la primera noche más cercana que se puede pedir (desde la fecha de la
+ * persona, nunca una fija). */
 export function initialState(today = todayIso()): OnboardingState {
-  return { services: ALL_SERVICES, origin: DEMO.origin_airports[0], cities: [], departDate: today, flexDays: 0,
+  return { services: ALL_SERVICES, origin: DEMO.origin_airports[0], cities: [], optimizeOrder: false,
+    departDate: earliestDepart(today), flexDays: 0,
     totalNights: 7, pax: 2, budget: 5000, constraints: DEMO.constraints };
 }
 
@@ -133,6 +138,7 @@ export function validate(s: OnboardingState, today = todayIso()): StepErrors {
 
   if (!isIsoDate(s.departDate)) e.dates.push("Elegí una fecha de ida válida.");
   else if (s.departDate < today) e.dates.push("La fecha de ida no puede estar en el pasado.");
+  else if (s.departDate < earliestDepart(today)) e.dates.push(tooSoon(today));
   else if (s.departDate > addDays(today, MAX_DAYS_AHEAD)) e.dates.push("Podés planificar hasta 2 años adelante.");
   if (!intIn(s.flexDays, FLEX_DAYS)) e.dates.push(`La flexibilidad va de ${FLEX_DAYS.min} a ${FLEX_DAYS.max} días.`);
   if (!intIn(s.pax, PAX)) e.dates.push(`Entre ${PAX.min} y ${PAX.max} viajeros.`);
@@ -159,7 +165,8 @@ export const hasErrors = (e: StepErrors) => Object.values(e).some((list) => list
 export function buildTripRequest(s: OnboardingState): TripRequest {
   return tripRequestSchema.parse({
     case_key: null, // el motor reconoce solo su caso de prueba (ruta, fechas y noches): la web no conoce datos de prueba
-    origin_airports: s.services.flights ? [s.origin] : [], // sin vuelos no hay desde dónde salir
+    // sin vuelos no hay desde dónde salir; "Ezeiza o Aeroparque" manda los dos aeropuertos
+    origin_airports: s.services.flights ? [...(ORIGINS.find((o) => o.code === s.origin)?.airports ?? [s.origin])] : [],
     services: s.services,
     cities: s.cities.map((c) => {
       const info = cityByCode(c.code);
@@ -167,7 +174,7 @@ export function buildTripRequest(s: OnboardingState): TripRequest {
       return { code: info.code, name: info.name, airports: info.airports, lat: info.lat, lon: info.lon,
         min_nights: c.nights, max_nights: c.nights, must_do: s.services.activities ? mustDoFor(info, c.nights) : [] };
     }),
-    fixed_order: true, // el orden lo elige el usuario
+    fixed_order: !(s.optimizeOrder && s.cities.length > 1), // con una sola ciudad no hay orden que elegir
     first_checkin_from: s.departDate,
     first_checkin_to: addDays(s.departDate, s.flexDays),
     total_nights_min: s.totalNights,
@@ -185,3 +192,8 @@ export function activityLoad(chosen: { slots: number }[], availableDays: number)
   const days = chosen.reduce((a, c) => a + c.slots, 0) / 2;
   return { days, availableDays, fits: days <= availableDays };
 }
+
+/** Por qué no se puede salir antes: se muestra junto al calendario y como error si la fecha quedó vieja. */
+export const tooSoon = (today: string) =>
+  `La primera noche puede ser desde el ${fmtDay(earliestDepart(today))}: con menos de ${MIN_LEAD_DAYS * 24} h casi no ` +
+  "quedan vuelos ni lugar, y la búsqueda fallaría.";

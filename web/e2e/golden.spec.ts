@@ -323,7 +323,7 @@ test("fechas: elegir la vuelta recalcula las noches y el pasado se rechaza", asy
   await expect(dialog.getByRole("alert")).toContainText("La fecha de ida no puede estar en el pasado.");
 });
 
-test("nuevo viaje: el formulario vuelve a cero (hoy, sin destinos) y los destinos son toggle", async ({ page }) => {
+test("nuevo viaje: el formulario vuelve a cero (primera fecha posible, sin destinos) y los destinos son toggle", async ({ page }) => {
   await goldenRun(page);
   await page.getByRole("link", { name: "Nuevo viaje" }).click();
   await expect(page).toHaveURL("/");
@@ -351,11 +351,13 @@ test("nuevo viaje: el formulario vuelve a cero (hoy, sin destinos) y los destino
   await expect(dialog.getByTestId("nights-allocation")).toHaveText("Noches asignadas: 5 de 5 ✓");
   await expect(dialog.getByRole("button", { name: /caso de ejemplo/ })).toHaveCount(0);
   await dialog.getByRole("button", { name: "Siguiente" }).click();
-  const today = await page.evaluate(() => {
-    const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  // La primera fecha posible es pasado mañana (margen mínimo: con menos casi no hay vuelos).
+  const earliest = await page.evaluate(() => {
+    const d = new Date(Date.now() + 2 * 86_400_000);
+    return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   });
-  await expect(dialog.getByLabel("Fecha de ida (primera noche)")).toHaveValue(today);
-  await expect(dialog.getByLabel("Fecha de ida (primera noche)")).toHaveAttribute("min", today);
+  await expect(dialog.getByLabel("Fecha de ida (primera noche)")).toHaveValue(earliest);
+  await expect(dialog.getByLabel("Fecha de ida (primera noche)")).toHaveAttribute("min", earliest);
 });
 
 test("ciudad: mapa de OpenStreetMap, alojamientos con estrellas y etiquetas, y links para comparar", async ({ page }) => {
@@ -457,8 +459,9 @@ test("zero dead-ends: corrida inexistente ofrece volver a armar un viaje", async
 test("release: total en pesos y eventos con degradación elegante (APIs simuladas en el borde)", async ({ page }) => {
   const day = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
   await page.route("**/api/fx", (r) => r.fulfill({ json: {
-    tarjeta: { venta: 2041, updatedAt: "2026-11-03T18:00:00.000Z" },
-    mep: { venta: 1581.1, updatedAt: "2026-11-03T20:57:00.000Z" }, source: "dolarapi.com" } }));
+    tarjeta: { cents_per_usd: 204100, updated_at: "2026-11-03T18:00:00Z" },
+    mep: { cents_per_usd: 158110, updated_at: "2026-11-03T20:57:00Z" }, source: "dolarapi.com",
+    fetched_at: "2026-11-03T21:00:00Z", stale: false } }));
   await page.route("**/api/events?*", (r) => r.fulfill({ json: { events: [{
     id: "ticketmaster:1", source: "ticketmaster", name: "Orlando Magic vs. Miami Heat", date: day, time: "19:00",
     venue: "Kia Center", category: "Sports", price_min_minor: 3550, price_max_minor: 41000,
@@ -617,6 +620,7 @@ test("microcopy: ayudas ⓘ con mouse, teclado y toque, sin desbordar; exigir co
   // táctil (375 px): tocar abre y vuelve a tocar cierra; la burbuja entra en la pantalla y no hay scroll horizontal
   const ctx = await browser.newContext({ viewport: { width: 375, height: 812 }, hasTouch: true, isMobile: true });
   const phone = await ctx.newPage();
+  await skipTours(phone); // contexto nuevo: sin esto aparece el recorrido guiado y su "Siguiente" choca con el del formulario
   const d2 = await openPreferences(phone);
   const kitchenHelp = d2.getByRole("button", { name: "Ayuda" }).last();
   await kitchenHelp.tap();

@@ -3,13 +3,14 @@
 import { useState } from "react";
 import { useCart } from "@/components/cart/CartContext";
 import { AlertIcon } from "@/components/ui/Alert";
-import { fmtMinor } from "@/lib/money";
+import { useMoney } from "@/components/money/MoneyProvider";
 
 const ORDER = ["vuelos", "alojamiento", "actividades", "transporte"] as const;
 const LABEL: Record<string, string> = { vuelos: "Vuelos", alojamiento: "Alojamiento", actividades: "Actividades", transporte: "Movilidad" };
 
 // Subtotal dinámico flotante: siempre visible; en celular se expande para ver el desglose.
 export default function SubtotalDock() {
+  const money = useMoney(); // precios en la moneda elegida (USD o pesos)
   const { totals: t, budgetMinor, reset } = useCart();
   const [open, setOpen] = useState(false);
   const left = budgetMinor - t.totalMinor;
@@ -27,9 +28,9 @@ export default function SubtotalDock() {
         <span className="text-sm text-white/70">Total del viaje</span>
         <span className="text-xs text-white/50 lg:hidden">{open ? "Ocultar ▾" : "Detalle ▴"}</span>
       </button>
-      <p className="mt-1 font-display text-3xl font-black tracking-tight" data-testid="cart-total">{fmtMinor(t.totalMinor)}</p>
+      <p className="mt-1 font-display text-3xl font-black tracking-tight" data-testid="cart-total">{money(t.totalMinor)}</p>
       <p className={`mt-1 text-sm font-medium ${t.deltaMinor > 0 ? "text-amber-300" : "text-emerald-300"}`} data-testid="cart-delta">
-        {t.changed === 0 ? "✓ Elección óptima" : `${t.deltaMinor >= 0 ? "+" : ""}${fmtMinor(t.deltaMinor)} vs. óptimo`}
+        {t.changed === 0 ? "✓ Elección óptima" : `${t.deltaMinor >= 0 ? "+" : ""}${money(t.deltaMinor)} vs. óptimo`}
       </p>
 
       <div className={`${open ? "block" : "hidden"} lg:block`}>
@@ -37,14 +38,14 @@ export default function SubtotalDock() {
           {ORDER.map((c) => (
             <div key={c} className="flex justify-between">
               <dt className="text-white/70">{LABEL[c]}</dt>
-              <dd className="tabular-nums">{fmtMinor(t.byCategory[c] ?? 0)}</dd>
+              <dd className="tabular-nums">{money(t.byCategory[c] ?? 0)}</dd>
             </div>
           ))}
         </dl>
         <p className={`mt-4 flex items-center gap-2 text-sm ${left >= 0 ? "text-white/70" : "rounded-xl bg-amber-400/15 px-3 py-2 font-semibold text-amber-300"}`}
           role={left < 0 ? "status" : undefined}>
           {left < 0 && <AlertIcon tone="warning" className="size-4" />}
-          {left >= 0 ? `Te quedan ${fmtMinor(left)} del presupuesto` : `Excede el presupuesto por ${fmtMinor(-left)}`}
+          {left >= 0 ? `Te quedan ${money(left)} del presupuesto` : `Excede el presupuesto por ${money(-left)}`}
         </p>
         {t.changed > 0 && (
           <button type="button" onClick={() => reset()}

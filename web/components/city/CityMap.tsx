@@ -97,6 +97,7 @@ function FitBounds({ points }: { points: MapPoint[] }) {
 }
 
 const FOCUS_ZOOM = 15;
+const FOCUS_RING = { color: "#e11d48", weight: 3, fillColor: "#fb7185", fillOpacity: 0.25 } as const;
 
 // "Ver en mapa": escucha los pedidos de esta ciudad (lib/mapFocus), trae el mapa a la vista, vuela hasta el punto y
 // lo resalta. El estado vive solo acá: la lista de tarjetas no se entera. La animación es la de Leaflet (frames
@@ -120,8 +121,10 @@ function FocusLayer({ city, box }: { city: string; box: RefObject<HTMLDivElement
   if (!focus) return null;
   return (
     <>
+      {/* `className` va como opción de Leaflet (se lee al crear el path): dentro de `pathOptions` react-leaflet lo aplica
+          con setStyle, que no asigna clases, y el anillo quedaba sin su clase. */}
       <CircleMarker key={`${focus.lat},${focus.lon}`} center={[focus.lat, focus.lon]} radius={16} interactive={false}
-        pathOptions={{ color: "#e11d48", weight: 3, fillColor: "#fb7185", fillOpacity: 0.25, className: "map-focus-ring" }}>
+        className="map-focus-ring" pathOptions={FOCUS_RING}>
         <Tooltip permanent direction="top" offset={[0, -14]}>{focus.label}</Tooltip>
       </CircleMarker>
       <div className="sr-only" aria-live="polite" data-testid="map-focus-status">Mostrando en el mapa: {focus.label}</div>

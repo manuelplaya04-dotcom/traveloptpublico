@@ -5,7 +5,7 @@ select plan(12);
 
 select is((select array_agg(code order by code) from public.catalog_cities where region = 'us_west' and active),
           array['LAS', 'LAX', 'SFO'], 'la Costa Oeste está activa');
-select is((select array_agg(code order by code) from public.catalog_cities where region = 'europe' and not active),
+select is((select array_agg(code order by code) from public.catalog_cities where code in ('LON', 'PAR') and not active),
           array['LON', 'PAR'], 'Londres y París cargadas pero inactivas');
 select is((select currency from public.catalog_cities where code = 'LON'), 'GBP', 'Londres en libras');
 select is((select currency from public.catalog_cities where code = 'PAR'), 'EUR', 'París en euros');

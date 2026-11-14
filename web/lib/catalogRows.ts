@@ -10,7 +10,7 @@ const rowSchema = z.object({
   code: z.string().regex(/^[A-Z]{2,5}$/),
   name: z.string().min(1).max(40),
   country: z.string().min(1).max(60),
-  region: z.enum(["us_east", "us_west", "europe"]),
+  region: z.enum(["us_east", "us_west", "ar_patagonia", "br_coast", "europe"]),
   currency: z.string().regex(/^[A-Z]{3}$/),
   airports: z.array(z.string().regex(/^[A-Z]{3}$/)).min(1).max(5),
   lat: z.number().min(-90).max(90),

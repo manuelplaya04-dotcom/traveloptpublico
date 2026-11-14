@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { AIRPORT_COORDS } from "../lib/airports";
 import { CATALOG_SNAPSHOT } from "../lib/catalog.snapshot";
 import { toCities } from "../lib/catalogRows";
-import { activeCities, cityByCode, scopeGroups, scopeLabel, searchCities, setCatalog } from "../lib/cities";
+import { activeCities, cityByCode, sameArea, scopeGroups, scopeLabel, searchCities, setCatalog } from "../lib/cities";
 
 // Todas las migraciones, en orden: una posterior puede agregar ciudades o activarlas.
 const DIR = new URL("../../supabase/migrations/", import.meta.url);
@@ -53,7 +53,7 @@ describe("la copia de respaldo coincide con las migraciones que siembran la base
   // Cada ciudad en un INSERT de catalog_cities: ("NYC", "Nueva York", "Estados Unidos", "us_east", "America/New_York",
   // "{JFK,LGA,EWR}", 40.758, -73.9855, 4, "{0,2,3}", null, true, 10[, "USD"]) — con comillas simples en el SQL. La moneda
   // se agregó después (default USD).
-  const city = /\('([A-Z]{3})', '([^']+)', '([^']+)', '(us_east|us_west|europe)', '[^']+', '\{([A-Z,]+)\}', (-?[\d.]+), (-?[\d.]+), (\d+), (null|'\{[\d,]+\}'), (null|'[A-Z]+'), (true|false), \d+(?:, '([A-Z]{3})')?\)/g;
+  const city = /\('([A-Z]{3})', '([^']+)', '([^']+)', '(us_east|us_west|europe|ar_patagonia|br_coast)', '[^']+', '\{([A-Z,]+)\}', (-?[\d.]+), (-?[\d.]+), (\d+), (null|'\{[\d,]+\}'), (null|'[A-Z]+'), (true|false), \d+(?:, '([A-Z]{3})')?\)/g;
   const activate = /update public\.catalog_cities set active = true where code in \(([^)]+)\)/g;
   const seeded = new Map<string, Record<string, unknown>>();
   for (const sql of MIGRATIONS) {
@@ -71,7 +71,7 @@ describe("la copia de respaldo coincide con las migraciones que siembran la base
     .sort((a, b) => Number(a[2]) - Number(b[2])).map((m) => m[1]);
 
   it("mismas ciudades, datos, moneda, región, estado e imperdibles", () => {
-    expect(seeded.size).toBeGreaterThanOrEqual(12); // las expresiones siguen encontrando las filas sembradas
+    expect(seeded.size).toBeGreaterThanOrEqual(32); // las expresiones siguen encontrando las filas sembradas
     expect([...seeded.keys()].sort()).toEqual(CATALOG_SNAPSHOT.map((c) => c.code).sort());
     for (const s of seeded.values()) {
       const snap = CATALOG_SNAPSHOT.find((c) => c.code === s.code)!;
@@ -86,7 +86,8 @@ describe("alcance de la beta", () => {
   const only = (...regions: string[]) => CATALOG_SNAPSHOT.map((c) => ({ ...c, active: regions.includes(c.region) }))
     .filter((c) => c.active);
   it("un renglón por región, en orden, con sus ciudades", () => {
-    expect(scopeGroups(activeCities()).map((g) => g.title)).toEqual(["Costa Este de EE. UU.", "Costa Oeste de EE. UU."]);
+    expect(scopeGroups(activeCities()).map((g) => g.title)).toEqual(
+      ["Costa Este de EE. UU.", "Costa Oeste de EE. UU.", "Patagonia argentina", "Costa de Brasil"]);
     expect(scopeGroups(activeCities())[1].cities).toBe("Los Ángeles, San Francisco y Las Vegas");
     expect(scopeGroups(only("us_east", "us_west", "europe")).map((g) => g.region)).toEqual(["us_east", "us_west", "europe"]);
     expect(scopeGroups([])).toEqual([]);
@@ -96,7 +97,7 @@ describe("alcance de la beta", () => {
     expect(scopeLabel(only("us_east"))).toBe("la Costa Este de EE. UU.");
     expect(scopeLabel(only("us_east", "us_west"))).toBe("la Costa Este y la Costa Oeste de EE. UU.");
     expect(scopeLabel(only("us_east", "us_west", "europe"))).toBe("la Costa Este y la Costa Oeste de EE. UU. y Europa");
-    expect(scopeLabel(activeCities())).toBe("la Costa Este y la Costa Oeste de EE. UU.");
+    expect(scopeLabel(activeCities())).toBe("la Costa Este y la Costa Oeste de EE. UU., la Patagonia argentina y la costa de Brasil");
   });
 });
 
@@ -104,5 +105,24 @@ describe("datos por ciudad activa", () => {
   it("todo aeropuerto de una ciudad activa tiene coordenadas (traslado por calle desde el alojamiento)", () => {
     const missing = activeCities().flatMap((c) => c.airports).filter((a) => !AIRPORT_COORDS[a]);
     expect(missing).toEqual([]);
+  });
+});
+
+describe("zonas que comparten aeropuerto", () => {
+  const c = (code: string) => cityByCode(code)!;
+  it("no se combinan la base y su satélite, ni dos satélites de la misma base", () => {
+    expect(sameArea(c("RIO"), c("BUZ"))).toBe(true);
+    expect(sameArea(c("BUZ"), c("CFR"))).toBe(true); // las dos se visitan desde Río (CFB/GIG)
+    expect(sameArea(c("BAR"), c("VLA"))).toBe(true);
+    expect(sameArea(c("NYC"), c("BKN"))).toBe(true);
+    expect(sameArea(c("BAR"), c("SMA"))).toBe(false); // aeropuertos distintos: hay vuelo o se elige una
+    expect(sameArea(c("RIO"), c("RIO"))).toBe(false);
+  });
+
+  it("Ámsterdam y el resto de Europa quedan cargadas pero no se pueden buscar todavía", () => {
+    for (const code of ["MAD", "BCN", "IBZ", "TFE", "AMS", "BRG"]) expect(c(code).active, code).toBe(false);
+    expect(searchCities("amster")).toEqual([]);
+    expect(searchCities("bari")[0]?.code).toBe("BAR");
+    expect(searchCities("buzios")[0]?.code).toBe("BUZ"); // sin acentos
   });
 });

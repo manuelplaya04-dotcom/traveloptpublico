@@ -1,15 +1,16 @@
 import NumberField from "@/components/ui/NumberField";
 import { cityByCode, ORIGINS } from "@/lib/cities";
-import { addDays, MAX_DAYS_AHEAD, todayIso } from "@/lib/dates";
+import { addDays, earliestDepart, MAX_DAYS_AHEAD, todayIso } from "@/lib/dates";
 import { fmtDay } from "@/lib/format";
 import {
-  FLEX_DAYS, PAX, returnBounds, returnDate, withReturnDate, type OnboardingState,
+  FLEX_DAYS, PAX, returnBounds, returnDate, tooSoon, withReturnDate, type OnboardingState,
 } from "@/lib/onboarding";
 
 const input = "rounded-xl border border-line bg-white px-3 py-2.5 text-ink outline-none transition focus:border-accent focus:ring-4 focus:ring-accent-soft";
 
 // Ida, vuelta y duración vinculadas: la vuelta es siempre ida + noches. Elegir la vuelta recalcula las noches;
-// el calendario de vuelta solo ofrece fechas entre 1 y 60 noches después de la ida, y el de ida no ofrece el pasado.
+// el calendario de vuelta solo ofrece fechas entre 1 y 60 noches después de la ida, y el de ida empieza a 2 días de hoy
+// (antes casi no hay vuelos: la búsqueda fallaría y gastaría cuota). El motivo se lee debajo del campo, no se esconde.
 // Solo se renderiza en el cliente (paso 2 del modal), así "hoy" es la fecha de la persona y no la del build.
 export default function StepDates({ s, set }: { s: OnboardingState; set: (patch: Partial<OnboardingState>) => void }) {
   const today = todayIso();
@@ -37,9 +38,11 @@ export default function StepDates({ s, set }: { s: OnboardingState; set: (patch:
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1.5">
           <span className="text-sm font-medium text-ink">{s.services.flights ? "Fecha de ida (primera noche)" : "Primera noche del viaje"}</span>
-          <input type="date" className={input} value={s.departDate} min={today} max={addDays(today, MAX_DAYS_AHEAD)}
-            onChange={(e) => set({ departDate: e.target.value })} />
-          {s.services.flights && <span className="text-xs text-muted">Si conviene, el vuelo sale la noche anterior.</span>}
+          <input type="date" className={input} value={s.departDate} min={earliestDepart(today)} max={addDays(today, MAX_DAYS_AHEAD)}
+            aria-describedby="depart-hint" onChange={(e) => set({ departDate: e.target.value })} />
+          <span id="depart-hint" className="text-xs text-muted" data-testid="depart-hint">
+            {tooSoon(today)}{s.services.flights ? " Si conviene, el vuelo sale la noche anterior." : ""}
+          </span>
         </label>
         <label className="flex flex-col gap-1.5">
           <span className="text-sm font-medium text-ink">{s.services.flights ? "Fecha de vuelta" : "Último día (check-out)"}</span>

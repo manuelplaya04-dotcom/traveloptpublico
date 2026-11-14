@@ -6,7 +6,7 @@ import WeatherIcon from "@/components/ui/WeatherIcon";
 import { fmtDay, stayDays, weatherKind, type WeatherKind } from "@/lib/format";
 import { estimateTrip, fmtTrip, hasCoords, type Trip } from "@/lib/geo";
 import { activityPriceHint, activityPriceLabel } from "@/lib/activityPrice";
-import { fmtMinor } from "@/lib/money";
+import { useMoney } from "@/components/money/MoneyProvider";
 import type { ItineraryPayload, WeatherDay } from "@/lib/types";
 
 type Stay = ItineraryPayload["stays"][number];
@@ -24,6 +24,7 @@ export default memo(function ActivityPlan({ stay, lodging, weather, maxRain, tra
   stay: Stay; lodging: { name: string; lat?: number | null; lon?: number | null } | null; weather: WeatherDay[]; maxRain: number;
   travelDaysFree: boolean; roads?: Map<string, Trip>; // rutas reales por calle (OSRM) por nombre de actividad
 }) {
+  const money = useMoney(); // precios en la moneda elegida (USD o pesos)
   // Distancia desde el alojamiento elegido a cada actividad: ruta real si la hay; si no, estimación en línea recta.
   const tripTo = (a: { name: string; lat?: number | null; lon?: number | null }) =>
     roads?.get(a.name) ?? (hasCoords(lodging) && hasCoords(a) ? estimateTrip(lodging, a) : undefined);
@@ -75,7 +76,7 @@ export default memo(function ActivityPlan({ stay, lodging, weather, maxRain, tra
                         <span className="flex items-center gap-3 text-sm">
                           <span className="whitespace-nowrap font-semibold text-ink" title={activityPriceHint(a.price_source, a.price_date_based)}>
                             {a.price_source === "box_office" || a.price_source === "curated"
-                              ? activityPriceLabel(a.cost_minor, a.price_source, a.price_date_based) : fmtMinor(a.cost_minor)}
+                              ? activityPriceLabel(a.cost_minor, a.price_source, a.price_date_based, money) : money(a.cost_minor)}
                           </span>
                           {href && <a href={href} target="_blank" rel="noopener noreferrer" className="whitespace-nowrap text-xs font-medium text-accent hover:underline">Comprar <ExternalIcon /></a>}
                         </span>

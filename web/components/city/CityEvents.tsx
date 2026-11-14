@@ -9,7 +9,7 @@ import ExternalIcon from "@/components/ui/ExternalIcon";
 import { Ticket } from "lucide-react";
 import { fmtDay } from "@/lib/format";
 import { safeHref } from "@/lib/links";
-import { fmtMinor } from "@/lib/money";
+import { useMoney } from "@/components/money/MoneyProvider";
 
 // engine/app/providers/events.py::CityEvent
 export type CityEvent = {
@@ -26,6 +26,7 @@ const SOURCE = { ticketmaster: "Ticketmaster", google_events: "Google" } as cons
 export default memo(function CityEvents({ city, cityName, start, end }: {
   city: string; cityName: string; start: string; end: string;
 }) {
+  const money = useMoney(); // precios en la moneda elegida (USD o pesos)
   const [events, setEvents] = useState<CityEvent[] | null>(null);
   useEffect(() => {
     const ctl = new AbortController();
@@ -47,7 +48,7 @@ export default memo(function CityEvents({ city, cityName, start, end }: {
         {events.map((e) => {
           const href = safeHref(e.link);
           const price = e.price_min_minor !== null
-            ? `Desde ${fmtMinor(e.price_min_minor)}${e.price_max_minor && e.price_max_minor > e.price_min_minor ? ` hasta ${fmtMinor(e.price_max_minor)}` : ""}`
+            ? `Desde ${money(e.price_min_minor)}${e.price_max_minor && e.price_max_minor > e.price_min_minor ? ` hasta ${money(e.price_max_minor)}` : ""}`
             : null;
           return (
             <div role="listitem" key={e.id} className="flex flex-col rounded-2xl bg-white p-4 shadow-sm lift transition-colors duration-300" data-testid="city-event">

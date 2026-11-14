@@ -6,7 +6,7 @@ import { flightCompareLinks, safeHref } from "@/lib/links";
 import type { FlightOption } from "@/lib/flights";
 import type { PriceTag } from "@/lib/market";
 import { airlineName, dayOffset, fmtDay, fmtDayOffset, fmtDuration, fmtTime, REJECTION_LABEL, sourceName } from "@/lib/format";
-import { fmtMinor } from "@/lib/money";
+import { useMoney } from "@/components/money/MoneyProvider";
 import { ADVICE_LABEL, ADVICE_STYLE, type Advice } from "@/lib/priceAdvice";
 import CardInfo from "@/components/ui/CardInfo";
 import MapButton from "@/components/ui/MapButton";
@@ -21,6 +21,7 @@ export default memo(function FlightCard({ option, pax, bagsPerPax, optimal, sele
   mapFocus?: MapFocus | null; // aeropuerto en el mapa de una ciudad del viaje
   onSelect: (o: FlightOption) => void;
 }) {
+  const money = useMoney(); // precios en la moneda elegida (USD o pesos)
   const { offer: f, costMinor, rejection } = option;
   const href = safeHref(f.deeplink);
   const offset = fmtDayOffset(dayOffset(f.depart_at, f.arrive_at));
@@ -80,13 +81,13 @@ export default memo(function FlightCard({ option, pax, bagsPerPax, optimal, sele
       <p className="mt-4 mb-6 text-xs text-muted">
         {f.included_bags > 0 ? `${f.included_bags} valija incluida por persona`
           : extraBags > 0 && f.bag_fee_known === false ? "Valija: costo no incluido (depende de la tarifa; ver en la aerolínea)"
-          : extraBags > 0 ? `Valija: +${fmtMinor(f.bag_fee_minor)} por persona` : "Sin valija despachada"}
+          : extraBags > 0 ? `Valija: +${money(f.bag_fee_minor)} por persona` : "Sin valija despachada"}
       </p>
 
       <footer className="mt-auto flex flex-col gap-4 border-t border-line pt-4">
         <div>
-          <p className="whitespace-nowrap font-display text-2xl font-extrabold text-ink" data-testid="flight-price">{fmtMinor(costMinor)}</p>
-          <p className="text-xs text-muted">{pax} pasajeros · {fmtMinor(Math.round(costMinor / pax))} c/u</p>
+          <p className="whitespace-nowrap font-display text-2xl font-extrabold text-ink" data-testid="flight-price">{money(costMinor)}</p>
+          <p className="text-xs text-muted">{pax} pasajeros · {money(Math.round(costMinor / pax))} c/u</p>
           {!rejection && signals && (
             <div className="mt-2 flex items-center justify-between gap-2">
               <VsAverage diff={signals.diff} />

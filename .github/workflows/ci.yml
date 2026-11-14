@@ -57,6 +57,10 @@ jobs:
         env:
           NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:55321
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder
+      # Presupuesto de rendimiento sobre ese mismo build (perf/budget.perf.ts): portada y modal con la CPU frenada 4x.
+      # Sin base ni motor: el catálogo sale de la copia de respaldo. Falla si se pierden cuadros o se bloquea el hilo.
+      - run: npx playwright install --with-deps chromium
+      - run: npm run perf
 
   secrets:
     runs-on: ubuntu-latest

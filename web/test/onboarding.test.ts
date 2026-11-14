@@ -55,6 +55,11 @@ describe("onboarding", () => {
     expect(req.fixed_order).toBe(true);
   });
 
+  it("optimizar el orden manda fixed_order: false (solo con dos o más destinos)", () => {
+    expect(buildTripRequest({ ...GOLDEN, optimizeOrder: true }).fixed_order).toBe(false);
+    expect(buildTripRequest({ ...GOLDEN, optimizeOrder: true, totalNights: 8, cities: [GOLDEN.cities[0]] }).fixed_order).toBe(true);
+  });
+
   it("ida, vuelta y duración están vinculadas: la vuelta es ida + noches", () => {
     expect(returnDate(GOLDEN)).toBe("2027-07-20"); // 8 jul + 12 noches
     expect(returnDate({ departDate: "2027-07-08", totalNights: 5 })).toBe("2027-07-13");
@@ -73,7 +78,12 @@ describe("onboarding", () => {
 
   it("no acepta fechas pasadas, inexistentes ni años absurdos", () => {
     expect(errors({ departDate: "2026-10-31" }).dates).toContain("La fecha de ida no puede estar en el pasado.");
-    expect(errors({ departDate: "2026-11-01" }).dates).toEqual([]); // hoy sí
+    // Margen de 2 días: hoy y mañana no (la búsqueda fallaría por falta de vuelos), pasado mañana sí.
+    for (const d of ["2026-11-01", "2026-11-02"]) {
+      expect(errors({ departDate: d }).dates, d).toEqual([
+        "La primera noche puede ser desde el mar, 3 nov: con menos de 48 h casi no quedan vuelos ni lugar, y la búsqueda fallaría."]);
+    }
+    expect(errors({ departDate: "2026-11-03" }).dates).toEqual([]);
     expect(errors({ departDate: "+102027-07-08" }).dates).toContain("Elegí una fecha de ida válida.");
     expect(errors({ departDate: "2027-02-30" }).dates).toContain("Elegí una fecha de ida válida.");
     expect(errors({ departDate: "2030-01-01" }).dates).toContain("Podés planificar hasta 2 años adelante.");
@@ -86,8 +96,9 @@ describe("onboarding", () => {
     expect(req.cities.map((c) => c.name)).toEqual(["Orlando", "Nueva York"]);
   });
 
-  it("un viaje nuevo arranca hoy y sin destinos (nunca una fecha fija)", () => {
-    expect(initialState("2026-11-01")).toMatchObject({ departDate: "2026-11-01", cities: [], flexDays: 0 });
+  it("un viaje nuevo arranca en la primera fecha posible y sin destinos (nunca una fecha fija)", () => {
+    expect(initialState("2026-11-01")).toMatchObject({ departDate: "2026-11-03", cities: [], flexDays: 0, optimizeOrder: false });
+    expect(initialState("").departDate).toBe(""); // en el servidor no hay "hoy" de la persona
     expect(validate(initialState("2026-11-01"), "2026-11-01").dates).toEqual([]);
   });
 
@@ -127,10 +138,17 @@ describe("buscador y reparto", () => {
 });
 
 describe("Fase 1: catálogo y calibración", () => {
-  it("buscables: las 7 de la Costa Este y las 3 de la Costa Oeste (Europa cargada, todavía inactiva)", async () => {
+  it("buscables: EE. UU., Patagonia y costa de Brasil (Europa cargada, todavía inactiva)", async () => {
     const { activeCities } = await import("../lib/cities");
-    expect(activeCities().map((c) => c.name).sort()).toEqual(["Boston", "Brooklyn", "Filadelfia", "Las Vegas",
-      "Los Ángeles", "Miami", "Nueva York", "Orlando", "San Francisco", "Washington D.C."]);
+    const count = (region: string) => activeCities().filter((c) => c.region === region).length;
+    expect([count("us_east"), count("us_west"), count("ar_patagonia"), count("br_coast"), count("europe")])
+      .toEqual([7, 3, 4, 10, 0]);
+  });
+
+  it("origen \"Ezeiza o Aeroparque\" busca desde los dos aeropuertos; el golden sigue saliendo de Ezeiza", () => {
+    expect(buildTripRequest(GOLDEN).origin_airports).toEqual(["EZE"]);
+    expect(buildTripRequest({ ...GOLDEN, origin: "BUE" }).origin_airports).toEqual(["EZE", "AEP"]);
+    expect(buildTripRequest({ ...GOLDEN, origin: "AEP" }).origin_airports).toEqual(["AEP"]);
   });
   it("los imperdibles nunca superan lo que entra en las noches asignadas", () => {
     const req = (orl: number, nyc: number) =>

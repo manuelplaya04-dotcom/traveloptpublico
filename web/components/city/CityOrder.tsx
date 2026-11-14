@@ -8,10 +8,12 @@ import type { TripRequest } from "@/lib/contracts";
 import { createRun, runErrorMessage } from "@/lib/runs";
 
 // Orden de las ciudades: arrastrar y soltar (o ← →). Al confirmar se lanza una corrida nueva con ese orden fijo:
-// cambian los vuelos de interconexión, las fechas de cada estadía y todo lo demás se re-optimiza.
-export default function CityOrder({ req }: { req: TripRequest }) {
+// cambian los vuelos de interconexión, las fechas de cada estadía y todo lo demás se re-optimiza. Parte del orden del
+// itinerario (`order`), que con "Optimizar el orden" lo eligió el motor y puede no ser el de la lista del pedido. Si la
+// búsqueda fue con el orden fijo, ofrece probar todos los órdenes (fixed_order: false).
+export default function CityOrder({ req, order: itineraryOrder }: { req: TripRequest; order: string[] }) {
   const router = useRouter();
-  const original = req.cities.map((c) => c.code);
+  const original = itineraryOrder;
   const [order, setOrder] = useState(original);
   const [dragging, setDragging] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
@@ -31,12 +33,12 @@ export default function CityOrder({ req }: { req: TripRequest }) {
     setDragging(null);
   };
 
-  async function recalc() {
+  async function recalc(fixed: boolean) {
     setBusy(true);
     setError(null);
     try {
       const cities = order.map((code) => req.cities.find((c) => c.code === code)!);
-      router.push(`/runs/${await createRun({ ...req, cities, fixed_order: true })}`);
+      router.push(`/runs/${await createRun({ ...req, cities, fixed_order: fixed })}`);
     } catch (e) {
       setError(runErrorMessage(e));
       setBusy(false);
@@ -49,13 +51,22 @@ export default function CityOrder({ req }: { req: TripRequest }) {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h2 id="order-title" className="font-display text-lg font-bold text-ink">Orden del viaje</h2>
-          <p className="text-sm text-muted">Arrastrá las ciudades para cambiar el recorrido y recalculamos todo.</p>
+          <p className="text-sm text-muted">
+            {req.fixed_order
+              ? "Arrastrá las ciudades para cambiar el recorrido y recalculamos todo."
+              : "Este recorrido lo eligió el optimizador: es el más barato de todos los órdenes posibles. Podés cambiarlo igual."}
+          </p>
         </div>
         {changed && (
           <div className="flex gap-2">
             <Button variant="ghost" disabled={busy} onClick={() => setOrder(original)}>Deshacer</Button>
-            <Button disabled={busy} onClick={recalc}>{busy ? "Recalculando…" : "Recalcular con este orden"}</Button>
+            <Button disabled={busy} onClick={() => recalc(true)}>{busy ? "Recalculando…" : "Recalcular con este orden"}</Button>
           </div>
+        )}
+        {!changed && req.fixed_order && (
+          <Button variant="ghost" disabled={busy} data-testid="try-best-order" onClick={() => recalc(false)}>
+            {busy ? "Recalculando…" : "Probar el orden más barato"}
+          </Button>
         )}
       </div>
       <ol className="mt-5 flex flex-wrap items-center gap-2" aria-label="Ciudades en orden de visita">

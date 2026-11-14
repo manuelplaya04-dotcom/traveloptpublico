@@ -118,3 +118,17 @@ def test_el_respaldo_del_codigo_coincide_con_las_migraciones():
     assert min_nights == SEED_RULES.short_term_min_nights
     assert registration == SEED_RULES.registration_required
     assert {c: k for (c, _), (_, k) in rows.items()} == SEED_RULES.sources
+
+
+def test_amsterdam_y_brujas_exigen_registro_y_quedan_solo_hoteles():
+    """La respuesta real de Google Hotels, como si fuera de Ámsterdam: ninguna estadía salva a un alquiler (el registro
+    no figura en el anuncio) y los hoteles siguen, así que el optimizador ofrece solo hoteles."""
+    for code in ("AMS", "BRG"):
+        assert not SEED_RULES.rental_allowed(code, 2) and not SEED_RULES.rental_allowed(code, 60)
+        assert SEED_RULES.sources[code] == "official"
+    for nights in (3, 30):
+        stay = Stay("AMS", date(2027, 5, 10), date(2027, 5, 10) + timedelta(days=nights))
+        rentals = parse(REAL["rentals"], stay, "p", pax=4)
+        hotels = [o for o in parse(REAL["hotels"], stay, "p", pax=4) if o.units[0].bathrooms_source == "inferred_per_room"]
+        assert rentals and {lodging_rejection(o, stay, C, 4) for o in rentals} == {"lodging.short_term_not_legal"}
+        assert hotels and all(o.short_term_legal for o in hotels)

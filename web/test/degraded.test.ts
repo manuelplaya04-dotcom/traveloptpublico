@@ -50,5 +50,6 @@ describe("cuota: búsquedas parciales y plan acotado", () => {
     expect(n).toMatch(/fecha de ida exacta/);
     expect(n).toMatch(/noche anterior/);
     expect(n).toMatch(/solo hoteles/);
+    expect(narrowedNotice(["order"])).toMatch(/solo el orden en que elegiste los destinos/);
   });
 });

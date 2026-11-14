@@ -7,6 +7,7 @@ import { CartProvider, type Allowed } from "@/components/cart/CartContext";
 import SubtotalDock from "@/components/cart/SubtotalDock";
 import { lodgingSlot } from "@/components/city/LodgingFeed";
 import FlightHub, { flightSlot } from "@/components/flights/FlightHub";
+import MoneyProvider from "@/components/money/MoneyProvider";
 import CalendarButton from "@/components/planner/CalendarButton";
 import ShareButton from "@/components/planner/ShareButton";
 import TripOverview from "@/components/planner/TripOverview";
@@ -30,7 +31,11 @@ const Checkout = dynamic(() => import("@/components/checkout/Checkout"), { loadi
 
 // Carga el pedido y las ofertas de la corrida (RLS: solo las propias) y arma el flujo por pasos sobre la combinación
 // de fechas elegida (por defecto, la óptima). Cada combinación tiene su carrito.
-export default function TripPlanner({ runId, its, children }: { runId: string; its: ItineraryRow[]; children: ReactNode }) {
+// `orderNarrowed`: la cuota obligó a probar solo el orden de la lista (quota_narrowed "order"), así que para la cabecera
+// el pedido efectivo es de orden fijo y no se presenta el recorrido como "el más barato de todos".
+export default function TripPlanner({ runId, its, orderNarrowed = false, children }: {
+  runId: string; its: ItineraryRow[]; orderNarrowed?: boolean; children: ReactNode;
+}) {
   const { data, error, retry } = useRunData(runId);
   const [rank, setRank] = useState(1);
 
@@ -47,8 +52,11 @@ export default function TripPlanner({ runId, its, children }: { runId: string; i
           cargaste, hasta conectar proveedores reales.
         </p>
       )}
-      <TripOverview req={data.req} its={its} rank={rank} onRank={setRank} />
-      <Steps key={rank} runId={runId} rank={rank} best={best} data={data}>{children}</Steps>
+      {/* Moneda de los precios (USD o pesos): la cabecera, los pasos y el dock la comparten. */}
+      <MoneyProvider>
+        <TripOverview req={orderNarrowed ? { ...data.req, fixed_order: true } : data.req} its={its} rank={rank} onRank={setRank} />
+        <Steps key={rank} runId={runId} rank={rank} best={best} data={data}>{children}</Steps>
+      </MoneyProvider>
     </div>
   );
 }

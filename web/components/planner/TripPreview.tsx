@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import RouteMap, { type Stop } from "@/components/planner/RouteMap";
-import { cityByCode, ORIGINS } from "@/lib/cities";
+import { cityByCode, originFor } from "@/lib/cities";
 import { factsFor } from "@/lib/cityFacts";
 import type { TripRequest } from "@/lib/contracts";
 import { createClient } from "@/lib/supabase/client";
@@ -34,13 +34,18 @@ export default function TripPreview({ runId }: { runId: string }) {
   }, [facts.length]);
 
   if (!req) return null;
-  const home = ORIGINS.find((o) => o.code === req.origin_airports[0]);
+  const home = originFor(req.origin_airports);
   const homeStops: Stop[] = home ? [{ code: "HOME", name: home.name.split(" (")[0], lat: home.lat, lon: home.lon }] : [];
   const cityStops: Stop[] = req.cities.map((c) => ({ code: c.code, name: cityByCode(c.code)?.name ?? c.name ?? c.code, lat: c.lat, lon: c.lon }));
 
   return (
     <div className="mt-6 space-y-4 text-left" data-testid="trip-preview">
       <RouteMap stops={[...homeStops, ...cityStops, ...homeStops]} />
+      {!req.fixed_order && (
+        <p className="text-center text-sm text-muted" data-testid="preview-free-order">
+          Estamos probando todos los órdenes posibles: el recorrido del mapa es provisorio hasta tener el más barato.
+        </p>
+      )}
       <ul className="flex flex-wrap justify-center gap-2 text-sm text-ink">
         {req.cities.map((c) => (
           <li key={c.code} className="rounded-full bg-white px-3 py-1 ring-1 ring-line">

@@ -72,6 +72,7 @@ EGRESS_ALLOWLIST: frozenset[str] = frozenset({
     "router.project-osrm.org",
     "query.wikidata.org",
     "generativelanguage.googleapis.com",  # Gemini: explicador del embudo
+    "dolarapi.com",  # cotización del dólar en Argentina (solo para mostrar pesos; ver app/services/fx.py)
     # webhooks de alertas (la URL concreta es un secreto del entorno; ver app/services/alerts.py)
     "discord.com", "discordapp.com", "hooks.slack.com", "api.telegram.org",
 })
@@ -119,6 +120,7 @@ LIMITERS["wikidata_sparql"] = TokenBucket(rate_per_s=1, burst=2)  # servicio pú
 LIMITERS["osrm_public"] = TokenBucket(rate_per_s=1, burst=1)  # política del servidor público: 1 pedido por segundo
 LIMITERS["ticketmaster_discovery"] = TokenBucket(rate_per_s=4, burst=4)  # la API admite 5 por segundo
 LIMITERS["serpapi_account"] = TokenBucket(rate_per_s=1, burst=2)  # lectura de cuota: no consume búsquedas
+LIMITERS["dolarapi"] = TokenBucket(rate_per_s=1, burst=2)  # API pública sin clave; con la caché de 30 min alcanza
 
 
 def limiter_for(provider: str) -> TokenBucket:

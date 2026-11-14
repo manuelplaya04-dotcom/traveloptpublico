@@ -1,33 +1,51 @@
 import { z } from "zod";
+import { fmtMinor } from "@/lib/money";
 
-// Cotizaciones del dólar en Argentina (dolarapi.com, sin clave). Solo para mostrar el viaje en pesos: el total que
-// concilia al centavo sigue siendo el del motor, en dólares.
-const rowSchema = z.object({
-  casa: z.string(),
-  venta: z.number().positive().finite(),
-  fechaActualizacion: z.string(),
+// Cotización del dólar en Argentina para MOSTRAR precios en pesos. El motor la trae de dolarapi.com y la cachea en la
+// base (engine/app/services/fx.py); la web la pide a su propia ruta /api/fx. El total que concilia al centavo sigue
+// siendo el del motor, en dólares: esto es solo presentación.
+const rateSchema = z.object({
+  cents_per_usd: z.number().int().positive().max(1e9), // centavos de peso por dólar (entero: sin coma flotante)
+  updated_at: z.string(),
 });
-export const dolarApiSchema = z.array(rowSchema);
+export const engineFxSchema = z.object({
+  tarjeta: rateSchema,
+  mep: rateSchema,
+  source: z.literal("dolarapi.com"),
+  fetched_at: z.string(),
+  stale: z.boolean(),
+});
+export type FxRates = z.infer<typeof engineFxSchema>;
 
-export type Rate = { venta: number; updatedAt: string };
-export type FxRates = { tarjeta: Rate; mep: Rate; source: "dolarapi.com" };
+// Cómo se muestran los precios: en dólares (los del motor) o en pesos al dólar tarjeta o al MEP, las dos formas reales
+// de pagar un viaje en dólares desde Argentina.
+export type DisplayCurrency = "USD" | "tarjeta" | "mep";
+export const DISPLAY_CURRENCIES: readonly DisplayCurrency[] = ["USD", "tarjeta", "mep"];
 
-// Las dos formas reales de pagar un viaje en dólares desde Argentina: tarjeta (dólar tarjeta) o dólares comprados por
-// MEP ("bolsa" en dolarapi). Si falta alguna, no hay cotización (la sección se oculta, nada se inventa).
-export function pickRates(rows: z.infer<typeof dolarApiSchema>): FxRates | null {
-  const by = new Map(rows.map((r) => [r.casa, r]));
-  const t = by.get("tarjeta");
-  const m = by.get("bolsa");
-  if (!t || !m) return null;
-  return {
-    tarjeta: { venta: t.venta, updatedAt: t.fechaActualizacion },
-    mep: { venta: m.venta, updatedAt: m.fechaActualizacion },
-    source: "dolarapi.com",
-  };
+/** Centavos de dólar -> pesos enteros, con enteros (half-up, simétrico para los negativos). null si no es exacto. */
+export function arsFromUsdMinor(usdMinor: number, centsPerUsd: number): number | null {
+  const product = Math.abs(usdMinor) * centsPerUsd; // centavos de dólar × centavos de peso = pesos × 10.000
+  if (!Number.isSafeInteger(usdMinor) || !Number.isSafeInteger(centsPerUsd) || !Number.isSafeInteger(product)) return null;
+  const pesos = Math.floor((product + 5_000) / 10_000);
+  return usdMinor < 0 ? -pesos : pesos;
 }
 
-// Centavos de dólar -> pesos enteros (redondeo al peso más cercano; es una referencia, no un cobro).
-export const arsFromUsdMinor = (usdMinor: number, venta: number) => Math.round((usdMinor * venta) / 100);
-
+// Estándar argentino: punto para miles y coma para decimales ("$ 1.234.567"). Sin centavos: es una referencia y un
+// peso es menos que el error de la cotización del día. Un solo formateador por módulo (se llama por cada precio).
 const ARS_FORMAT = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
 export const fmtArs = (pesos: number) => ARS_FORMAT.format(pesos);
+const RATE_FORMAT = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", minimumFractionDigits: 2 });
+export const fmtRate = (centsPerUsd: number) => RATE_FORMAT.format(centsPerUsd / 100); // "$ 1.475,50" (solo texto)
+
+export type MoneyFormat = (usdMinor: number) => string;
+
+/** Formateador de precios para el modo elegido. Sin cotización (o con un monto no convertible) muestra USD: un precio
+ *  nunca queda en blanco ni se inventa una conversión. */
+export function moneyFormat(mode: DisplayCurrency, rates: FxRates | null): MoneyFormat {
+  if (mode === "USD" || !rates) return (m) => fmtMinor(m);
+  const cents = rates[mode].cents_per_usd;
+  return (m) => {
+    const pesos = arsFromUsdMinor(m, cents);
+    return pesos === null ? fmtMinor(m) : fmtArs(pesos);
+  };
+}

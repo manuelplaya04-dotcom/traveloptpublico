@@ -20,7 +20,7 @@ import { quotedTransport } from "@/lib/checkout";
 import { cityByCode } from "@/lib/cities";
 import type { TripRequest } from "@/lib/contracts";
 import { fmtDay } from "@/lib/format";
-import { fmtMinor } from "@/lib/money";
+import { useMoney } from "@/components/money/MoneyProvider";
 import type { ActivityOfferRow, ItineraryPayload, TransportQuote, WeatherDay } from "@/lib/types";
 
 type Stay = ItineraryPayload["stays"][number];
@@ -34,6 +34,7 @@ const CityMap = dynamic(() => import("@/components/city/CityMap"), {
 export default function CityDashboard({ index, stay, req, weather, transport, activities }: {
   index: number; stay: Stay; req: TripRequest; weather: WeatherDay[]; transport: TransportQuote[]; activities: ActivityOfferRow[];
 }) {
+  const money = useMoney(); // precios en la moneda elegida (USD o pesos)
   const c = req.constraints;
   const on = req.services;
   const lodging = useChosenLodging(stay);
@@ -41,10 +42,10 @@ export default function CityDashboard({ index, stay, req, weather, transport, ac
   // los que tienen ubicación real (nada de coordenadas inventadas).
   const points = useMemo<MapPoint[]>(() => [
     ...(stay.lodging_options ?? []).filter((o) => !o.rejection && o.offer_id !== lodging?.offer_id).filter(hasCoords)
-      .map((o) => ({ lat: o.lat, lon: o.lon, label: `${o.name} · ${fmtMinor(o.cost_minor ?? 0)}`, kind: "option" as const })),
+      .map((o) => ({ lat: o.lat, lon: o.lon, label: `${o.name} · ${money(o.cost_minor ?? 0)}`, kind: "option" as const })),
     ...(hasCoords(lodging) ? [{ lat: lodging.lat, lon: lodging.lon, label: lodging.name, kind: "lodging" as const }] : []),
     ...stay.activities.filter(hasCoords).map((a) => ({ lat: a.lat, lon: a.lon, label: a.name, kind: "activity" as const })),
-  ], [lodging, stay.activities, stay.lodging_options]);
+  ], [lodging, stay.activities, stay.lodging_options, money]);
   const info = cityByCode(stay.city);
   // Rutas reales por calle desde el alojamiento elegido: a los aeropuertos de la ciudad y a cada actividad.
   // sin vuelos cotizados no hay traslado al aeropuerto que mostrar

@@ -78,6 +78,7 @@ export default function OnboardingModal({ session, open, onClose }: { session: n
   const toggle = useCallback((code: string) => setS((prev) => ({ ...prev, ...toggleCity(prev, code) })), []);
   const setTotal = useCallback((totalNights: number) => set({ totalNights }), [set]);
   const setServices = useCallback((services: Services) => set({ services }), [set]);
+  const setOptimizeOrder = useCallback((optimizeOrder: boolean) => set({ optimizeOrder }), [set]);
 
   function next() {
     const errs = validate(s)[STEP_KEYS[step]];
@@ -153,8 +154,8 @@ export default function OnboardingModal({ session, open, onClose }: { session: n
           {step === 0 && (
             <div className="space-y-8">
               <ServiceToggles value={s.services} onChange={setServices} />
-              <StepDestinations stops={s.cities} totalNights={s.totalNights}
-                onChange={setCities} onToggle={toggle} onTotalChange={setTotal} />
+              <StepDestinations stops={s.cities} totalNights={s.totalNights} optimizeOrder={s.optimizeOrder}
+                onChange={setCities} onToggle={toggle} onTotalChange={setTotal} onOptimizeOrder={setOptimizeOrder} />
             </div>
           )}
           {step === 1 && <StepDates s={s} set={set} />}

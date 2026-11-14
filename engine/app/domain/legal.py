@@ -37,8 +37,8 @@ class LegalRules:
 # base). test_legal.py exige que coincidan.
 SEED_RULES = LegalRules(
     short_term_min_nights={"NYC": 30, "BKN": 30, "LAX": 31, "SFO": 30, "LAS": 31},
-    registration_required=frozenset({"PAR"}),
+    registration_required=frozenset({"PAR", "AMS", "BRG"}),
     sources={"NYC": "official", "BKN": "official", "LAX": "official", "SFO": "secondary", "LAS": "official",
-             "PAR": "official"},
+             "PAR": "official", "AMS": "official", "BRG": "official"},
 )
 FAIL_CLOSED = LegalRules(complete=False)

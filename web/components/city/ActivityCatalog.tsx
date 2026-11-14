@@ -6,7 +6,7 @@ import { memo, useMemo, useState } from "react";
 import { safeHref } from "@/lib/links";
 import Button from "@/components/ui/Button";
 import type { TripRequest } from "@/lib/contracts";
-import { fmtMinor } from "@/lib/money";
+import { useMoney } from "@/components/money/MoneyProvider";
 import { activityLoad } from "@/lib/onboarding";
 import { createRun, runErrorMessage } from "@/lib/runs";
 import Alert from "@/components/ui/Alert";
@@ -27,6 +27,7 @@ type Item = {
 // lo que quiere hacer y el motor re-optimiza el calendario: elige el día de cada actividad respetando clima, días
 // seguidos y capacidad diaria, al menor costo.
 export default memo(function ActivityCatalog({ req, city, offers }: { req: TripRequest; city: string; offers: ActivityOfferRow[] }) {
+  const money = useMoney(); // precios en la moneda elegida (USD o pesos)
   const router = useRouter();
   const current = req.cities.find((c) => c.code === city)?.must_do ?? [];
   const [chosen, setChosen] = useState<string[]>(current);
@@ -103,8 +104,8 @@ export default memo(function ActivityCatalog({ req, city, offers }: { req: TripR
                   {/* Precio debajo (no en una columna aparte): en tarjetas de 280 px la columna fija dejaba ~20 px al nombre. */}
                   <span className="mt-2 flex flex-wrap items-baseline gap-x-2 text-sm">
                     <span className="font-semibold text-ink">
-                      {it.source === "box_office" || it.source === "curated" ? activityPriceLabel(it.min, it.source, it.dateBased)
-                        : it.min === it.max ? fmtMinor(it.min) : `${fmtMinor(it.min)}–${fmtMinor(it.max).replace("USD ", "")}`}
+                      {it.source === "box_office" || it.source === "curated" ? activityPriceLabel(it.min, it.source, it.dateBased, money)
+                        : it.min === it.max ? money(it.min) : `${money(it.min)} a ${money(it.max)}`}
                     </span>
                     <span className="text-xs text-muted" title={activityPriceHint(it.source, it.dateBased)}>
                       {it.source === "box_office" ? "no se suma al total" : "por persona"}

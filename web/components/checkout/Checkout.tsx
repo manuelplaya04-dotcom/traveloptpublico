@@ -13,7 +13,7 @@ import { cityByCode } from "@/lib/cities";
 import type { TripRequest } from "@/lib/contracts";
 import type { FlightOption, Leg } from "@/lib/flights";
 import { airlineName, TRANSPORT_MODE } from "@/lib/format";
-import { fmtMinor } from "@/lib/money";
+import { useMoney } from "@/components/money/MoneyProvider";
 import type { ItineraryPayload, TransportQuote } from "@/lib/types";
 import Alert from "@/components/ui/Alert";
 import BuyTimingSlot from "@/components/ui/BuyTimingSlot";
@@ -25,6 +25,7 @@ type Link = { label: string; href: string | undefined };
 export default function Checkout({ best, req, legs, options, transport }: {
   best: ItineraryPayload; req: TripRequest; legs: Leg[]; options: FlightOption[][]; transport: TransportQuote[];
 }) {
+  const money = useMoney(); // precios en la moneda elegida (USD o pesos)
   const { cart, totals: t, budgetMinor } = useCart();
   const [confirmed, setConfirmed] = useState(false);
 
@@ -63,19 +64,19 @@ export default function Checkout({ best, req, legs, options, transport }: {
             {r.map((x) => (
               <div key={x.key} className="flex justify-between gap-3">
                 <dt className="text-muted">{x.label}</dt>
-                <dd className="tabular-nums text-ink" data-testid={`rubro-${x.key}`}>{fmtMinor(x.minor)}</dd>
+                <dd className="tabular-nums text-ink" data-testid={`rubro-${x.key}`}>{money(x.minor)}</dd>
               </div>
             ))}
           </dl>
           <div className="border-t border-line pt-4">
             <p className="text-sm text-muted">Total final</p>
-            <p className="font-display text-3xl font-black tracking-tight text-ink" data-testid="checkout-total">{fmtMinor(t.totalMinor)}</p>
+            <p className="font-display text-3xl font-black tracking-tight text-ink" data-testid="checkout-total">{money(t.totalMinor)}</p>
             <p className="mt-1 text-xs text-muted">
-              Por persona: <span data-testid="checkout-per-pax">{perPax.map((x) => fmtMinor(x)).join(" / ")}</span>
+              Por persona: <span data-testid="checkout-per-pax">{perPax.map((x) => money(x)).join(" / ")}</span>
             </p>
             {over > 0 && (
               <div className="mt-3">
-                <Alert tone="warning" compact data-testid="checkout-over-budget">Supera el presupuesto por {fmtMinor(over)}</Alert>
+                <Alert tone="warning" compact data-testid="checkout-over-budget">Supera el presupuesto por {money(over)}</Alert>
               </div>
             )}
           </div>

@@ -44,7 +44,7 @@ Dado que el orquestador depende de múltiples APIs externas, implementa patrones
 
 ---
 
-## Estado de cumplimiento (revisión 2026-10-28)
+## Estado de cumplimiento (revisión 2026-11-13)
 
 ✅ cumple · ◐ parcial · ☐ pendiente
 
@@ -65,13 +65,13 @@ Dado que el orquestador depende de múltiples APIs externas, implementa patrones
 | 3 | Índices SQL | ✅ | `search_runs (user_id, created_at)`, corridas activas, PK compuestas en ofertas e itinerarios. Revisar al pasar a modo live |
 | 3 | Caché del historial de clima | ✅ | `api_cache` por coordenadas, sin vencimiento para el histórico |
 | 3 | Lazy loading en el frontend | ✅ | `next/dynamic` en el dashboard por ciudad, el checkout, el detalle del clima y el mapa; la versión de impresión se monta al imprimir. CLS 0 en Optimizar → resultado; accesibilidad auditada con axe-core en los E2E |
-| 3 | Re-renders en interacciones de UI | ✅ | Carrusel: el estado de las flechas vive en un subcomponente (scroll pasivo agrupado por frame), la fila no se redibuja. "Ver en mapa": bus fuera de React, solo se redibuja la capa de resaltado del mapa; animación nativa de Leaflet. E2E de integración lista↔mapa (sin requests nuevas, sin tocar la selección, consola limpia) |
+| 3 | Re-renders en interacciones de UI | ✅ | Carrusel: el estado de las flechas vive en un subcomponente (scroll pasivo agrupado por frame), la fila no se redibuja. "Ver en mapa": bus fuera de React, solo se redibuja la capa de resaltado del mapa; animación nativa de Leaflet. E2E de integración lista↔mapa (sin requests nuevas, sin tocar la selección, consola limpia). Presupuesto de rendimiento automático en el CI (`web/perf`, decisión 23): falla si el modal pierde cuadros o la portada bloquea el hilo |
 | 3 | Llamadas concurrentes | ✅ | `Promise.all` en el planner, `asyncio.gather` en el clima, 5 extracciones en paralelo en n8n |
 | 4 | Exponential backoff | ✅ | Reintentos con jitter y respeto de `Retry-After` |
 | 4 | Circuit breaker | ✅ | Por proveedor: se abre tras 5 fallas seguidas (red, timeout, 429, 5xx), 30 s de enfriamiento, prueba semiabierta |
 | 4 | Timeout de 4 s para APIs no críticas | ✅ | `NONCRITICAL_DEADLINE_S=4` para clima y actividades (extracción y "Ver más"); la consulta sigue en segundo plano y calienta el caché |
 | 1 | Cuota de proveedores pagos por uso | ✅ | SerpApi (vuelos y hoteles, 250/mes): caché primero (30 min / 24 h), tope de búsquedas por corrida, limitador de cuenta compartido y medidor de cuota (`account.json`); agotada, modo histórico o error controlado `quota_exhausted` (decisión 10) |
-| 1 | SSRF en la web | ✅ | Los fetch del servidor Next van a hosts fijos (tiles OSM, dolarapi.com) o a una lista cerrada de hosts de fotos (`lib/photo.ts`, sin redirecciones, solo imagen, tamaño máximo) |
+| 1 | SSRF en la web | ✅ | Los fetch del servidor Next van a hosts fijos (tiles OSM; la cotización del dólar la trae el motor, con su lista blanca) o a una lista cerrada de hosts de fotos (`lib/photo.ts`, sin redirecciones, solo imagen, tamaño máximo) |
 | 4 | Alertas operativas | ✅ | `app/services/alerts.py`: log JSON + webhook asíncrono (secreto, hosts en lista blanca), throttling de 1 aviso por tipo cada 15 min, contexto sin PII |
 | 4 | Degradación elegante | ✅ | Clima o actividades caídos: el motor responde 200, marca `summary.degraded` de forma atómica y el optimizador sigue con vuelos y alojamiento. Advertencias `clima_no_disponible` / `actividades_no_disponibles`, aviso en la interfaz y etiqueta por actividad |
 
@@ -310,3 +310,56 @@ Dado que el orquestador depende de múltiples APIs externas, implementa patrones
     - El encabezado muestra el nombre del paso.
     - El slider de lluvia usa 0% y 100%.
     - El mensaje "sin resultados" del buscador sale del catálogo (decía "solo Costa Este").
+23. **Ruta óptima, fecha mínima, precios en pesos, expansión y presupuesto de rendimiento (2026-11-13):**
+    - **Fecha mínima de ida:** la primera noche puede ser desde pasado mañana (`MIN_LEAD_DAYS = 2`). Con menos casi no
+      quedan vuelos ni lugar y la búsqueda fallaría gastando cuota. El calendario no ofrece días anteriores y explica
+      por qué debajo del campo. El motor repite el control antes de crear la corrida (`422 depart_too_soon`), contado en
+      UTC con un día de tolerancia para no rechazar nunca lo que la web acepta. El caso de prueba (`case_key`) queda
+      exento porque no busca precios en vivo.
+    - **Ruta óptima:** el switch "Optimizar el orden de mi ruta" manda `fixed_order: false`. El motor ya probaba todas
+      las permutaciones (hasta 4 ciudades, 24 órdenes) con desempate explícito, así que es determinístico y coincide con
+      la fuerza bruta (`test_route_order.py`). **Costo:** probar todos los órdenes multiplica los tramos y las estadías
+      a cotizar (2 ciudades: ~el doble de búsquedas; 3: ~5 veces). Con la cuota gratuita de SerpApi (6 búsquedas pagas
+      por corrida) casi nunca entra sin caché. Por eso hay un cuarto recorte, `order` (el último que se resigna): si no
+      alcanza, se busca solo el orden de la lista y la web lo avisa. El golden no cambia, porque usa orden fijo.
+    - **Precios en pesos:** el motor trae dólar tarjeta y MEP de dolarapi.com y los cachea 30 min en `api_cache`
+      (`app/services/fx.py`, `GET /v1/fx/ars`). Sigue siendo el único que escribe en la base; Vercel no comparte memoria
+      entre instancias. Si la fuente falla, sirve la última cotización de hasta 24 h marcada como vieja; si no hay,
+      `503` y la web muestra USD con un aviso. La cotización viaja como centavos de peso por dólar (`int`) y la web
+      convierte con enteros (half-up). El motor, CP-SAT y los totales que concilian siguen en USD. El formato es el
+      argentino ("$ 1.234.567"), sin centavos porque es una referencia. Dos contextos de React separados: llegar la
+      cotización no redibuja ningún precio estando en USD, y cambiar de moneda redibuja solo los componentes con
+      precios, una vez. La web ya no llama a dolarapi.com: solo al motor.
+    - **Catálogo** (`20261113150000_catalog_global_expansion.sql`, idempotente; probado corriéndola dos veces con el
+      mismo hash del estado):
+      - Patagonia (4) y costa de Brasil (10) activas. Madrid, Barcelona, Ibiza, Tenerife, Ámsterdam y Brujas cargadas e
+        inactivas.
+      - Las ciudades que se visitan desde el aeropuerto de otra (Búzios desde Río, Villa La Angostura desde Bariloche)
+        llevan `same_area_as` y no se combinan: el motor une ciudades con vuelos, no por tierra. `sameArea` ahora
+        también agrupa dos satélites de la misma base.
+      - Sin imperdibles sembrados: cada uno necesita un precio publicado y verificable. Las atracciones reales llegan
+        de Wikidata.
+      - "Islas Canarias" se carga como Tenerife (un archipiélago no es una ciudad). Arapiraca no es costera: se llega
+        por Maceió.
+      - Origen nuevo: Aeroparque, y "Ezeiza o Aeroparque" (manda los dos aeropuertos), porque los vuelos a la Patagonia
+        y a Brasil salen casi siempre de Aeroparque.
+    - **Normas legales:** Ámsterdam y Brujas con `short_term_rental_registration_required` y fuente oficial (registro
+      en cada anuncio; en Ámsterdam también 4 huéspedes y 30 noches al año, que quedan en la nota porque el registro ya
+      descarta todo alquiler). España **sin norma cargada**: el registro único nacional (RD 1312/2024) habría sido
+      anulado por el Supremo en mayo de 2026, según fuentes secundarias, y rigen normas de cada comunidad todavía sin
+      revisar. Por eso Europa queda inactiva. Patagonia y Brasil sin norma: no se encontró una regla por estadía para
+      filtrar, y queda pendiente de revisión legal.
+    - **Presupuesto de rendimiento en el CI** (`web/perf/budget.perf.ts`, `npm run perf`): corre contra el build de
+      producción, con la CPU frenada 4x por CDP. Mide cuadros perdidos (rAF > 33 ms), el cuadro más largo (Long
+      Animation Frames) y la interacción más lenta (Event Timing).
+
+      | Tramo | Umbral | Medición normal | Con el desenfoque reinyectado |
+      |---|---|---|---|
+      | Switches del modal | < 20% de cuadros perdidos | 0–6% | 34% (falla) |
+      | Scroll del modal | < 12% de cuadros perdidos | 0–3% | 17% (falla) |
+      | Carga de la portada | < 2 s | 0,3–1,1 s, por la hidratación | solo frena saltos grandes |
+
+      Falta la página de resultados: necesita motor y base en el CI.
+    - **Arreglos de tests de punta a punta que ya fallaban:** el anillo de "Ver en mapa" se dibujaba, pero sin su clase.
+      Dentro de `pathOptions`, react-leaflet la aplica con `setStyle`, que no asigna clases; ahora va como opción de
+      Leaflet. Además, el contexto de celular del test de microcopy no marcaba el recorrido guiado como visto.

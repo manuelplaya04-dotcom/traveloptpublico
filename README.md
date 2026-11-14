@@ -8,7 +8,7 @@ o departamentos alcanza para el grupo y en qué día va cada actividad según el
 sueltas; TravelOpt optimiza el viaje completo y devuelve las 3 mejores combinaciones de fechas, con el costo conciliado
 al centavo y cada opción descartada con su motivo.
 
-- **Demo en vivo:** https://travelopt-rho.vercel.app (beta: Costa Este de EE. UU.)
+- **Demo en vivo:** https://travelopt-rho.vercel.app (beta: EE. UU., Patagonia argentina y costa de Brasil)
 - **Caso de referencia:** Buenos Aires → Orlando → Nueva York, 5 viajeros, 12 noches. Óptimo verificado:
   **USD 20,083.62**, el mismo con CP-SAT y con un oráculo de fuerza bruta.
 
@@ -109,6 +109,14 @@ flowchart LR
 - **Cotización modular.** Vuelos, alojamiento y actividades se pueden apagar ("ya lo tengo"): el módulo no se busca,
   no entra al modelo ni suma al total, y el explicador no puede nombrarlo. Un recorrido guiado liviano (sin
   dependencias) lo explica la primera vez.
+- **Ruta óptima.** Con "Optimizar el orden de mi ruta", CP-SAT prueba todos los órdenes de visita (hasta 24) y
+  devuelve el más barato, con desempate explícito (determinístico y verificado contra la fuerza bruta). Si la cuota de
+  precios en vivo no alcanza para cotizar todos los órdenes, lo dice y usa el orden elegido.
+- **Precios en pesos sin tocar el núcleo.** El motor y los totales siguen en USD (centavos). La cotización (dólar
+  tarjeta y MEP) la trae el motor, la cachea en Postgres y viaja como entero; la web convierte con aritmética entera y,
+  si no hay cotización, muestra USD con un aviso.
+- **Presupuesto de rendimiento en el CI.** El build de producción se mide con la CPU frenada 4x: el CI falla si el
+  modal pierde cuadros o la portada bloquea el hilo principal (calibrado reinyectando una regresión real).
 - **Incertidumbre modelada de forma explícita.** Si un dato no se sabe (cocina en un hotel, zona horaria de un
   aeropuerto, precio de una entrada), queda como `None` y no se supone. Una restricción dura solo acepta datos
   verificados.
@@ -117,7 +125,7 @@ flowchart LR
 - **Privacidad y legalidad.** Sesiones anónimas con CAPTCHA (Cloudflare Turnstile), sin registro. Las búsquedas se
   borran solas a los 30 días (Ley 25.326, minimización de datos). Las alertas operativas pasan por una lista blanca de
   campos, sin datos personales. Reglas de **alquiler temporario por ciudad** (por ejemplo, NYC Local Law 18: menos de
-  30 noches solo con anfitrión registrado; París: número de registro obligatorio), leídas de la base con fuente citada: el
+  30 noches solo con anfitrión registrado; París, Ámsterdam y Brujas: número de registro obligatorio), leídas de la base con fuente citada: el
   alquiler que no puede ser legal se descarta y quedan los hoteles. Si la norma no se puede leer, se descartan todos los alquileres (fallo cerrado).
 - **Seguridad (OWASP).** CSP con nonce por request y `strict-dynamic`. Lista blanca de hosts de salida contra SSRF. Links
   externos saneados. Rate limits por usuario y globales en Postgres. Ningún secreto en variables `NEXT_PUBLIC_`.

@@ -112,6 +112,7 @@ const NARROWED_LABEL: Record<string, string> = {
   flex: "solo tu fecha de ida exacta (sin los días de flexibilidad)",
   overnight: "sin vuelos que salgan la noche anterior",
   rentals: "solo hoteles (sin alquileres temporarios)",
+  order: "solo el orden en que elegiste los destinos (probar todos los órdenes necesitaba más búsquedas)",
 };
 
 export function narrowedNotice(steps: string[] | undefined): string | null {

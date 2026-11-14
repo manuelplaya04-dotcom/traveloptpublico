@@ -1,10 +1,11 @@
 import CityOrder from "@/components/city/CityOrder";
+import CurrencySwitch from "@/components/money/CurrencySwitch";
 import ArsTotal from "@/components/planner/ArsTotal";
 import RouteMap from "@/components/planner/RouteMap";
-import { cityByCode, ORIGINS } from "@/lib/cities";
+import { cityByCode, originFor } from "@/lib/cities";
 import type { TripRequest } from "@/lib/contracts";
 import { fmtDay } from "@/lib/format";
-import { fmtMinor } from "@/lib/money";
+import { useMoney } from "@/components/money/MoneyProvider";
 import type { ItineraryRow } from "@/lib/types";
 import Alert from "@/components/ui/Alert";
 
@@ -13,9 +14,10 @@ import Alert from "@/components/ui/Alert";
 export default function TripOverview({ req, its, rank, onRank }: {
   req: TripRequest; its: ItineraryRow[]; rank: number; onRank: (r: number) => void;
 }) {
+  const money = useMoney(); // precios en la moneda elegida (USD o pesos)
   const it = its.find((x) => x.rank === rank) ?? its[0];
   const best = it.payload;
-  const home = ORIGINS.find((o) => o.code === req.origin_airports[0]);
+  const home = originFor(req.origin_airports);
   // Solo puntos con coordenadas reales: nada de (0, 0) inventado en el mapa de ruta si falta un dato.
   const homeStops = home ? [{ code: "HOME", name: home.name.split(" (")[0], lat: home.lat, lon: home.lon }] : [];
   const cityStops = best.order.flatMap((c) => {
@@ -40,15 +42,16 @@ export default function TripOverview({ req, its, rank, onRank }: {
             </p>
           </div>
           <div>
-            <p className="text-sm text-muted">Total calculado</p>
-            <p className="font-display text-4xl font-black tracking-tight text-ink" data-testid="best-total">{fmtMinor(it.total_minor)}</p>
+            <CurrencySwitch />
+            <p className="mt-3 text-sm text-muted">Total calculado</p>
+            <p className="font-display text-4xl font-black tracking-tight text-ink" data-testid="best-total">{money(it.total_minor)}</p>
             <p className="mt-1 text-xs text-muted">
-              Por persona: <span data-testid="per-pax">{best.breakdown.per_pax_minor.map((x) => fmtMinor(x)).join(" / ")}</span>
+              Por persona: <span data-testid="per-pax">{best.breakdown.per_pax_minor.map((x) => money(x)).join(" / ")}</span>
             </p>
             <ArsTotal totalMinor={it.total_minor} />
             {over > 0 && (
               <div className="mt-3">
-                <Alert tone="warning" compact data-testid="over-budget">Supera el presupuesto por {fmtMinor(over)}</Alert>
+                <Alert tone="warning" compact data-testid="over-budget">Supera el presupuesto por {money(over)}</Alert>
               </div>
             )}
           </div>
@@ -73,8 +76,8 @@ export default function TripOverview({ req, its, rank, onRank }: {
                       <span className="text-muted">{fmtDay(x.payload.first_checkin)} · {x.payload.order.map((c) => `${cityByCode(c)?.name ?? c} ${x.payload.nights[c]}n`).join(" + ")}</span>
                       {x.rank === 1 && <span className="rounded-full bg-accent-soft px-2 py-0.5 text-accent">Óptimo</span>}
                     </span>
-                    <span className="mt-2 block font-display text-xl font-extrabold text-ink">{fmtMinor(x.total_minor)}</span>
-                    <span className="text-xs text-muted">{x.rank === 1 ? "La más barata" : `+${fmtMinor(x.total_minor - its[0].total_minor)}`}</span>
+                    <span className="mt-2 block font-display text-xl font-extrabold text-ink">{money(x.total_minor)}</span>
+                    <span className="text-xs text-muted">{x.rank === 1 ? "La más barata" : `+${money(x.total_minor - its[0].total_minor)}`}</span>
                   </button>
                 </li>
               );
@@ -83,7 +86,7 @@ export default function TripOverview({ req, its, rank, onRank }: {
         </div>
       )}
 
-      <CityOrder req={req} />
+      <CityOrder key={best.order.join()} req={req} order={best.order} />
     </section>
   );
 }

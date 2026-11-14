@@ -13,7 +13,7 @@ import secrets
 from contextlib import asynccontextmanager
 import time
 from time import perf_counter
-from datetime import date
+from datetime import UTC, date, datetime, timedelta
 from collections.abc import Awaitable, Callable, Coroutine
 from typing import Annotated, Any, TypeVar
 from uuid import UUID
@@ -41,11 +41,12 @@ from app.providers.weather import OpenMeteoClimatology, OpenMeteoForecast, histo
 from app.repo.base import NON_TERMINAL, RateLimited, Repository, RunLimits, RunRecord
 from app.repo.memory import MemoryRepository
 from app.services.cache import MemoryCache
+from app.services.fx import ars_rates
 from app.services.http import CircuitOpen, RequestStats, UpstreamError
 from app.services import alerts
 from app.services.alerts import counts as alert_counts
 from app.services.alerts import report
-from app.services.quota_plan import STEPS, effective_request, narrow, narrowed_steps
+from app.services.quota_plan import applicable_steps, effective_request, narrow, narrowed_steps
 from app.services import serpapi as serpapi_svc
 from app.services.serpapi import QuotaExhausted, SerpApi
 from app.services.ratelimit import SlidingWindow
@@ -206,6 +207,17 @@ async def _trigger_n8n(request: Request, run_id: str) -> None:
 
 
 CLIENT_KEY = re.compile(r"^[0-9a-f]{32}$")
+# Margen mínimo para la primera noche (mismo valor que `MIN_LEAD_DAYS` en web/lib/dates.ts): con menos casi no hay
+# vuelos y la búsqueda fallaría gastando cuota. Se cuenta en UTC con un día de tolerancia: la fecha de la persona puede
+# ir un día atrás de UTC (en Argentina, de 21 a 24 h), y así el motor nunca rechaza lo que la web acepta.
+MIN_LEAD_DAYS = 2
+
+
+def too_soon(first_night: date, now: datetime | None = None) -> bool:
+    today = (now or datetime.now(UTC)).date()
+    return first_night < today + timedelta(days=MIN_LEAD_DAYS - 1)
+
+
 LEGAL_RULES_TTL_S = 600
 
 
@@ -227,6 +239,9 @@ async def _create(request: Request, body: CreateRunIn, repo: Repository) -> dict
     # Sin user_id solo crean las rutas dev (bloqueadas en producción) y los tests.
     limits = RunLimits(s.max_active_runs_per_user, s.max_runs_per_user_hour, s.max_active_runs_total,
                        s.max_runs_per_client_hour) if user_id else None
+    # El caso de prueba (case_key) es de fixture: no busca precios en vivo, su fecha no gasta cuota.
+    if body.trip_request.case_key is None and too_soon(body.trip_request.first_checkin_from):
+        raise HTTPException(422, {"code": "depart_too_soon", "min_lead_days": MIN_LEAD_DAYS})
     # Clave seudónima de la conexión (la calcula la web con HMAC; el motor nunca ve la IP). En header y no en el cuerpo:
     # un motor anterior la ignora, así web y motor se pueden desplegar en cualquier orden. Con otro formato, se ignora.
     raw_key = request.headers.get("X-Client-Key", "")
@@ -249,6 +264,15 @@ async def healthz():
     s = get_settings()
     # Fuera de local solo "ok": entorno, modo y versión no se publican.
     return {"ok": True, "env": s.env, "default_mode": s.default_mode, "version": app.version} if s.is_dev else {"ok": True}
+
+
+@app.get("/v1/fx/ars", dependencies=[Depends(require_key)])
+async def fx_ars(request: Request):
+    """Dólar tarjeta y MEP para mostrar precios en pesos (ver app/services/fx.py). Solo lo llama el servidor de la web."""
+    rates = await ars_rates(request.app.state.http, request.app.state.cache)
+    if rates is None:
+        raise HTTPException(503, {"code": "fx_unavailable"})
+    return rates.model_dump(mode="json")
 
 
 @app.get("/v1/dev/openapi.json", dependencies=[Depends(require_key), Depends(dev_only)], include_in_schema=False)
@@ -298,7 +322,7 @@ async def _quota_steps(mode: str, req: TripRequest, request: Request) -> tuple[l
     if mode == "fixture" or not s.serpapi_api_key:
         return [], None
     state, steps, cost = request.app.state, [], 0
-    for step in (None, *STEPS):
+    for step in (None, *applicable_steps(req)):
         if step:
             steps.append(step)
         current = narrow(req, steps)

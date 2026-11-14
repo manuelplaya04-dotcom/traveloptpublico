@@ -6,9 +6,11 @@ import { fmtMinor } from "@/lib/money";
 export type PriceSource = "provider" | "curated" | "box_office";
 export const BOX_OFFICE_LABEL = "Paseo público / Entrada sujeta a taquilla";
 
-export function activityPriceLabel(minor: number, source: PriceSource | undefined, dateBased: boolean | undefined): string {
+// `fmt`: formateador de la moneda elegida (useMoney); por defecto, USD.
+export function activityPriceLabel(minor: number, source: PriceSource | undefined, dateBased: boolean | undefined,
+  fmt: (minor: number) => string = fmtMinor): string {
   if (source === "box_office") return BOX_OFFICE_LABEL;
-  return dateBased ? `desde ${fmtMinor(minor)}` : fmtMinor(minor);
+  return dateBased ? `desde ${fmt(minor)}` : fmt(minor);
 }
 
 export const activityPriceHint = (source: PriceSource | undefined, dateBased: boolean | undefined) =>

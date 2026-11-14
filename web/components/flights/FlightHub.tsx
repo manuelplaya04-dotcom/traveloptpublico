@@ -4,7 +4,7 @@ import { useMemo, useState, type KeyboardEvent } from "react";
 import { useCart } from "@/components/cart/CartContext";
 import FlightCard, { type FlightSignals } from "@/components/flights/FlightCard";
 import Rejected from "@/components/ui/Rejected";
-import { cityByCode, ORIGINS } from "@/lib/cities";
+import { cityByCode, originFor } from "@/lib/cities";
 import type { TripRequest } from "@/lib/contracts";
 import type { FlightOption, Leg } from "@/lib/flights";
 import { airlineName, fmtDay } from "@/lib/format";
@@ -12,10 +12,10 @@ import { dailyLows, fewSeats, groupStats, priceTags, vsAverage } from "@/lib/mar
 import Carousel from "@/components/ui/Carousel";
 import { usePriceAdvice } from "@/hooks/usePriceAdvice";
 import { airportFocus } from "@/lib/mapTargets";
-import { fmtMinor } from "@/lib/money";
+import { useMoney } from "@/components/money/MoneyProvider";
 
 const place = (code: string, req: TripRequest) =>
-  code === "HOME" ? (ORIGINS.find((o) => o.code === req.origin_airports[0])?.name.split(" (")[0] ?? "Casa")
+  code === "HOME" ? (originFor(req.origin_airports)?.name.split(" (")[0] ?? "Casa")
     : cityByCode(code)?.name ?? code;
 
 export const flightSlot = (leg: number) => `flight:${leg}`;
@@ -27,6 +27,7 @@ type Tab = number | "all"; // índice de tramo o todos juntos
 export default function FlightHub({ req, legs, options, runId }: {
   req: TripRequest; legs: Leg[]; options: FlightOption[][]; runId: string;
 }) {
+  const money = useMoney(); // precios en la moneda elegida (USD o pesos)
   const { cart, choose } = useCart();
   const advice = usePriceAdvice(runId);
   const [tab, setTab] = useState<Tab>(0);
@@ -79,7 +80,7 @@ export default function FlightHub({ req, legs, options, runId }: {
                 active ? "bg-white font-semibold text-ink shadow-sm" : "text-muted hover:text-ink"}`}>
               <span className="block">{leg ? kind(leg) : "Todos"}</span>
               <span className={`block text-xs ${active ? "text-accent" : "text-muted"}`}>
-                {leg ? (cost !== undefined ? fmtMinor(cost) : "—") : `${legs.length} tramos`}
+                {leg ? (cost !== undefined ? money(cost) : "—") : `${legs.length} tramos`}
               </span>
             </button>
           );
