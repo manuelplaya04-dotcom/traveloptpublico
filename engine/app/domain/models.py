@@ -53,8 +53,11 @@ class Constraints(BaseModel):
     min_bathrooms: int = Field(2, ge=0)
     min_bedrooms: int = Field(0, ge=0)
     max_stops: int = Field(1, ge=0)
-    earliest_departure_hour: int = Field(6, ge=0, le=23)
-    latest_arrival_hour: int = Field(23, ge=0, le=23)
+    # Franja horaria de los vuelos. None = sin límite: la persona no lo pidió. Un valor por defecto oculto filtraba vuelos
+    # reales (las salidas de madrugada desde Ezeiza) con el cartel "Sale antes de tu hora mínima" sin que nadie la
+    # hubiera elegido. El caso golden la fija de forma explícita (6 y 23).
+    earliest_departure_hour: int | None = Field(None, ge=0, le=23)
+    latest_arrival_hour: int | None = Field(None, ge=0, le=23)
     checked_bags_per_pax: int = Field(1, ge=0)
     allow_overnight_outbound: bool = True
     max_heavy_rain_prob: float = Field(0.5, ge=0, le=1)  # solo actividades outdoor
@@ -140,6 +143,21 @@ class TripRequest(BaseModel):
 # ---------------------------------------------------------------- ofertas
 
 
+class FlightSegment(BaseModel):
+    """Un vuelo del itinerario, tal como lo informa el proveedor. Nada se completa por inferencia."""
+    flight_number: Annotated[str, StringConstraints(pattern=r"^[A-Z0-9]{2} ?\d{1,4}[A-Z]?$")]  # "F9 2512"
+    airline: Annotated[str, StringConstraints(min_length=1, max_length=80)] | None = None  # nombre del proveedor
+    origin: IATA
+    destination: IATA
+
+
+class Layover(BaseModel):
+    """Escala entre dos segmentos. `airport` None: el proveedor no dijo dónde (se muestra como no informado)."""
+    airport: IATA | None = None
+    name: Annotated[str, StringConstraints(min_length=1, max_length=120)] | None = None
+    duration_min: int | None = Field(None, gt=0)
+
+
 class FlightOffer(BaseModel):
     kind: Literal["flight"] = "flight"
     id: str
@@ -154,7 +172,12 @@ class FlightOffer(BaseModel):
     arrive_utc: datetime | None = None
     duration_min: int | None = Field(None, gt=0)
     stops: int = Field(ge=0)
-    carrier: str
+    carrier: str  # código IATA de la aerolínea del primer segmento (sale del número de vuelo)
+    # Detalle del itinerario. None = el proveedor no lo informó (caso de prueba, simulado, ofertas guardadas antes de
+    # este cambio): la interfaz lo muestra como no informado, nunca lo deduce. Con datos reales, `layovers` tiene un
+    # elemento por escala (lista vacía = directo) y `segments`, un elemento por vuelo.
+    segments: list[FlightSegment] | None = Field(None, max_length=8)
+    layovers: list[Layover] | None = Field(None, max_length=7)
     price_per_pax_minor: int = Field(ge=0)  # tarifa final con impuestos
     included_bags: int = Field(0, ge=0)  # valijas despachadas incluidas por pax
     bag_fee_minor: int = Field(0, ge=0)  # por valija extra y por pax

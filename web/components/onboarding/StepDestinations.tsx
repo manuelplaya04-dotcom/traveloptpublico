@@ -1,5 +1,5 @@
-import { FlaskConical } from "lucide-react";
-import { memo } from "react";
+import { ChevronDown, FlaskConical } from "lucide-react";
+import { memo, useSyncExternalStore } from "react";
 import CitySearch from "@/components/onboarding/CitySearch";
 import RouteOrderSwitch from "@/components/onboarding/RouteOrderSwitch";
 import CountControl from "@/components/ui/CountControl";
@@ -87,15 +87,26 @@ export default memo(function StepDestinations({ stops, totalNights, optimizeOrde
 // catálogo de la base: si se activa una ciudad, el aviso se actualiza solo.
 const NIGHTS_UNIT = ["noche", "noches"] as const;
 
-// Un renglón por región: se escanea de un vistazo en vez de leer un párrafo largo.
+// Un renglón por región: se escanea de un vistazo en vez de leer un párrafo largo. Se puede minimizar (queda el título,
+// que también es la descripción accesible del buscador) y la elección se recuerda en este navegador.
 function BetaScope() {
+  const [collapsed, setCollapsed] = useBetaCollapsed();
   return (
     <div id="beta-scope" data-testid="beta-scope" className="mt-3 mb-4 rounded-xl bg-accent-soft/60 px-4 py-3 text-sm text-ink">
-      <p className="font-semibold">
-        <FlaskConical aria-hidden className="mr-1 inline size-4 align-text-bottom text-accent" />
-        Fase de prueba (Beta): por ahora, solo estas ciudades.
-      </p>
-      <ul className="mt-2 space-y-1.5">
+      <div className="flex items-start justify-between gap-3">
+        <p className="font-semibold">
+          <FlaskConical aria-hidden className="mr-1 inline size-4 align-text-bottom text-accent" />
+          Fase de prueba (Beta): por ahora, solo estas ciudades.
+        </p>
+        <button type="button" aria-expanded={!collapsed} aria-controls="beta-scope-list" data-testid="beta-scope-toggle"
+          onClick={() => setCollapsed(!collapsed)}
+          className="flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold text-accent-hover
+            hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+          {collapsed ? "Ver ciudades" : "Minimizar"}
+          <ChevronDown aria-hidden className={`size-4 transition-transform ${collapsed ? "" : "rotate-180"}`} />
+        </button>
+      </div>
+      <ul id="beta-scope-list" hidden={collapsed} className="mt-2 space-y-1.5">
         {scopeGroups(activeCities()).map((g) => (
           <li key={g.region} className="flex gap-2">
             <span aria-hidden className="mt-2 size-1.5 shrink-0 rounded-full bg-accent" />
@@ -133,4 +144,35 @@ function IconButton(props: { label: string; disabled?: boolean; onClick: () => v
       {props.children}
     </button>
   );
+}
+
+// Aviso Beta minimizado o no, recordado en este navegador. useSyncExternalStore: en el servidor (y sin almacenamiento
+// legible) siempre expandido, así la hidratación coincide y nunca se esconde el alcance por un error.
+const BETA_KEY = "travelopt:beta-scope-collapsed:v1";
+const betaListeners = new Set<() => void>();
+let betaInMemory = false; // sin almacenamiento, vale para esta pestaña
+function readBetaCollapsed(): boolean {
+  try {
+    return localStorage.getItem(BETA_KEY) === "1";
+  } catch {
+    return betaInMemory;
+  }
+}
+function useBetaCollapsed(): [boolean, (v: boolean) => void] {
+  const collapsed = useSyncExternalStore(
+    (cb) => { betaListeners.add(cb); return () => { betaListeners.delete(cb); }; },
+    readBetaCollapsed,
+    () => false,
+  );
+  const set = (v: boolean) => {
+    betaInMemory = v;
+    try {
+      if (v) localStorage.setItem(BETA_KEY, "1");
+      else localStorage.removeItem(BETA_KEY);
+    } catch {
+      // sin almacenamiento: queda en memoria (betaInMemory) hasta recargar
+    }
+    for (const cb of betaListeners) cb();
+  };
+  return [collapsed, set];
 }

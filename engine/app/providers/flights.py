@@ -21,7 +21,7 @@ from datetime import date, datetime
 
 import httpx
 
-from app.domain.models import FlightOffer
+from app.domain.models import FlightOffer, FlightSegment, Layover
 from app.domain.timezones import flight_times
 from app.providers.bag_fees import bag_fee_per_bag_minor
 from app.optimizer.skeletons import FlightQuery
@@ -53,6 +53,42 @@ def _local(ts: str) -> datetime:
     return datetime.strptime(ts, "%Y-%m-%d %H:%M")
 
 
+_IATA = re.compile(r"^[A-Z]{3}$")
+
+
+def _text(v: object, limit: int) -> str | None:
+    return v.strip()[:limit] if isinstance(v, str) and v.strip() else None
+
+
+def _segments(raw: list) -> list[FlightSegment] | None:
+    """Cada vuelo del itinerario con su número, aerolínea y aeropuertos. Si alguno viene incompleto, None (no
+    informado): una lista a medias mostraría un itinerario que no es el real."""
+    out: list[FlightSegment] = []
+    for s in raw:
+        if not isinstance(s, dict):
+            return None
+        number = " ".join((s.get("flight_number") or "").split())
+        dep, arr = (s.get("departure_airport") or {}).get("id"), (s.get("arrival_airport") or {}).get("id")
+        if not _FLIGHT_NO.match(number) or not all(isinstance(a, str) and _IATA.match(a) for a in (dep, arr)):
+            return None
+        out.append(FlightSegment(flight_number=number, airline=_text(s.get("airline"), 80), origin=dep, destination=arr))
+    return out or None
+
+
+def _layovers(raw: object) -> list[Layover]:
+    """Escalas tal como las informa el proveedor; un aeropuerto ausente o mal formado queda en None (no se deduce)."""
+    out: list[Layover] = []
+    for x in raw if isinstance(raw, list) else []:
+        x = x if isinstance(x, dict) else {}
+        code, minutes = x.get("id"), x.get("duration")
+        out.append(Layover(
+            airport=code if isinstance(code, str) and _IATA.match(code) else None,
+            name=_text(x.get("name"), 120),
+            duration_min=minutes if isinstance(minutes, int) and not isinstance(minutes, bool) and minutes > 0 else None,
+        ))
+    return out
+
+
 def normalize(itinerary: dict, provider: str, deeplink: str | None,
               fetched_at: datetime | None = None, bags: int = 0) -> FlightOffer | None:
     """Una opción de `best_flights`/`other_flights` -> `FlightOffer`. None si falta algo imprescindible."""
@@ -69,6 +105,7 @@ def normalize(itinerary: dict, provider: str, deeplink: str | None,
         origin, destination = first["departure_airport"]["id"], last["arrival_airport"]["id"]
     except (KeyError, TypeError, ValueError):
         return None
+    layovers = _layovers(itinerary.get("layovers"))
     times = flight_times(origin, depart, destination, arrive)
     if times.duration_min is not None and times.duration_min <= 0:  # llega antes de salir: dato roto del proveedor
         report("flight_illogical_duration", "warning", provider=provider)
@@ -86,7 +123,9 @@ def normalize(itinerary: dict, provider: str, deeplink: str | None,
         depart_utc=times.depart_utc,
         arrive_utc=times.arrive_utc,
         duration_min=times.duration_min,
-        stops=len(itinerary.get("layovers") or []),
+        stops=len(layovers),
+        segments=_segments(segments),
+        layovers=layovers,
         carrier=m.group(1),
         price_per_pax_minor=price,
         seats_available=SEATS_UNKNOWN,

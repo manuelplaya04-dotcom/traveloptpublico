@@ -9,8 +9,8 @@ export const constraintsSchema = z.object({
   min_bathrooms: z.number().int().min(0).max(10),
   min_bedrooms: z.number().int().min(0).max(10),
   max_stops: z.number().int().min(0).max(3),
-  earliest_departure_hour: z.number().int().min(0).max(23),
-  latest_arrival_hour: z.number().int().min(0).max(23),
+  earliest_departure_hour: z.number().int().min(0).max(23).nullable(), // null = sin límite (motor: None)
+  latest_arrival_hour: z.number().int().min(0).max(23).nullable(),
   checked_bags_per_pax: z.number().int().min(0).max(3),
   allow_overnight_outbound: z.boolean(),
   max_heavy_rain_prob: z.number().min(0).max(1),

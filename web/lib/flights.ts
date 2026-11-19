@@ -57,8 +57,10 @@ export function legMatches(f: FlightOffer, leg: Leg): boolean {
 
 export function flightRejection(f: FlightOffer, leg: Leg, c: Constraints, pax: number): string | null {
   if (f.stops > c.max_stops) return "flight.too_many_stops";
-  if (minutes(f.depart_at) < c.earliest_departure_hour * 60) return "flight.departs_too_early";
-  if (leg.arriveOn !== null && minutes(f.arrive_at) > c.latest_arrival_hour * 60) return "flight.arrives_too_late";
+  if (c.earliest_departure_hour !== null && minutes(f.depart_at) < c.earliest_departure_hour * 60) return "flight.departs_too_early";
+  if (leg.arriveOn !== null && c.latest_arrival_hour !== null && minutes(f.arrive_at) > c.latest_arrival_hour * 60) {
+    return "flight.arrives_too_late";
+  }
   if (f.seats_available < pax) return "flight.insufficient_seats";
   return null;
 }
@@ -79,4 +81,19 @@ export function legOptions(leg: Leg, offers: FlightOffer[], req: TripRequest): F
     }))
     .sort((a, b) => Number(!!a.rejection) - Number(!!b.rejection) || a.costMinor - b.costMinor
       || a.offer.id.localeCompare(b.offer.id));
+}
+
+export type LegRole = "Ida" | "Vuelta" | "Interconexión";
+/** Qué tramo es: sale de casa (ida), vuelve a casa (vuelta) o une dos ciudades del viaje. */
+export const legRole = (l: Pick<Leg, "from" | "to">): LegRole =>
+  l.from === "HOME" ? "Ida" : l.to === "HOME" ? "Vuelta" : "Interconexión";
+
+// Filtro rápido "Llegar antes de" (hora local de llegada), sobre las ofertas ya cargadas: no busca nada nuevo.
+export const ARRIVAL_CUTOFFS = [8, 10, 12, 14, 16, 18, 20, 22] as const;
+export const arrivesBy = (f: Pick<FlightOffer, "arrive_at">, hour: number) => minutes(f.arrive_at) <= hour * 60;
+
+/** La opción elegible más barata que llega a tiempo (empate: la que llega antes). undefined si ninguna llega. */
+export function cheapestArrivingBy(opts: FlightOption[], hour: number): FlightOption | undefined {
+  return opts.filter((o) => !o.rejection && arrivesBy(o.offer, hour))
+    .sort((a, b) => a.costMinor - b.costMinor || minutes(a.offer.arrive_at) - minutes(b.offer.arrive_at))[0];
 }

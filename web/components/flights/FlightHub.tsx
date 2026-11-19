@@ -6,8 +6,9 @@ import FlightCard, { type FlightSignals } from "@/components/flights/FlightCard"
 import Rejected from "@/components/ui/Rejected";
 import { cityByCode, originFor } from "@/lib/cities";
 import type { TripRequest } from "@/lib/contracts";
-import type { FlightOption, Leg } from "@/lib/flights";
-import { airlineName, fmtDay } from "@/lib/format";
+import { ARRIVAL_CUTOFFS, arrivesBy, cheapestArrivingBy, type FlightOption, type Leg } from "@/lib/flights";
+import { airlineLabel } from "@/lib/flightDetail";
+import { fmtDay, fmtTime } from "@/lib/format";
 import { dailyLows, fewSeats, groupStats, priceTags, vsAverage } from "@/lib/market";
 import Carousel from "@/components/ui/Carousel";
 import { usePriceAdvice } from "@/hooks/usePriceAdvice";
@@ -31,6 +32,8 @@ export default function FlightHub({ req, legs, options, runId }: {
   const { cart, choose } = useCart();
   const advice = usePriceAdvice(runId);
   const [tab, setTab] = useState<Tab>(0);
+  // "Llegar antes de" por tramo (hora local). Solo filtra lo que se ve: el carrito y el total no cambian solos.
+  const [arriveBy, setArriveBy] = useState<Record<number, number | null>>({});
   const middles = legs.filter((l) => l.from !== "HOME" && l.to !== "HOME").length;
   const kind = (l: Leg) => l.from === "HOME" ? "Ida" : l.to === "HOME" ? "Vuelta"
     : middles > 1 ? `Interconexión ${l.index}` : "Interconexión";
@@ -38,7 +41,7 @@ export default function FlightHub({ req, legs, options, runId }: {
   const signals = useMemo(() => options.map((opts) => legSignals(opts, req.pax)), [options, req.pax]);
   const selectors = useMemo(() => legs.map((l) => (o: FlightOption) => choose(flightSlot(l.index), {
     id: o.offer.id, category: "vuelos", costMinor: o.costMinor,
-    label: `${airlineName(o.offer.carrier)} ${o.offer.origin}→${o.offer.destination}`,
+    label: `${airlineLabel(o.offer)} ${o.offer.origin}→${o.offer.destination}`,
   })), [legs, choose]);
   // Aeropuerto de cada oferta en el mapa de su ciudad: se calcula una vez por corrida (objetos estables para memo).
   const foci = useMemo(() => {
@@ -91,6 +94,12 @@ export default function FlightHub({ req, legs, options, runId }: {
         {shown.map((i) => {
           const leg = legs[i];
           const slot = flightSlot(leg.index);
+          const cutoff = arriveBy[leg.index] ?? null;
+          const eligible = options[i].filter((o) => !o.rejection);
+          const visible = cutoff === null ? eligible : eligible.filter((o) => arrivesBy(o.offer, cutoff));
+          const chosen = options[i].find((o) => o.offer.id === chosenId(leg));
+          const outside = cutoff !== null && chosen !== undefined && !arrivesBy(chosen.offer, cutoff);
+          const fallback = cutoff === null ? undefined : cheapestArrivingBy(options[i], cutoff);
           return (
             <div key={slot} className="space-y-5">
               <header className="flex flex-wrap items-baseline justify-between gap-2">
@@ -100,7 +109,29 @@ export default function FlightHub({ req, legs, options, runId }: {
                 </h3>
                 <p className="text-sm text-muted">{fmtDay(leg.arriveOn ?? leg.departDates[0])} · {options[i].length} opciones</p>
               </header>
-              {[options[i].filter((o) => !o.rejection), options[i].filter((o) => o.rejection)].map((group, g) => {
+              {eligible.length > 1 && (
+                <ArrivalFilter id={`arrive-by-${leg.index}`} value={cutoff} shown={visible.length} total={eligible.length}
+                  onChange={(v) => setArriveBy((prev) => ({ ...prev, [leg.index]: v }))} />
+              )}
+              {outside && (
+                <p role="status" data-testid="arrival-outside" className="rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                  Tu vuelo elegido llega a las {fmtTime(chosen.offer.arrive_at)}, después de las {cutoff}:00. Lo mantenemos (y el
+                  total no cambia) hasta que elijas otro.{" "}
+                  {fallback && (
+                    <button type="button" data-testid="arrival-pick" onClick={() => selectors[i](fallback)}
+                      className="font-semibold text-amber-950 underline underline-offset-2 hover:no-underline">
+                      Elegir el más barato que llega a tiempo ({fmtTime(fallback.offer.arrive_at)}, {money(fallback.costMinor)})
+                    </button>
+                  )}
+                </p>
+              )}
+              {cutoff !== null && visible.length === 0 && (
+                <p className="rounded-2xl bg-surface px-4 py-3 text-sm text-slate-700" data-testid="arrival-none">
+                  Ninguna opción llega antes de las {cutoff}:00. Probá con una hora más tarde.
+                </p>
+              )}
+              {[visible, options[i].filter((o) => o.rejection)].map((group, g) => {
+                if (group.length === 0) return null;
                 const grid = (
                   <Carousel label={`Vuelos ${kind(leg).toLowerCase()} ${place(leg.from, req)} a ${place(leg.to, req)}`}>
                     {group.map((o) => (
@@ -140,4 +171,23 @@ function legSignals(opts: FlightOption[], pax: number): Map<string, FlightSignal
     diff: vsAverage(o.costMinor, stats),
     trend,
   }]));
+}
+
+// "Llegar antes de": un <select> nativo (teclado y lector de pantalla sin trabajo extra) y cuántas opciones quedan.
+function ArrivalFilter({ id, value, shown, total, onChange }: {
+  id: string; value: number | null; shown: number; total: number; onChange: (v: number | null) => void;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+      <label htmlFor={id} className="font-medium text-ink">Llegar antes de</label>
+      <select id={id} data-testid={id} value={value ?? ""} onChange={(e) => onChange(e.target.value === "" ? null : Number(e.target.value))}
+        className="rounded-xl border border-line bg-white px-3 py-2 text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent-soft">
+        <option value="">Cualquier hora</option>
+        {ARRIVAL_CUTOFFS.map((h) => <option key={h} value={h}>las {h}:00</option>)}
+      </select>
+      <span className="text-xs text-slate-600" aria-live="polite">
+        {value === null ? "Hora local de llegada" : `${shown} de ${total} opciones llegan a tiempo`}
+      </span>
+    </div>
+  );
 }

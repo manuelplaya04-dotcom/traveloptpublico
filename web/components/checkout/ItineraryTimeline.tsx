@@ -1,7 +1,8 @@
 import { BedDouble, Clock, House, Luggage, MapPin, Moon, Plane, Sunset, Ticket, type LucideIcon } from "lucide-react";
 import { cityByCode } from "@/lib/cities";
 import type { DayGroup, DayTag } from "@/lib/checkout";
-import { airlineName, dayOffset, fmtDay, fmtDayOffset, fmtDuration, fmtTime } from "@/lib/format";
+import { airlineLabel } from "@/lib/flightDetail";
+import { dayOffset, fmtDay, fmtDayOffset, fmtDuration, fmtTime } from "@/lib/format";
 
 const cityName = (code: string) => cityByCode(code)?.name ?? code;
 
@@ -15,7 +16,10 @@ const ICON = "mr-1.5 inline size-4 align-text-bottom";
 
 // Línea de tiempo del itinerario: agrupada por destino (encabezado con check-in, check-out y noches) y conectada día
 // por día (Día 1, 2, …). Sin datos no rompe: muestra un aviso en lugar del calendario.
-export default function ItineraryTimeline({ groups }: { groups: DayGroup[] }) {
+export default function ItineraryTimeline({ groups, roles }: {
+  groups: DayGroup[];
+  roles?: ReadonlyMap<string, string>; // id de la oferta -> "Ida" / "Interconexión" / "Vuelta"
+}) {
   if (groups.length === 0 || groups.every((g) => g.days.length === 0)) {
     return <p className="rounded-2xl bg-surface p-5 text-sm text-muted" data-testid="timeline-empty">
       Todavía no hay fechas para armar el calendario.
@@ -74,9 +78,10 @@ export default function ItineraryTimeline({ groups }: { groups: DayGroup[] }) {
                       {d.flights.map((f) => (
                         <li key={f.id} className="text-ink">
                           <Plane aria-hidden className={`${ICON} text-accent`} />
+                          {roles?.get(f.id) && <b className="mr-1 font-semibold" data-testid="timeline-flight-role">{roles.get(f.id)}:</b>}
                           {f.origin} {fmtTime(f.depart_at)} → {f.destination} {fmtTime(f.arrive_at)}
                           {dayOffset(f.depart_at, f.arrive_at) !== 0 && <sup className="text-accent">{fmtDayOffset(dayOffset(f.depart_at, f.arrive_at))}</sup>}
-                          <span className="text-muted"> · {airlineName(f.carrier)}{f.duration_min ? ` · ${fmtDuration(f.duration_min)}` : ""}</span>
+                          <span className="text-muted"> · {airlineLabel(f)}{f.duration_min ? ` · ${fmtDuration(f.duration_min)}` : ""}</span>
                         </li>
                       ))}
                       {d.activities.map((a) => (

@@ -5,7 +5,8 @@ import { CompareLinks, PriceTags, Sparkline, VsAverage } from "@/components/ui/P
 import { flightCompareLinks, safeHref } from "@/lib/links";
 import type { FlightOption } from "@/lib/flights";
 import type { PriceTag } from "@/lib/market";
-import { airlineName, dayOffset, fmtDay, fmtDayOffset, fmtDuration, fmtTime, REJECTION_LABEL, sourceName } from "@/lib/format";
+import { dayOffset, fmtDay, fmtDayOffset, fmtDuration, fmtTime, REJECTION_LABEL, sourceName } from "@/lib/format";
+import { airlineLabel, flightNumbers, stopsOf, stopsSummary } from "@/lib/flightDetail";
 import { useMoney } from "@/components/money/MoneyProvider";
 import { ADVICE_LABEL, ADVICE_STYLE, type Advice } from "@/lib/priceAdvice";
 import CardInfo from "@/components/ui/CardInfo";
@@ -27,6 +28,8 @@ export default memo(function FlightCard({ option, pax, bagsPerPax, optimal, sele
   const offset = fmtDayOffset(dayOffset(f.depart_at, f.arrive_at));
   const duration = fmtDuration(f.duration_min);
   const extraBags = Math.max(0, bagsPerPax - f.included_bags);
+  const numbers = flightNumbers(f);
+  const stops = stopsOf(f);
 
   return (
     <article
@@ -37,7 +40,10 @@ export default memo(function FlightCard({ option, pax, bagsPerPax, optimal, sele
     >
       <header className="flex items-start justify-between gap-3">
         <div>
-          <p className="font-semibold text-ink">{airlineName(f.carrier)}</p>
+          <p className="font-semibold text-ink" data-testid="flight-airline">{airlineLabel(f)}</p>
+          <p className="text-xs text-slate-600" data-testid="flight-numbers">
+            {numbers ? `Vuelo ${numbers}` : `${f.carrier} · número de vuelo no informado`}
+          </p>
           <p className="text-xs text-muted">{[sourceName(f.deeplink), fmtDay(f.depart_at)].filter(Boolean).join(" · ")}</p>
         </div>
         <span className="flex items-center gap-1">
@@ -65,7 +71,7 @@ export default memo(function FlightCard({ option, pax, bagsPerPax, optimal, sele
           <p className="text-xs font-medium text-muted">{f.origin}</p>
         </div>
         <div className="flex flex-1 flex-col items-center">
-          <span className="whitespace-nowrap text-xs text-muted">{f.stops === 0 ? "Directo" : `${f.stops} escala${f.stops > 1 ? "s" : ""}`}{duration && ` · ${duration}`}</span>
+          <span className="whitespace-nowrap text-xs text-muted">{stopsSummary(f)}{duration && ` · ${duration}`}</span>
           <span className="my-1 h-px w-full bg-line" aria-hidden />
         </div>
         <div className="text-right">
@@ -76,6 +82,16 @@ export default memo(function FlightCard({ option, pax, bagsPerPax, optimal, sele
         </div>
       </div>
 
+      {stops.length > 0 && (
+        <ul className="mt-3 space-y-1 text-xs text-slate-600" data-testid="flight-stops" aria-label="Escalas">
+          {stops.map((st, i) => (
+            <li key={i}>
+              Escala en <b className="font-semibold text-ink">{st.airport ?? "aeropuerto no informado"}</b>
+              {st.name ? ` · ${st.name}` : ""}{st.wait ? ` · espera de ${st.wait}` : ""}
+            </li>
+          ))}
+        </ul>
+      )}
       <MapButton focus={mapFocus ?? null} className="mt-3" />
 
       <p className="mt-4 mb-6 text-xs text-muted">

@@ -21,7 +21,8 @@ import { usePrintMode } from "@/hooks/usePrintMode";
 import { useRunData, type RunData } from "@/hooks/useRunData";
 import { legOptions, legsFor } from "@/lib/flights";
 import { RESULTS_TOUR } from "@/lib/tour";
-import { airlineName, isDemoProvider } from "@/lib/format";
+import { airlineLabel } from "@/lib/flightDetail";
+import { isDemoProvider } from "@/lib/format";
 import type { ItineraryPayload, ItineraryRow } from "@/lib/types";
 
 // Carga diferida: el dashboard por ciudad y el checkout recién se piden al llegar a su paso.
@@ -81,7 +82,7 @@ function Steps({ runId, rank, best, data, children }: {
   const optimal: Record<string, Pick> = useMemo(() => ({
     ...Object.fromEntries(best.flights.map((f) => [flightSlot(f.leg), {
       id: f.offer.id, category: "vuelos", costMinor: f.cost_minor,
-      label: `${airlineName(f.offer.carrier)} ${f.offer.origin}→${f.offer.destination}`,
+      label: `${airlineLabel(f.offer)} ${f.offer.origin}→${f.offer.destination}`,
     } satisfies Pick])),
     ...Object.fromEntries(best.stays.flatMap((st) => (st.lodging ? [[lodgingSlot(st.city), {
       id: st.lodging.offer_id, category: "alojamiento", costMinor: st.lodging.cost_minor, label: st.lodging.name,
@@ -91,7 +92,7 @@ function Steps({ runId, rank, best, data, children }: {
   const allowed: Allowed = useMemo(() => ({
     ...Object.fromEntries(legs.map((l, i) => [flightSlot(l.index), Object.fromEntries(options[i].filter((o) => !o.rejection)
       .map((o) => [o.offer.id, { id: o.offer.id, category: "vuelos", costMinor: o.costMinor,
-        label: `${airlineName(o.offer.carrier)} ${o.offer.origin}→${o.offer.destination}` } satisfies Pick]))])),
+        label: `${airlineLabel(o.offer)} ${o.offer.origin}→${o.offer.destination}` } satisfies Pick]))])),
     ...Object.fromEntries(best.stays.map((st) => [lodgingSlot(st.city), Object.fromEntries((st.lodging_options ?? [])
       .filter((o) => !o.rejection && o.cost_minor !== null)
       .map((o) => [o.offer_id, { id: o.offer_id, category: "alojamiento", costMinor: o.cost_minor!, label: o.name } satisfies Pick]))])),

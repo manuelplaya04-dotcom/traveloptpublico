@@ -37,9 +37,9 @@ export default function TripOverview({ req, its, rank, onRank }: {
               {cityStops.map((c) => c.name).join(" → ")}
             </h1>
             <p className="mt-2 text-muted">
-              {req.pax} viajeros · {fmtDay(best.first_checkin)} → {fmtDay(last.check_out)} ·{" "}
-              {best.stays.reduce((a, s) => a + s.nights, 0)} noches
+              {req.pax} viajeros · {best.stays.reduce((a, s) => a + s.nights, 0)} noches
             </p>
+            <TripDates best={best} lastCheckOut={last.check_out} />
           </div>
           <div>
             <CurrencySwitch />
@@ -88,5 +88,26 @@ export default function TripOverview({ req, its, rank, onRank }: {
 
       <CityOrder key={best.order.join()} req={req} order={best.order} />
     </section>
+  );
+}
+
+// Fechas de ida y vuelta a la vista. Con vuelos, el día en que sale el primero y el último del óptimo (el de ida
+// puede ser la noche anterior a la primera noche); sin vuelos cotizados, la primera noche y el check-out.
+function TripDates({ best, lastCheckOut }: { best: ItineraryRow["payload"]; lastCheckOut: string }) {
+  const byLeg = [...best.flights].sort((a, b) => a.leg - b.leg);
+  const out = byLeg[0]?.offer;
+  const back = byLeg.length > 1 ? byLeg[byLeg.length - 1].offer : undefined;
+  const items = out && back
+    ? [["Ida", fmtDay(out.depart_at), "trip-depart"], ["Vuelta", fmtDay(back.depart_at), "trip-return"]]
+    : [["Primera noche", fmtDay(best.first_checkin), "trip-depart"], ["Check-out", fmtDay(lastCheckOut), "trip-return"]];
+  return (
+    <dl className="mt-3 flex flex-wrap gap-2 text-sm" aria-label="Fechas del viaje">
+      {items.map(([label, value, id]) => (
+        <div key={id} className="flex items-baseline gap-1.5 rounded-full bg-white px-3 py-1.5 ring-1 ring-line">
+          <dt className="font-medium text-slate-600">{label}</dt>
+          <dd className="font-semibold text-ink" data-testid={id}>{value}</dd>
+        </div>
+      ))}
+    </dl>
   );
 }

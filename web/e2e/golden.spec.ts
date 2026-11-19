@@ -52,6 +52,9 @@ async function openPreferences(page: Page) {
   await dialog.getByRole("button", { name: "Siguiente" }).click();
   await goldenDates(dialog);
   await dialog.getByRole("button", { name: "Siguiente" }).click();
+  // El caso golden fija una franja horaria (fixture: 6:00 a 23:00); un viaje nuevo no trae ninguna.
+  await dialog.getByLabel("Salir desde las").selectOption("6");
+  await dialog.getByLabel("Llegar hasta las").selectOption("23");
   return dialog;
 }
 

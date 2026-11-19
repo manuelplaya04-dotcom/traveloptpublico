@@ -11,8 +11,9 @@ import ExternalIcon from "@/components/ui/ExternalIcon";
 import { groupByStay, OWN_LODGING, quotedTransport, rubros, splitPerPax, timeline } from "@/lib/checkout";
 import { cityByCode } from "@/lib/cities";
 import type { TripRequest } from "@/lib/contracts";
-import type { FlightOption, Leg } from "@/lib/flights";
-import { airlineName, TRANSPORT_MODE } from "@/lib/format";
+import { legRole, type FlightOption, type Leg } from "@/lib/flights";
+import { airlineLabel } from "@/lib/flightDetail";
+import { TRANSPORT_MODE } from "@/lib/format";
 import { useMoney } from "@/components/money/MoneyProvider";
 import type { ItineraryPayload, TransportQuote } from "@/lib/types";
 import Alert from "@/components/ui/Alert";
@@ -36,12 +37,14 @@ export default function Checkout({ best, req, legs, options, transport }: {
   const days = timeline(best, flights.flatMap((f) => (f ? [f.offer] : [])),
     (city) => cart.selected[lodgingSlot(city)]?.label ?? cart.optimal[lodgingSlot(city)]?.label ?? (req.services.lodging ? city : OWN_LODGING),
     (city) => cityByCode(city)?.name ?? city);
-  const r = rubros(t, legs, (l) => flights[legs.indexOf(l)]?.costMinor ?? 0, req.services);
+  // Tramo de cada vuelo elegido ("Ida", "Interconexión", "Vuelta"), para nombrarlo en el carril del itinerario.
+  const roles = new Map(flights.flatMap((f, i) => (f ? [[f.offer.id, legRole(legs[i])] as const] : [])));
+  const r = rubros(t, legs,(l) => flights[legs.indexOf(l)]?.costMinor ?? 0, req.services);
   const perPax = splitPerPax(t.totalMinor, req.pax);
   const over = t.totalMinor - budgetMinor;
 
   const links: Link[] = [
-    ...flights.flatMap((f) => (f ? [{ label: `Vuelo ${f.offer.origin}→${f.offer.destination} · ${airlineName(f.offer.carrier)}`, href: safeHref(f.offer.deeplink) }] : [])),
+    ...flights.flatMap((f) => (f ? [{ label: `Vuelo ${f.offer.origin}→${f.offer.destination} · ${airlineLabel(f.offer)}`, href: safeHref(f.offer.deeplink) }] : [])),
     ...best.stays.flatMap((s) => (s.lodging ? [{ label: `Alojamiento · ${lodging(s.city)?.name ?? s.lodging.name}`,
       href: safeHref(lodging(s.city)?.deeplink ?? s.lodging.deeplink) }] : [])),
     ...best.stays.flatMap((s) => s.activities.map((a) => ({ label: `Entradas · ${a.name}`, href: safeHref(a.deeplink) }))),
@@ -56,7 +59,7 @@ export default function Checkout({ best, req, legs, options, transport }: {
       </div>
 
       <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_22rem] xl:items-start">
-        <ItineraryTimeline groups={groupByStay(days, best.stays)} />
+        <ItineraryTimeline groups={groupByStay(days, best.stays)} roles={roles} />
 
         <aside className="break-inside-avoid space-y-5 rounded-3xl bg-surface p-6 sm:p-8 print:border print:border-black" aria-label="Resumen de costos">
           <h3 className="font-display text-lg font-bold text-ink">Resumen</h3>

@@ -28,6 +28,12 @@ export default function StepPreferences({ c, services, set }: {
                 info={HELP.stops} />
               <NumberField label="Valijas despachadas por persona" value={c.checked_bags_per_pax} min={0} max={3}
                 onChange={(v) => set("checked_bags_per_pax", v)} info={HELP.bags} />
+              <HourSelect label="Salir desde las" value={c.earliest_departure_hour} hours={DEPART_FROM}
+                hint="Hora local de salida, en todos los tramos."
+                onChange={(v) => set("earliest_departure_hour", v)} />
+              <HourSelect label="Llegar hasta las" value={c.latest_arrival_hour} hours={ARRIVE_UNTIL}
+                hint="Hora local de llegada a cada destino (la vuelta a casa no se limita)."
+                onChange={(v) => set("latest_arrival_hour", v)} />
             </>
           )}
         </div>
@@ -76,6 +82,26 @@ function RainSlider({ value, onChange }: { value: number; onChange: (v: number) 
       <span className="mt-2 block text-xs text-muted">
         Los días con más probabilidad de lluvia fuerte que esto no agendamos actividades al aire libre.
       </span>
+    </label>
+  );
+}
+
+// Horario de los vuelos: opcional y explícito. "Sin límite" (null) es el valor de un viaje nuevo; solo si la persona
+// elige una hora el motor descarta vuelos por horario (y recién ahí aparece "Sale antes de tu hora mínima").
+const DEPART_FROM = [4, 5, 6, 7, 8, 9, 10, 12] as const;
+const ARRIVE_UNTIL = [16, 18, 20, 21, 22, 23] as const;
+function HourSelect({ label, value, hours, hint, onChange }: {
+  label: string; value: number | null; hours: readonly number[]; hint: string; onChange: (v: number | null) => void;
+}) {
+  return (
+    <label className="flex flex-col gap-1.5">
+      <span className="text-sm font-medium text-ink">{label}</span>
+      <select value={value ?? ""} onChange={(e) => onChange(e.target.value === "" ? null : Number(e.target.value))}
+        className="rounded-xl border border-line bg-white px-3 py-2.5 text-ink outline-none transition focus:border-accent focus:ring-4 focus:ring-accent-soft">
+        <option value="">Sin límite</option>
+        {hours.map((h) => <option key={h} value={h}>{h}:00</option>)}
+      </select>
+      <span className="text-xs text-muted">{hint}</span>
     </label>
   );
 }

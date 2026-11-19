@@ -50,12 +50,16 @@ export const GOLDEN: OnboardingState = {
   constraints: DEMO.constraints,
 };
 
+// Un viaje nuevo no trae franja horaria de vuelos: el formulario no la pide, así que no puede filtrar en silencio.
+// (Antes heredaba 6:00 y 23:00 del caso de ejemplo y descartaba vuelos de madrugada "por tu hora mínima".)
+const NEW_TRIP_CONSTRAINTS: Constraints = { ...DEMO.constraints, earliest_departure_hour: null, latest_arrival_hour: null };
+
 /** Estado de un viaje nuevo: sin destinos y con la primera noche más cercana que se puede pedir (desde la fecha de la
  * persona, nunca una fija). */
 export function initialState(today = todayIso()): OnboardingState {
   return { services: ALL_SERVICES, origin: DEMO.origin_airports[0], cities: [], optimizeOrder: false,
     departDate: earliestDepart(today), flexDays: 0,
-    totalNights: 7, pax: 2, budget: 5000, constraints: DEMO.constraints };
+    totalNights: 7, pax: 2, budget: 5000, constraints: NEW_TRIP_CONSTRAINTS };
 }
 
 export type StepErrors = { destinations: string[]; dates: string[]; preferences: string[] };

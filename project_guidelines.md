@@ -363,3 +363,28 @@ Dado que el orquestador depende de múltiples APIs externas, implementa patrones
     - **Arreglos de tests de punta a punta que ya fallaban:** el anillo de "Ver en mapa" se dibujaba, pero sin su clase.
       Dentro de `pathOptions`, react-leaflet la aplica con `setStyle`, que no asigna clases; ahora va como opción de
       Leaflet. Además, el contexto de celular del test de microcopy no marcaba el recorrido guiado como visto.
+24. **Mejoras de una prueba de usabilidad (2026-11-19):**
+    - **Cartel falso de "hora mínima":** el formulario armaba cada viaje nuevo con las restricciones del caso de ejemplo
+      (`DEMO.constraints`), que traen `earliest_departure_hour: 6` y `latest_arrival_hour: 23`. Ninguna pantalla las
+      muestra ni las deja cambiar, pero el motor las aplicaba como filtro duro: los vuelos de madrugada (frecuentes desde
+      Ezeiza) quedaban descartados con "Sale antes de tu hora mínima". Ahora las dos son opcionales (`None` = sin
+      límite) en el motor y en el contrato, y un viaje nuevo las manda en `null`. El paso de preferencias las muestra como
+      "Salir desde las" y "Llegar hasta las" ("Sin límite" por defecto): el filtro existe solo si la persona lo elige. Con
+      las mismas ofertas del caso golden y sin franja, el óptimo baja de USD 20,083.62 a 19,868.62 (`test_time_window.py`):
+      la franja oculta escondía un viaje más barato. El golden del motor (fixture con 6 y 23) no se mueve, y los E2E
+      que lo arman desde el formulario eligen 6:00 y 23:00 como haría una persona. Un pedido guardado sin el campo vale como sin límite.
+    - **Detalle de vuelos sin inventar:** Google Flights (SerpApi) informa por segmento la aerolínea, el número de vuelo
+      y los aeropuertos, y por escala el aeropuerto, su nombre y la espera. `FlightOffer` suma `segments` y `layovers`,
+      opcionales: `None` es no informado (caso de prueba, simulado u ofertas guardadas antes) y la interfaz lo dice
+      ("número de vuelo no informado", "aeropuerto no informado"). Un segmento incompleto anula la lista entera (no se
+      muestra un itinerario a medias); una escala sin aeropuerto queda con `airport: None`. Retrocompatible: el caché
+      guarda la respuesta cruda del proveedor, así que lo ya cacheado se vuelve a leer con el detalle completo.
+    - **Fechas de ida y vuelta:** la cabecera del resultado muestra "Ida" y "Vuelta" (días de salida del primer y del
+      último vuelo del óptimo) o, sin vuelos cotizados, "Primera noche" y "Check-out". En el carril del itinerario,
+      cada vuelo dice qué tramo es (Ida, Interconexión o Vuelta).
+    - **Filtro por hora de llegada:** "Llegar antes de" por tramo, sobre las ofertas ya cargadas (no hace búsquedas
+      nuevas ni gasta cuota). Si el vuelo elegido queda afuera, **se mantiene** (el total no cambia solo) y un aviso
+      ofrece, a un clic, el más barato que llega a tiempo. La hora es la local de llegada.
+    - **Aviso Beta minimizable:** botón con `aria-expanded` y `aria-controls`. Al minimizar queda el título, que es
+      también la descripción accesible del buscador. Arranca abierto y se recuerda en el navegador
+      (`useSyncExternalStore`, siempre abierto en el servidor, en memoria si no hay almacenamiento).

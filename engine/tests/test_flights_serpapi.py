@@ -222,3 +222,40 @@ def test_valijas_con_tarifa_publicada_solo_en_vuelos_dentro_de_eeuu():
     assert bag_fee_per_bag_minor("AA", "MCO", "JFK", 0) == 0
     no_bags = parse(data, "serpapi_google_flights", bags=0)
     assert all(o.bag_fee_minor == 0 and o.bag_fee_known for o in no_bags)
+
+
+# ---------------------------------------------------------------- aerolínea, vuelos y escalas (dato real, sin deducir)
+
+REAL_MCO_NYC = json.loads((Path(__file__).parent / "contracts" / "serpapi_google_flights_mco_nyc.json").read_text("utf-8"))
+
+
+def test_respuesta_real_trae_aerolinea_numero_y_aeropuerto_de_escala():
+    offers = parse(REAL_MCO_NYC, "serpapi_google_flights")
+    with_stop = [o for o in offers if o.stops == 1]
+    assert len(with_stop) == 1
+    o = with_stop[0]
+    assert [(s.flight_number, s.airline, s.origin, s.destination) for s in o.segments or []] == [
+        ("F9 1241", "Frontier", "MCO", "ATL"), ("F9 3458", "Frontier", "ATL", "LGA")]
+    assert o.layovers is not None and len(o.layovers) == 1
+    assert (o.layovers[0].airport, o.layovers[0].duration_min) == ("ATL", 142)
+    assert o.layovers[0].name == "Hartsfield-Jackson Atlanta International Airport"
+    direct = [o for o in offers if o.stops == 0]
+    assert direct and all(o.layovers == [] and o.segments and len(o.segments) == 1 for o in direct)
+
+
+def _itinerary(**patch) -> dict:
+    seg = {"departure_airport": {"id": "EZE", "time": "2027-07-07 22:10"},
+           "arrival_airport": {"id": "MIA", "time": "2027-07-08 06:05"}, "flight_number": "AA 900", "airline": "American"}
+    return {"flights": [seg], "price": 900, **patch}
+
+
+def test_escala_sin_aeropuerto_queda_no_informada_y_segmento_incompleto_no_inventa_itinerario():
+    o = normalize(_itinerary(layovers=[{"duration": 90}, {"id": "lima", "name": " "}]), "p", None)
+    assert o is not None and o.stops == 2
+    assert [(x.airport, x.name, x.duration_min) for x in o.layovers or []] == [(None, None, 90), (None, None, None)]
+    broken = _itinerary()
+    broken["flights"] = [broken["flights"][0], {"flight_number": "AA 901", "departure_airport": {"time": "2027-07-08 08:00"},
+                                                "arrival_airport": {"id": "JFK", "time": "2027-07-08 11:00"}}]
+    o2 = normalize(broken, "p", None)
+    assert o2 is not None and o2.segments is None  # uno incompleto: el detalle no se informa a medias
+    assert FlightOffer.model_validate({k: v for k, v in o2.model_dump().items() if k not in ("segments", "layovers")})

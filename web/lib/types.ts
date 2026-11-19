@@ -36,6 +36,9 @@ export type BreakdownLine = {
 };
 
 // Modelo canónico FlightOffer (engine/app/domain/models.py). Fechas locales sin zona: "YYYY-MM-DDTHH:MM[:SS]".
+export type FlightSegment = { flight_number: string; airline?: string | null; origin: string; destination: string };
+export type Layover = { airport?: string | null; name?: string | null; duration_min?: number | null };
+
 export type FlightOffer = {
   id: string;
   provider: string;
@@ -47,7 +50,10 @@ export type FlightOffer = {
   arrive_utc?: string | null;
   duration_min?: number | null; // duración real (en UTC)
   stops: number;
-  carrier: string;
+  carrier: string; // código IATA de la aerolínea del primer segmento
+  // Detalle real del proveedor. Ausente = no informado (caso de prueba, simulado u oferta guardada antes): no se deduce.
+  segments?: FlightSegment[] | null;
+  layovers?: Layover[] | null;
   price_per_pax_minor: number;
   included_bags: number;
   bag_fee_minor: number;

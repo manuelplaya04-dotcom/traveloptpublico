@@ -54,9 +54,10 @@ def leg_matches(f: FlightOffer, leg: Leg) -> bool:
 def flight_rejection(f: FlightOffer, leg: Leg, c: Constraints, pax: int) -> str | None:
     if f.stops > c.max_stops:
         return "flight.too_many_stops"
-    if f.depart_at.time() < time(c.earliest_departure_hour):
+    if c.earliest_departure_hour is not None and f.depart_at.time() < time(c.earliest_departure_hour):
         return "flight.departs_too_early"
-    if leg.arrive_on is not None and f.arrive_at.time() > time(c.latest_arrival_hour):
+    if (leg.arrive_on is not None and c.latest_arrival_hour is not None
+            and f.arrive_at.time() > time(c.latest_arrival_hour)):
         return "flight.arrives_too_late"
     if f.seats_available < pax:
         return "flight.insufficient_seats"
